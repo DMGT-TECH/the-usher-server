@@ -1,41 +1,44 @@
-# The Usher Installation
+# Installing The Usher
 
-This document will outline the steps necessary to deploy the Usher to a given environment for usage as an Authorization Service. Please refer to the [DEVELOP page](./DEVELOP.md) if you are looking to deploy the Usher locally for a developer / contributor use case.
+This document outlines the steps necessary to deploy the Usher to an environment for usage as an Authorization Service. Please refer to the [DEVELOP page](./DEVELOP.md) if you are looking to deploy the Usher locally for the developer / contributor use case.
 
-The Usher was developed such that it can be run either as an node.js Express API Server or as an AWS Lambda function.
 
-## Prerequisite Requirements
+## Requirements
 
 * **NodeJS** The Usher application requires NodeJS >= 14.x.
 * **PostgreSQL** The Usher application requires access to a running PostgreSQL database. Please ensure you are running at least [version 12](https://www.postgresql.org/support/versioning/), as the Usher is not tested with older versions.
 
+## Database Server
+
 ### Create Database Schema
 
 On the database server, run the following command to create the schema that will be used by the Usher.
-`create schema usher`
+
+```
+create schema usher
+```
 
 ### Run Database Migrations
 
-The Usher uses knex.js migrations pattern to manage database schema updates. This allows for a one command process to ensure the schema is up to date. As the command is idempotent to be safe this command can be run as part of every deploy of the Usher.
+The Usher uses `knex.js` migrations to manage database schema updates. This allows for a one-command process to ensure the schema is up to date. As the command is idempotent to be safe this command can be run as part of every deploy of the Usher.
 
 **Method 1**: Run migrations using Usher GitHub source with npm commands
 
 ```bash
-git clone git@github.com:DMGT-TECH/the-usher.git
+git clone git@github.com:DMGT-TECH/theusher-server.git
 cd database
 cp .env.sample .env
-# Update value of `PGURI` connection string to point to db server
+# Update value of `PGURI` connection string to point to the database server
 npm install
 npm run migrate:latest
 ```
 
-**Method 2**: Run migrations using Github The Usher Package
-
-TODO
+The above steps that run the database migrations will ensure the database schema is deployed and up to date. 
 
 ## Bootstrap Database with Seed Information
 
-The above steps that run the database migrations will ensure the database schema is deployed and up to date, but there is some initial information that needs to be one-time loaded to the database in order for the Usher to be configured and start up correctly. The table below lists the initial data and descriptions that must be inserted to the database. **TODO**: In the future this process will be further automated to remove the need for manual database inserts.
+To use The Usher, some initial information needs to be loaded into the Usher's database in order for the Usher to be configured and start up correctly. The table below lists the tables that need to be populated, and describes what data to populate it with.
+
 
 | Object | Description | Table | Attributes |
 |-|-|-|-|
@@ -47,11 +50,13 @@ The above steps that run the database migrations will ensure the database schema
 | Persona Role Join | Associate First Persona to Usher Admin Role | personaroles | personakey: personas.key foreign key for First Persona rolekey: roles.key foreign key for Usher Admin |
 | Tenant Client Join | Associate Usher Client with Tenant | tenantclients | tenantkey: tenants.key foreign key for Tenant clientkey: clients.key foreign key for Usher Client |
 
-## Run The Usher as AWS Lambda
+## The Usher Server
 
-The main usher express.js server is wrapped via the `serverless-http` library to allow it to be used as a "handler" for an AWS Lambda function.
+The Usher was developed such that it can be run either as a `node.js` Express API Server or as an AWS Lambda function.
 
-TODO more information about how to wrap Usher with serverless.com framework
+### Run The Usher as an AWS Lambda
+
+The Usher's express.js server is wrapped with the `serverless-http` library to allow it to be used as a "handler" for an AWS Lambda function.
 
 ### Configure .env File
 
@@ -80,7 +85,7 @@ The following two methods consist of the general steps to get the Usher project 
 ### Installing from GitHub Release Packages
 
 1. Create an empty folder
-1. In that folder, create a file `.npmrc` and add the line `registry=https://npm.pkg.github.com/DMGT-TECH` to it. The numbers below specify the version you would like to install. Please see the [GitHub repo](https://github.com/DMGT-TECH/the-usher/packages) for the latest published packages.
+1. In that folder, create a file `.npmrc` and add the line `registry=https://npm.pkg.github.com/DMGT-TECH` to it. The numbers below specify the version you would like to install. Please see the [GitHub repo](https://github.com/DMGT-TECH/theusher-server/packages) for the latest published packages.
 
 ```bash
 npm init
@@ -88,14 +93,14 @@ npm install --save @dmgt-tech/database@npm:@dmgt-tech/the-usher-database@1.3.4
 npm install --save @dmgt-tech/the-usher@1.3.4
 ```
 
-To run, you can `cd node_modules/@dmgt-tech/the-usher/`, add a `.env` file, and then `npm start`.
+To run, you can `cd node_modules/@dmgt-tech/theusher-server/`, add a `.env` file, and then `npm start`.
 
 ### Installing from Source
 
 The following commands provide the basic steps that are involved with downloading and running the Usher. You can then adapt these steps to suite your specific use case.
 
 ```bash
-git clone https://github.com/DMGT-TECH/the-usher
+git clone https://github.com/DMGT-TECH/theusher-server
 
 cd server
 npm install
