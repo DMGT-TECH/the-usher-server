@@ -16,9 +16,9 @@ Done. This will launch three containers: The Usher server, its database, and a m
 
 ## The Test Drive
 
-The next step is to get a token from the identity provider to use with The Usher.  For short, we refer to this as an IdP Token.
+The next step is to get a token from an identity provider to use with The Usher.  For short, we refer to this as an IdP Token.
 
-DMGT have a test user and API set up in Auth0 corresponding to a test persona in The Usher's default database. You can get a token for this persona using a script we have included:
+The Usher ships with a mock identity provider that simulates Auth0's API endpoint (`/oauth/token`) and issues IdP tokens for a few hardcoded users with username and password authentication (these users are the ones in the test seed data for The Usher's database). We have provided a script to obtain a token from the mock identity server:
 
 ```sh
 ./server/scripts/get_jwt_for_test_tenant.sh | json_pp
@@ -40,7 +40,7 @@ Let's keep a copy of an access token using jq to grab it from the JSON output:
 export IDP_TOKEN=`./server/scripts/get_jwt_for_test_tenant.sh | jq --raw-output .access_token`
 ```
 
-Now let's use the Auth0 token to get a token from The Usher:
+Now let's use the IdP token to get an access token from The Usher:
 
 ```sh
 curl -X POST "http://localhost:3001/self/token" -H "Content-type: application/json" -H "Authorization: Bearer $IDP_TOKEN"  -H "client_id: test-client1" | json_pp
@@ -69,7 +69,7 @@ Pasting The Usher token into <https://jwt.io> decodes it:
 }
 ```
 
-You can do other things like get the list of permissions your persona has:
+You can use the IdP token to access other endpoints on The Usher, like this one that gets the list of permissions your persona has:
 
 ```sh
 curl -X GET "http://localhost:3001/self/permissions" -H "Content-type: application/json" -H "Authorization: Bearer $IDP_TOKEN"  -H "client_id: test-client1" | json_pp
