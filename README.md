@@ -1,24 +1,20 @@
 # The Usher
 
-The Usher is an authorization server that issues tokens for users authenticated by an identity provider (IdP) like Auth0 or [Microsoft Active Directory](https://docs.microsoft.com/en-us/azure/active-directory-b2c/access-tokens).  These tokens can in turn be used by a client application, API gateway, or user agent (web browser, curl, Postman, Excel) to secure access to backend resources like APIs or other company-controlled services.
+The Usher is a minimalist authorization server. It does not manage authentication (identity), rather it issues tokens for users authenticated by an identity provider (IdP) like Auth0 or [Microsoft Active Directory](https://docs.microsoft.com/en-us/azure/active-directory-b2c/access-tokens).  These tokens can in turn be used by a client application, API gateway, or user agent (web browser, curl, Postman, Excel) to secure access to backend resources like APIs or other company-controlled services.
 
-Authorization is based on Roles and Permissions managed in The Usher's database.  You may choose to synchronize the roles and permissions database with a CRM or CPQ system (e.g., Salesforce via Heroku Connect).
-
-Roles and Permissions are currently granted on a per-persona basis (persona being identified by their IdP token's `sub` claim; a roadmap item is to add support for granting based on identity provider groups; see [#48](https://github.com/DMGT-TECH/the-usher/issues/48)).
+The Usher authorizes access by looking up roles and permissions in The Usher's database associated with the `sub` claim in the IdP token.  You may choose to synchronize the database with a CRM or CPQ system (e.g., Salesforce via Heroku Connect), so that authorizations reflect up-to-date information on purchases or subscriptions.
 
 
-## Using The Usher for Authorization in Your Application
+## Using The Usher for Authorization in an Application
 
 An application leveraging The Usher for Authorization will usually involve four components:
 
-1. a client application (web app, mobile app, desktop app)
-1. a backend resource API/server
-1. an identity provider service
-1. an instance of The Usher
+1. **a client application** is a web app, mobile app, desktop app, etc. It initiates the login process, forwarding the unauthenticated user to the identity provider, passes the obtained IdP token to The Usher to obtain an access token, and then accesses the secured backend resource.  You could do all these steps manually using an HTTP client like cURL or Postman. 
+1. **a backend resource API/server** hosts the service that is to be secured by The Usher's access tokens.
+1. **an identity provider (IdP) service** issues an IdP token based on authentication credentials (like username and password)
+1. **an instance of The Usher** provides, among others, the `/self/token` endpoint which issues an authorization token based on the token from the IdP.
 
-The client application manages the login, forwarding the unauthenticated user to the identity provider, uses the IdP token to obtain an access token from The Usher, and then accesses the secured backend resource.  You could do all these steps manually using an HTTP client like cURL or Postman.
-
-Note that information in the client itself isn't considered secured, as anyone could access that content by viewing source, disabling or modifying JavaScript, and/or decompiling. A client app should not simply inspect the token and act on permissions contained therein. Any content or service that you wish to secure should be placed in a backend resource API.
+Any content or service that you wish to secure should be placed in a backend resource API, not stored in the client. Data or services stored in the client itself cannot be considered secured, as anyone could access that content by viewing source, disabling or modifying JavaScript, and/or decompiling. This means that a client app should not simply inspect the token and then show data based on permissions contained therein. 
 
 ## See the Quickstart
 
