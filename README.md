@@ -1,6 +1,6 @@
 # The Usher
 
-The Usher is a minimalist authorization server. It does not manage authentication (identity), rather it issues tokens for users authenticated by an identity provider (IdP) like Auth0 or [Microsoft Active Directory](https://docs.microsoft.com/en-us/azure/active-directory-b2c/access-tokens).  These tokens can in turn be used by a client application, API gateway, or user agent (web browser, curl, Postman, Excel) to secure access to backend resources like APIs or other company-controlled services.
+The Usher is a minimalist authorization server. It does **not** manage authentication (identity), rather it issues tokens for users authenticated by an identity provider (IdP) like Auth0 or [Microsoft Active Directory](https://docs.microsoft.com/en-us/azure/active-directory-b2c/access-tokens).  These tokens can in turn be used by a client application, API gateway, or user agent (web browser, curl, Postman, Excel) to secure access to backend resources like APIs or other company-controlled services.
 
 The Usher authorizes access by looking up roles and permissions in The Usher's database associated with the `sub` claim in the IdP token.  You may choose to synchronize the database with a CRM or CPQ system (e.g., Salesforce via Heroku Connect), so that authorizations reflect up-to-date information on purchases or subscriptions.
 
@@ -9,16 +9,16 @@ The Usher authorizes access by looking up roles and permissions in The Usher's d
 
 An application leveraging The Usher for Authorization will usually involve four components:
 
-1. **a client application** is a web app, mobile app, desktop app, etc. It initiates the login process, forwarding the unauthenticated user to the identity provider, passes the obtained IdP token to The Usher to obtain an access token, and then accesses the secured backend resource.  You could do all these steps manually using an HTTP client like cURL or Postman. 
+1. **a client application**: a web app, mobile app, or desktop app, etc. that initiates the login process, forwarding the unauthenticated user to the identity provider, passes the obtained IdP token to The Usher to obtain an access token, and then accesses the secured backend resource.  Note, you could do all these steps manually by directly using a user agent, like cURL or Postman. 
 1. **a backend resource API/server** hosts the service that is to be secured by The Usher's access tokens.
 1. **an identity provider (IdP) service** issues an IdP token based on authentication credentials (like username and password)
 1. **an instance of The Usher** provides, among others, the `/self/token` endpoint which issues an authorization token based on the token from the IdP.
 
-Any content or service that you wish to secure should be placed in a backend resource API, not stored in the client. Data or services stored in the client itself cannot be considered secured, as anyone could access that content by viewing source, disabling or modifying JavaScript, and/or decompiling. This means that a client app should not simply inspect the token and then show data based on permissions contained therein. 
+Generally speaking, any content or service that you wish to secure should be placed in a backend resource API, not stored in the client and "unlocked" by receiving a token with the right permissions. Data or services stored in clients cannot be considered secured, as anyone could access that content by viewing source, disabling or modifying it, and/or decompiling.
 
 ## See the Quickstart
 
-Before writing a complete application with authorization, you might like to walk through how tokens are issued, how to configure The Usher, etc. If so, take a look at [QUICKSTART](./QUICKSTART.md).
+Before writing a complete application with The Usher for authorization, you might like to walk through how tokens are issued, how to configure The Usher, etc. If so, take a look at [QUICKSTART](./QUICKSTART.md).
 
 ## More Information
 
@@ -56,9 +56,10 @@ This list of links is written for developers that would like to contribute to Th
 - Data Model
   - [X] Permissions assigned to personas via role assigment 
   - [X] Permissions assigned directly to personas
-  - [X] Support for individual personas (identified by `sub` claim) to have multiple optional "user_contexts"
+  - [X] Support for individual personas (each identified by same `sub` claim) to have multiple optional "user_contexts"
 - API
-  - [X] OpenAPI 3 Spec for documentation and implementation. (`oas-tools` routes endpoints to code, endpoints can be easily changed)
+  - [X] OpenAPI 3 Spec for documentation 
+  - [X] OpenAPI 3 Spec for implementation (`oas-tools` routes endpoints to code, endpoints can be easily renamed)
   - [X] App portal support endpoint (`/self/clients`) that returns all clients to which a persona has access (i.e., any permissions)
 - Security
   - [X] Identity providers must be whitelisted to be accepted by The Usher (token's `iss` claim)
@@ -75,3 +76,4 @@ This list of links is written for developers that would like to contribute to Th
 - [ ] Serverless database layer (e.g., Firestore or DynamoDB)
 - [ ] Scopes based on identity provider groups
 - [ ] Full admin API to manage client applications, personas, roles, and permissions
+- [ ] API endpoint to return a list of `user_contexts` available for a persona
