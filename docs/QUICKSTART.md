@@ -12,11 +12,11 @@ cd the-usher
 docker-compose up
 ```
 
-Done. This will launch two containers: The Usher server and its database, accessible via port forwarding on your local machine.
+Done. This will launch three containers: The Usher server, its database, and a mock identity server.  All three are accessible via port forwarding on your local machine.
 
 ## The Test Drive
 
-The next step is to get a test token, typically an access token, from the identity provider to use with The Usher.  For short, we refer to this as an IdP Token.
+The next step is to get a token from the identity provider to use with The Usher.  For short, we refer to this as an IdP Token.
 
 DMGT have a test user and API set up in Auth0 corresponding to a test persona in The Usher's default database. You can get a token for this persona using a script we have included:
 
