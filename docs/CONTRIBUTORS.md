@@ -1,6 +1,6 @@
 # Contributors
 
-As The Usher was developed, its design and implementation benefitted from contributions from and technical discussions with many individuals.  A partial list is below:
+As The Usher was developed, its design and implementation benefited from contributions from and technical discussions with many individuals.  A partial list is below:
 
 * Andy Noble (https://github.com/andynoble)
 * Patryk Laurent (https://github.com/plaurent)
@@ -11,5 +11,6 @@ As The Usher was developed, its design and implementation benefitted from contri
 * Sindhu Tatenene (https://github.com/sindhute)
 * Deniz S. Ozkaynak (https://github.com/murkantilism)
 * Keyvan Chamani (https://github.com/k1ch)
+* Michael Holtzman (https://github.com/mikelax)
 
-Please submit a pull request or contact us if you'd like your name added.
+Please submit a pull request or contact us if you'd like your name added. 🚀
