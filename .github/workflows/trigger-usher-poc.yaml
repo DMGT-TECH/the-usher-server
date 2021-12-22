@@ -1,11 +1,11 @@
 name: DEPLOY THE_USHER APP
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   job_1:
-    name: Trigger the-usher poc azure deployment event 
+    name: Trigger the-usher poc azure deployment event
     runs-on: ubuntu-latest
     steps:
       - name: Emit the repository_dispatch
@@ -14,11 +14,11 @@ jobs:
 
           token: ${{ secrets.USHER_POC_ACCESS_TOKEN }}
           repo: the-usher-poc-config
-          owner: dmgt-tech 
+          owner: dmgt-tech
           event_type: azure_deploy
 
   job_2:
-    name: Trigger the-usher poc aws deployment event 
+    name: Trigger the-usher poc aws deployment event
     runs-on: ubuntu-latest
     steps:
       - name: Emit the repository_dispatch
@@ -27,5 +27,5 @@ jobs:
 
           token: ${{ secrets.USHER_POC_ACCESS_TOKEN }}
           repo: the-usher-poc-config
-          owner: dmgt-tech 
+          owner: dmgt-tech
           event_type: aws_deploy
