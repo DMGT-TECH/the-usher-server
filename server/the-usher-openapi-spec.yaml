@@ -1,0 +1,1000 @@
+openapi: 3.0.1
+info:
+  title: The Usher
+  description: |
+    The Usher server allows a business to authorize an identified user for access to resources or services offered by the business.
+  termsOfService: replace_with_url
+  contact:
+    email: theusher@dmgt.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+externalDocs:
+  description: Requirements doc
+  url: https://dmgtcloud-my.sharepoint.com/:w:/g/personal/patryk_laurent_dmgt_com/Eb2xvNe6YA1LqSySXfqgn-4BUjBadg3nX_AEKnmH1xK1XA?e=RletVi
+servers:
+    - url: https://localhost:3001
+    - url: https://o07e9wdidk.execute-api.us-east-1.amazonaws.com/prod
+tags:
+- name: Server Configuration
+  description: This API endpoint allows setting up initial top-level admin personas, who must subsequently access the other endpoints with a valid ID token.
+- name: Self APIs
+  description: The Self APIs are the main APIs accessed by a client application that a persona has logged in to.
+- name: Admin APIs
+  description: APIs that provide access to top-level Usher Related data
+- name: Client Admin APIs
+  description: APIs that provide access to client specific data and operations
+
+#Default security scheme:
+security:
+  - bearerSelfAuth: []
+
+paths:
+  /:
+    get:
+      operationId: getConfiguration
+      'x-swagger-router-controller': 'endpoint_root'
+      summary: Returns basic information about this server.
+      description: This endpoint returns a JSON object with URIs for an authenticated persona to obtain an access token, and for an API or client application to get this server's JSON Web Key Set (JWKS).
+      security:
+        #any authenticated user
+        - bearerSelfAuth: []
+        - bearerAdminAuth: []
+      tags:
+        - Server Configuration
+      responses:
+        '200':
+          description: On success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerConfig'
+        default:
+          $ref: '#/components/responses/Default'
+
+  /.well-known/jwks.json:
+    get:
+      'x-swagger-router-controller': 'endpoint_jwksjson'
+      operationId: getJwks
+      summary: Returns this server’s public key in JSON Web Key Set (JWKS) format.
+      tags:
+        - Server Configuration
+      description: "Returns public key information that can be used to verify the signature on tokens (JWTs) issued by this server."
+      security: [] # public endpoint
+      responses:
+        '200':
+          description: On success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jwks'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+  /self/clients:
+    get:
+      operationId: getSelfClients
+      'x-swagger-router-controller': 'endpoint_self_clients'
+      tags:
+        - Self APIs
+      security:
+        - bearerSelfAuth: []
+      summary: List all of the client applications for which currently logged-in persona has at least one role or permission.
+      parameters:
+        - $ref: '#/components/parameters/userContextParam'
+      responses:
+        '200':
+          description: On success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfClients'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+
+  /self/roles:
+    get:
+      operationId: getSelfRoles
+      'x-swagger-router-controller': 'endpoint_self_roles'
+      tags:
+      - Self APIs
+      security:
+        - bearerSelfAuth: []
+      summary: List entitled roles for the currently logged-in persona for the client application(s).
+      description: |-
+        Returns the list of roles assigned to this persona and for the group(s) of which they are a member.
+      parameters:
+        - $ref: '#/components/parameters/clientIdParam'
+        - $ref: '#/components/parameters/userContextParam'
+        - $ref: '#/components/parameters/payloadFormatParam'
+      responses:
+        '200':
+          description: On success return a list of granted roles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionOfRoles'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+  /self/permissions:
+    get:
+      operationId: getSelfPermissions
+      'x-swagger-router-controller': 'endpoint_self_permissions'
+      tags:
+      - Self APIs
+      security:
+        - bearerSelfAuth: []
+      summary: List entitled permissions for the currently logged-in persona for the client application(s).
+      description: |-
+        Returns the list of permissions assigned to this persona and for the group(s) of which they are a member. <P>
+      parameters:
+        - $ref: '#/components/parameters/clientIdParam'
+        - $ref: '#/components/parameters/userContextParam'
+        - $ref: '#/components/parameters/payloadFormatParam'
+      responses:
+        '200':
+          description: On success return a list of granted permissions.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/CollectionOfPermissions'
+                  - $ref: '#/components/schemas/DictionaryOfPermissions'
+                  - $ref: '#/components/schemas/ArrayOfPermissions'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+  /self/scope:
+    get:
+      'x-swagger-router-controller': 'endpoint_self_scopes'
+      tags:
+      - Self APIs
+      security:
+        - bearerSelfAuth: []
+      summary: List the granted roles and permissions of the currently logged-in persona for the client application.
+      description: |-
+        Returns a list of permissions and roles assigned to this persona and for the group(s) of which they are a member.  A smaller scope than what was requested may be returned.
+      operationId: listSelfScopes
+      parameters:
+        - $ref: '#/components/parameters/clientIdParam'
+        - $ref: '#/components/parameters/userContextParam'
+        - $ref: '#/components/parameters/scopeParam'
+        - $ref: '#/components/parameters/payloadFormatParam'
+      responses:
+        '200':
+          description: On success, returns a keyed list of granted entitlements.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/CollectionOfScope'
+                  - $ref: '#/components/schemas/DictionaryOfScope'
+                  - $ref: '#/components/schemas/ArrayOfScope'
+                  - $ref: '#/components/schemas/HierarchyOfScope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+
+  /self/token:
+    post:
+      'x-swagger-router-controller': 'endpoint_self_token'
+      operationId: issueSelfToken  #  https://tools.ietf.org/html/rfc7523#section-2.1
+      summary: Issue an access token (JWT) containing permissions for the logged-in persona to cover the requested scope.
+      description: |
+        Returns, in the response body (not in the header), a signed JWT access token with the requested scope, if granted.  May return a smaller scope if fewer entitlements were granted to the persona. Requires a signed access token from the Persona Authorization (identity) server (e.g., Auth0, Cognito, or Azure AD) containing the **sub** claim and possibly a **groups** claim if individual personas are not being managed on this server for the given client application.
+
+        Use this endpoint if the scope need to be passed to a publicly accessible resource server.
+      tags:
+        - Self APIs
+      security:
+        - bearerSelfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/clientIdParam'
+        - $ref: '#/components/parameters/userContextParam'
+        - $ref: '#/components/parameters/scopeParam'
+        - $ref: '#/components/parameters/lifetimeParam'
+      responses:
+        '200':
+          description: Returns a signed JWT containing the following JSON payload.
+          headers:
+            X-OAuth-Scopes:
+              schema:
+                type: string
+              description: The scopes the token has authorized.
+            X-Accepted-OAuth-Scopes:
+              schema:
+                type: string
+              description: The scopes that the action checks for.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+
+  /self/refresh_token:
+    post:
+      'x-swagger-router-controller': 'endpoint_self_refresh_token'
+      operationId: issueSelfRefreshToken
+      summary: Issue a refreshed access token (JWT) containing permissions for the logged-in persona to cover the requested scope.
+      description: "Returns, in the response body (not in the header), a signed JWT access token with the requested scope, if granted.  May return a smaller scope if fewer entitlements were granted to the persona. Requires a non-expired refresh token issued by The Usher's <b>/self/token</b> endpoint."
+      tags:
+        - Self APIs
+      security: [] # public endpoint
+      parameters:
+        - name: client_id
+          description: Unique identifier for the client.
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityNameDef'
+        - $ref: '#/components/parameters/userContextParam'
+        - name: grant_type
+          schema:
+            type: string
+            maxLength: 13
+            minLength: 13
+            pattern: '\brefresh_token\b'
+          in: query
+          required: true
+          description: "Value MUST be set to \"refresh_token\""
+        - name: refresh_token
+          schema:
+            type: string
+            maxLength: 36
+            minLength: 36
+            pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4{1}[a-fA-F0-9]{3}-[89abAB]{1}[a-fA-F0-9]{3}-[a-fA-F0-9]{12}$'
+          in: query
+          required: true
+          description: "The refresh_token issued to the client returned in the response from <b>/self/token</b>"
+      responses:
+        '200':
+          description: Returns a signed JWT containing the following JSON payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+  /roles:
+    get:
+      'x-swagger-router-controller': 'endpoint_roles'
+      operationId: getRoles
+      summary: Get a List of Roles for a given Client
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      parameters:
+        - $ref: '#/components/parameters/clientIdQueryParam'
+      responses:
+        200:
+          description: The List of Roles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionOfRoles'
+        400:
+          $ref: '#/components/responses/BadRequest'
+    post:
+      'x-swagger-router-controller': 'endpoint_roles'
+      operationId: createRole
+      summary: Create a new Role for a given Client
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+                - client_id
+                - name
+      responses:
+        201:
+          description: The newly created Role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        400:
+          $ref: '#/components/responses/BadRequest'
+
+  /roles/{role_key}:
+    parameters:
+      - $ref: '#/components/parameters/roleKeyPathParam'
+    get:
+      'x-swagger-router-controller': 'roles/role_key'
+      operationId: getRole
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        200:
+          description: Return a Role for the given key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        404:
+          $ref: '#/components/responses/NotFound'
+    patch:
+      'x-swagger-router-controller': 'roles/role_key'
+      operationId: patchRole
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        204:
+          description: OK if the Role is updated
+        404:
+          $ref: '#/components/responses/NotFound'
+    delete:
+      'x-swagger-router-controller': 'roles/role_key'
+      operationId: deleteRole
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        204:
+          description: OK if the Role is deleted
+        404:
+          $ref: '#/components/responses/NotFound'
+
+
+  /clients/{client_id}:
+    get:
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerClientAdminAuth: []
+      parameters:
+        - $ref: '#/components/parameters/clientIdPathParam'
+      responses:
+        200:
+          description: Return details for the given Client object
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /clients/{client_id}/roles:
+    parameters:
+      - $ref: '#/components/parameters/clientIdPathParam'
+    get:
+      'x-swagger-router-controller': 'clients/roles'
+      operationId: listClientRoles
+      summary: Return a list of Roles for the given Client
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerClientAdminAuth: []
+      responses:
+        200:
+          description: Return list of Roles for given Client object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionOfRoles'
+    post:
+      'x-swagger-router-controller': 'clients/roles'
+      operationId: createClientRole
+      summary: Create a new Role for the given Client
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerClientAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+                - name
+      responses:
+        201:
+          description: Return the newly created Role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+
+  /sessions:
+    delete:
+      operationId: invalidateSession
+      'x-swagger-router-controller': 'endpoint_invalidate_session'
+      summary: Invalidate an ongoing session for a persona.
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      parameters:
+        - name: sub
+          in: query
+          schema:
+            $ref: '#/components/schemas/EntityNameDef'
+          required: true
+        - name: ucx
+          in: query
+          schema:
+            $ref: '#/components/schemas/EntityNameDef'
+          required: false
+        - name: iss
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: 'Success: The session was invalidated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        default:
+          $ref: '#/components/responses/Default'
+
+components:
+
+  parameters:
+  #---------------------
+    clientIdPathParam:
+      name: client_id
+      description: Unique identifier for client.
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/EntityNameDef'
+      examples:
+        Client ID:
+          value: datalake-api
+    # client_id
+    clientIdParam:
+      name: client_id
+      description: Unique identifier for the client.
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/EntityNameDef'
+      examples:
+        Example 1 (client application ID):
+          value: Newsletter+Application
+        Example 2 (top-level):
+          value: the-usher
+        Example 3 (all client applications where persona has a role):
+          value: "*"
+    # client_id as query param
+    clientIdQueryParam:
+      name: client_id
+      description: Unique identifier for the client.
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/EntityNameDef'
+    roleKeyPathParam:
+      name: role_key
+      description: The unique role identifier
+      in: path
+      required: true
+      schema:
+        type: integer
+    # user_context
+    userContextParam:
+      name: user_context
+      in: header
+      required: false
+      schema:
+        $ref: '#/components/schemas/EntityNameDef'
+    # scope
+    scopeParam:
+      name: scope
+      description: |-
+        Requested scope (optional). Space-separated list of permissions the client application wishes to have granted for this persona.
+        If this is not specified, then all entitled permissions are **granted**.
+      in: query
+      required: false
+      schema:
+        type: string
+        pattern: '[0-9a-zA-Z-_ :]+'
+      examples:
+        Example 1 (Scope):
+          value: app:read app:create
+    # lifetime
+    lifetimeParam:
+      name: lifetime
+      description: How long this token should be valid, in seconds.
+      in: query
+      required: false
+      schema:
+        type: string
+        pattern: '[0-9]{1,5}'
+    # payload format
+    payloadFormatParam:
+      name: payload_format
+      description: The JSON format for returning the payload
+      in: header
+      required: false
+      schema:
+        type: string
+        enum:
+          - dictionary
+          - array
+          - collection
+          - hierarchy
+
+  schemas:
+#---------------------
+# Entities
+
+# BASE DEFINITIONS
+    EntityNameDef:
+      type: string
+      maxLength: 50
+      pattern: '[0-9a-zA-Z-_:\*]{1,50}'
+    EntityDescriptionDef:
+      type: string
+      maxLength: 100
+      pattern: '[0-9a-zA-Z-_:\*]{1,100}'
+
+
+# ROLES
+#---------------------
+    Role:
+      type: object
+      properties:
+        key:
+          type: integer
+          minimum: 1
+          format: int32
+        clientkey:
+          type: integer
+          minimum: 1
+          format: int32
+        name:
+          $ref: '#/components/schemas/EntityNameDef'
+        description:
+          type: string
+          nullable: true # Can't use shared schema with nullable in 3.0.x
+          maxLength: 100
+      required:
+        - key
+        - clientkey
+        - name
+      example:
+        name: usher:admim
+#---------------------
+    CollectionOfRoles:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+
+# PERMISSIONS
+#---------------------
+    Permission:
+      type: object
+      properties:
+        permission:
+          $ref: '#/components/schemas/EntityNameDef'
+        description:
+          $ref: '#/components/schemas/EntityDescriptionDef'
+      required:
+        - permission
+#---------------------
+    ArrayOfPermissions:
+      type: array
+      items:
+        type: array
+        items:
+          $ref: '#/components/schemas/EntityNameDef'
+#---------------------
+    CollectionOfPermissions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Permission'
+#---------------------
+    DictionaryOfPermissions:
+      type: object
+      additionalProperties: false
+      properties:
+        permission:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityNameDef'
+
+# CLIENTS
+#---------------------
+    Client:
+      type: object
+      properties:
+        client_id:
+          $ref: '#/components/schemas/EntityNameDef'
+        clientname:
+          $ref: '#/components/schemas/EntityNameDef'
+        description:
+          $ref: '#/components/schemas/EntityDescriptionDef'
+        secret:
+          type: string
+          maxLength: 50
+      required:
+        - client_id
+        - clientname
+      example:
+        client_id: newsletter-app
+        clientname: The Newsletter App
+        description: Application for reading the newsletter on a mobile device
+        secret: secretphraseused
+#---------------------
+    ArrayOfClients:
+      type: array
+      items:
+        $ref: '#/components/schemas/Client'
+      example:
+        - client_id: the-usher
+          clientname: The Usher
+          description: This Resource Authorization Server
+        - client_id: client-app1
+          clientname: Client Application 1
+          description: An application for calling data APIs
+          secret: shhhhhhhhhhhhhh
+        - client_id: client-app2
+          clientname: Client Application 2
+
+# SCOPE
+#---------------------
+    ArrayOfScope:
+      type: array
+      items:
+        type: array
+        items: {}
+#---------------------
+    CollectionOfScope:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          role:
+            $ref: '#/components/schemas/EntityNameDef'
+          permission:
+            type: array
+            items:
+              $ref: '#/components/schemas/EntityNameDef'
+#---------------------
+    DictionaryOfScope:
+      type: object
+      additionalProperties: false
+      properties:
+        role:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityNameDef'
+        permission:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/EntityNameDef'
+#---------------------
+    HierarchyOfScope:
+      type: array
+      items:
+          type: object
+          properties:
+            role:
+              $ref: '#/components/schemas/EntityNameDef'
+            permission:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityNameDef'
+# TOKEN
+#---------------------
+    Token:
+      type: object
+      additionalProperties: false
+      properties:
+          token_type:
+            type: string
+          access_token:
+            type: string
+          refresh_token:
+            type: string
+          expires_in:
+            type: integer
+            format: int32
+      required:
+        - token_type
+        - access_token
+        - refresh_token
+        - expires_in
+      example:
+        "Example Access Token":
+          token_type: "Bearer"
+          access_token: "OPAQUE TOKEN"
+          refresh_token: "2550f150-b75a-459b-8d98-19961b651892"
+          expires_in: 3600
+
+# KEYS
+#---------------------
+    Key:
+      type: object
+      additionalProperties: false
+      properties:
+        kty:
+          type: string
+        kid:
+          type: string
+        use:
+          type: string
+        alg:
+          type: string
+        n:
+          type: string
+        e:
+          type: string
+
+# JWKS
+#---------------------
+    Jwks:
+      type: object
+      additionalProperties: false
+      properties:
+        keys:
+          type: array
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Key'
+      required:
+        - keys
+      example:
+        {"keys":[
+          {
+            "kid":"2020-02-12A",
+            "kty":"RSA",
+            "alg":"RS256",
+            "use":"sig",
+            "key_ops": "verify",
+            "n":"2kVO54uvOhDfpn3SUrWA-iaVhlBry6MgiUImReN_4jpYf-aBA-f0mgDmF-708bspPluzGjG6KRDg0UtGl3PpndyZk9PDAxgHbdzY6bRwHLchxB7RW4NYF4CgScqAQ38HbFmUQlQOj-V_Xadb_PSUoV-acM0aGjBig-t5mRSvdoedg1nF9Lt4eJ-1DV0lw-xS5XHKzzS0s9aJtwUuR38Iem3tF5k_o71cvnbKM9T_kQhASn9RGloS9LXgjWsChNiyP0KgMLINdYo3x-hdUbpZCiit0b3fvJQIsX2BXeOcgtEGuTNcxYPdbLMD5wA7TLzSFWrkJ0ZemVAuSilOyfaHdw",
+            "e":"AQAB",
+        }]}
+
+# CONFIG
+#---------------------
+    ServerConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        token_endpoint:
+          type: string
+        jwks_uri:
+          type: string
+        the-usher-package-version:
+          type: string
+          maxLength: 40
+          pattern: '^[\d]+\.[\d]+\.[\d]+$'
+      required:
+        - token_endpoint
+        - jwks_uri
+        - the-usher-package-version
+      example:
+        token_endpoint: $SERVER_URL/self/token
+        jwks_uri: $SERVER_URL/.well-known/jwks.json
+        the-usher-package-version: 1.2.0
+
+# RESPONSE SCHEMAS
+#---------------------
+    # Success response body
+    Success:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: integer
+          minimum: 200
+          maximum: 299
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+    # Error response body
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 600
+        message:
+          type: string
+          pattern: '.'
+      required:
+        - code
+        - message
+
+  securitySchemes:
+    bearerSelfAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    bearerAdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    bearerClientAdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Bad Request
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Unauthorized
+
+    Forbidden:
+      description: The server understood the request but refuses to authorize it
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: Forbidden
+
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Not Found
+
+    UnsupportedMediaType:
+      description: The request entity has a media type which the server or resource does not support
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 415
+            message: Unsupported Media Type
+
+    TooManyRequests:
+      description: The user has sent too many requests in a given amount of time
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 429
+            message: Too Many Requests
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

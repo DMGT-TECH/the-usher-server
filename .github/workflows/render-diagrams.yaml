@@ -1,0 +1,19 @@
+name: DIAGRAMS-RENDER
+
+on:
+  push:
+    paths:
+      - 'diagrams/*.wsq'
+    tags-ignore:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Trepp/actions-render-wsq@v1
+        with:
+          folder: './diagrams'
+          style: 'modern-blue'
+          commitChanges: 'true'

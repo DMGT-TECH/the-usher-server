@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  title: MockIdentityProvider for The Usher
+  description: |
+    The mock identity provider helps in testing The Usher without dependency on an external identity provider.
+  termsOfService: replace_with_url
+  contact:
+    email: theusher@dmgt.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+externalDocs:
+  description: Requirements doc
+  url: https://dmgtcloud-my.sharepoint.com/:w:/g/personal/patryk_laurent_dmgt_com/Eb2xvNe6YA1LqSySXfqgn-4BUjBadg3nX_AEKnmH1xK1XA?e=RletVi
+servers:
+    - url: https://localhost:3002
+tags:
+- name: Server Configuration
+  description: Retrieve server configuration information.
+- name: Token APIs
+  description: Obtain tokens from the server.
+
+paths:
+  /:
+    get:
+      operationId: getConfiguration
+      'x-swagger-router-controller': 'endpoint_root'
+      summary: Returns basic information about this server.
+      description: This endpoint returns a JSON object with URIs for an authenticated persona to obtain an access token, and for an API or client application to get this server's JSON Web Key Set (JWKS).
+      tags:
+        - Server Configuration
+      responses:
+        '200':
+          description: On success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerConfig'
+        default:
+          $ref: '#/components/responses/Default'
+
+  /.well-known/jwks.json:
+    get:
+      'x-swagger-router-controller': 'endpoint_jwksjson'
+      operationId: getJwks
+      summary: Returns this server’s public key in JSON Web Key Set (JWKS) format.
+      tags:
+        - Server Configuration
+      description: "Returns public key information that can be used to verify the signature on tokens (JWTs) issued by this server."
+      security: [] # public endpoint
+      responses:
+        '200':
+          description: The JWKS public key server information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jwks'
+        default:
+          $ref: '#/components/responses/Default'
+
+
+  /oauth/token:
+    post:
+      'x-swagger-router-controller': 'endpoint_oauth_token'
+      operationId: issueOauthToken  #  https://tools.ietf.org/html/rfc7523#section-2.1
+      summary: Issue an access token (JWT) containing permissions for the logged-in persona to cover the requested scope, and an ID token.
+      description: |
+        Returns, in the response body (not in the header), a signed JWT access token with the requested scope, if granted.  May return a smaller scope if fewer entitlements were granted to the persona. Requires a signed access token from the Persona Authorization (identity) server (e.g., Auth0, Cognito, or Azure AD) containing the **sub** claim and possibly a **groups** claim if individual personas are not being managed on this server for the given client application.
+
+        Use this endpoint if the scope need to be passed to a publicly accessible resource server.
+      security: [] # public endpoint
+      tags:
+        - Token APIs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  client_id:
+                    $ref: '#/components/schemas/EntityNameDef'
+                  client_secret:
+                    $ref: '#/components/schemas/EntityNameDef'
+                  audience:
+                    $ref: '#/components/schemas/EntityNameDef'
+                  scope:
+                    $ref: '#/components/schemas/ScopeDef'
+                  username:
+                    $ref: '#/components/schemas/EntityNameDef'
+                  password:
+                    $ref: '#/components/schemas/EntityNameDef'
+                  grant_type:
+                    $ref: '#/components/schemas/GrantTypeDef'
+                  realm:
+                    $ref: '#/components/schemas/EntityNameDef'
+      responses:
+        '200':
+          description: Returns a signed JWTs containing the following JSON payload.
+          headers:
+            X-OAuth-Scopes:
+              schema:
+                type: string
+              description: The scopes the token has authorized.
+            X-Accepted-OAuth-Scopes:
+              schema:
+                type: string
+              description: The scopes that the action checks for.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessAndIdentityTokens'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Default'
+
+
+components:
+
+  schemas:
+#---------------------
+# Entities
+
+# BASE DEFINITIONS
+    EntityNameDef:
+      type: string
+      maxLength: 100
+      pattern: '[0-9a-zA-Z-_:\*]{1,100}'
+    ScopeDef:
+      type: string
+      pattern: '^((openid|email|read:email)\b\s*)*$'  # Only match scope containing these words
+    GrantTypeDef:
+      type: string
+      enum: ['http://auth0.com/oauth/grant-type/password-realm', 'password']
+
+# TOKEN
+#---------------------
+    AccessAndIdentityTokens:
+      type: object
+      additionalProperties: false
+      properties:
+          token_type:
+            type: string
+          id_token:
+            type: string
+          access_token:
+            type: string
+          scope:
+            $ref: '#/components/schemas/ScopeDef'
+          expires_in:
+            type: integer
+            format: int32
+      required:
+        - token_type
+        - access_token
+        - id_token
+        - expires_in
+      example:
+        "Example Access Identity and Tokens":
+          token_type: "Bearer"
+          access_token: "OPAQUE TOKEN"
+          id_token: "Example Here"
+          scope: "openid email"
+          refresh_token: "2550f150-b75a-459b-8d98-19961b651892"
+          expires_in: 3600
+
+# KEYS
+#---------------------
+    Key:
+      type: object
+      additionalProperties: false
+      properties:
+        kty:
+          type: string
+        kid:
+          type: string
+        use:
+          type: string
+        alg:
+          type: string
+        n:
+          type: string
+        e:
+          type: string
+
+# JWKS
+#---------------------
+    Jwks:
+      type: object
+      additionalProperties: false
+      properties:
+        keys:
+          type: array
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Key'
+      required:
+        - keys
+      example:
+        {"keys":[
+          {
+            "kid":"2020-02-12A",
+            "kty":"RSA",
+            "alg":"RS256",
+            "use":"sig",
+            "key_ops": "verify",
+            "n":"2kVO54uvOhDfpn3SUrWA-iaVhlBry6MgiUImReN_4jpYf-aBA-f0mgDmF-708bspPluzGjG6KRDg0UtGl3PpndyZk9PDAxgHbdzY6bRwHLchxB7RW4NYF4CgScqAQ38HbFmUQlQOj-V_Xadb_PSUoV-acM0aGjBig-t5mRSvdoedg1nF9Lt4eJ-1DV0lw-xS5XHKzzS0s9aJtwUuR38Iem3tF5k_o71cvnbKM9T_kQhASn9RGloS9LXgjWsChNiyP0KgMLINdYo3x-hdUbpZCiit0b3fvJQIsX2BXeOcgtEGuTNcxYPdbLMD5wA7TLzSFWrkJ0ZemVAuSilOyfaHdw",
+            "e":"AQAB",
+        }]}
+
+# CONFIG
+#---------------------
+    ServerConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        token_endpoint:
+          type: string
+        jwks_uri:
+          type: string
+          format: uri
+      required:
+        - token_endpoint
+        - jwks_uri
+      example:
+        token_endpoint: $SERVER_URL/self/token
+        jwks_uri: $SERVER_URL/.well-known/jwks.json
+
+# RESPONSE SCHEMAS
+#---------------------
+    # Error response body
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 600
+        message:
+          type: string
+          pattern: '.'
+      required:
+        - code
+        - message
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Unauthorized
+    Default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

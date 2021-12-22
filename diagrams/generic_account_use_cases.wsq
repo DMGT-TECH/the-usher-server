@@ -1,0 +1,35 @@
+title Account based flows
+
+participant End User as e
+participant Client App as c
+participant Auth0 as a
+participant User Admin as h
+participant The Usher as u
+
+opt User Admin sync
+h->u: sync includes populating\nthe personas table
+end
+e->c: user opens application
+c->c: user selects "Login"
+c->a: user authenticates with Auth0
+alt auth0 contains or obtains user_scope
+a->c: idp token returned with user_scope
+else auth0 does not contain user_scope
+a->c: idp token returned without user_scope
+alt get accounts from User Admin
+c->h: request user_scope\n[sub_claim]
+h->c: return user_scope
+else get accounts from The Usher
+c->u: requests user_scope using \ntoken [sub_claim, iss_claim]
+u->u: get all user_scope\nfor sub_claim
+u->c: returns user_scopes
+end
+end
+
+c->c: display accounts avaiable
+c->c: user selects account
+c->c: identify relevant\nuser_scope
+c->u: requests entitlements using user_scope and\ntoken [sub_claim, iss_claim]
+u->u: generates access token
+u->c: returns access token
+c<->e: use application

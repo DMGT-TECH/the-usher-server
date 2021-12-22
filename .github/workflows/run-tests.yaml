@@ -1,0 +1,72 @@
+name: NODE-TESTS
+
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  workflow_run:
+    workflows: ["Dependabot PR Check"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PGURI: postgresql://postgres:tehsecure@localhost:5432/postgres
+      PGUSER: postgres
+      PGPASSWORD: tehsecure
+      PGSCHEMA: usher
+    steps:
+    - run: sudo ethtool -K eth0 tx off rx off
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        cache: 'npm'
+        cache-dependency-path: |
+          database/package-lock.json
+          server/package-lock.json
+          mockidentityprovider/package-lock.json
+    - name: build docker-compose stack
+      run: docker-compose -f docker-compose-ci.yml up -d
+    - name: Check running containers
+      run: docker ps
+    - name: database npm ci
+      run: npm ci
+      working-directory: ./database/
+    - name: prepare database test data
+      run: |
+        npm run db-drop-create-schema
+        npm run migrate:latest
+        npm run seed:run
+        npm run db-reset-test-data
+      working-directory: ./database/
+    - name: run database layer tests
+      run: npm test
+      working-directory: ./database/
+      env:
+        PUBLIC_KEY: ${{ secrets.PUBLIC_KEY }}
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        TOKEN_LIFETIME_SECONDS: 3600
+        SESSION_LIFETIME_SECONDS: 43200
+    - name: server npm ci
+      run: npm ci
+      working-directory: ./server/
+    - name: start the usher server
+      run: npm start &
+      working-directory: ./server/
+      env:
+        PUBLIC_KEY: ${{ secrets.PUBLIC_KEY }}
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        TOKEN_LIFETIME_SECONDS: ${{ secrets.TOKEN_LIFETIME_SECONDS }}
+        SESSION_LIFETIME_SECONDS: ${{ secrets.SESSION_LIFETIME_SECONDS }}
+        ISSUER_WHITELIST: https://dmgt-test.auth0.com/,test1.net,foo,https://auth.labs.dmgt.com/,http://branded-idp-alias.dmgt.com.mock.localhost:3002/,http://idp.dmgt.com.mock.localhost:3002/,http://whitelisted-but-not-aliased.labs.dmgt.com.mock.localhost:3002/
+        ISSUER_ALIASES: '{"https://auth.labs.dmgt.com/": "https://dmgt-test.auth0.com/", "http://branded-idp-alias.dmgt.com.mock.localhost:3002/": "http://idp.dmgt.com.mock.localhost:3002/"}'
+        THEUSHER_AUD_CLAIMS: https://us-central1-dmgt-oocto.cloudfunctions.net/the-usher,http://localhost:3001
+    - name: run server tests
+      run: npm test
+      working-directory: ./server/
+      env:
+        PUBLIC_KEY: ${{ secrets.PUBLIC_KEY }}
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}

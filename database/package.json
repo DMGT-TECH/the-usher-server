@@ -1,0 +1,33 @@
+{
+  "name": "@dmgt-tech/the-usher-database",
+  "version": "1.4.1",
+  "description": "Database layer for TheUsher",
+  "scripts": {
+    "test": "mocha",
+    "db-reset-test-data": "node ./init/reset_testdata.js",
+    "db-drop-create-schema": "node ./init/drop-create-schema.js",
+    "db-security-test-data": "node ./init/load_security_test_data.js",
+    "db-scenario1": "node ./init/load_sample_data_scenario1.js",
+    "db-create-schema-if-not-exists": "node ./init/create_schema_if_not_exists.js",
+    "migrate:make": "knex migrate:make",
+    "migrate:latest": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "seed:make": "knex seed:make",
+    "seed:run": "knex seed:run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:DMGT-TECH/the-usher.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "10.0.0",
+    "knex": "0.95.14",
+    "pg": "8.7.1",
+    "uuid": "8.3.2"
+  },
+  "devDependencies": {
+    "mocha": "^9.1.3"
+  }
+}

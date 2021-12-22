@@ -1,0 +1,56 @@
+version: '3.7'
+services:
+  db:
+    image: postgres:12.1-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${PGUSER:-postgres}
+      - POSTGRES_PASSWORD=${PGPASSWORD:-tehsecure}
+    volumes:
+      - ./storage/postgres:/var/lib/postgresql/data
+    networks:
+      main:
+        aliases:
+          - usher-db
+  usher-server:
+    image: node:14.17.3-alpine
+    expose: [3001, 9229]
+    entrypoint: ["sh", "/app/scripts/run_for_development.sh"]
+    depends_on: [db]
+    ports:
+      - 3001:3001
+      - 9229:9229
+    volumes:
+      - ./:/app
+    environment:
+      - PGURI=${USHER_PGURI:-postgres://postgres:tehsecure@usher-db:5432/postgres?sslmode=disable}
+    links:
+      - "mockidentityprovider-server:idp.dmgt.com.mock.localhost"
+      - "mockidentityprovider-server:branded-idp-alias.dmgt.com.mock"
+      - "mockidentityprovider-server:notwhitelisted.labs.dmgt.com.mock"
+      - "mockidentityprovider-server:whitelisted-but-not-aliased.labs.dmgt.com.mock"
+    networks:
+      main:
+        aliases:
+          - usher-server
+    restart: on-failure
+  mockidentityprovider-server:
+    image: node:14.17.3-alpine
+    expose: [3002]
+    entrypoint: ["sh", "/app/scripts/run_for_development_mockidentityprovider.sh"]
+    ports:
+      - 3002:3002
+    volumes:
+      - ./:/app
+    networks:
+      main:
+        aliases:
+          - mockidentityprovider
+          - idp.dmgt.com.mock
+          - branded-idp-alias.dmgt.com.mock
+          - notwhitelisted.labs.dmgt.com.mock
+          - whitelisted-but-not-aliased.labs.dmgt.com.mock
+          # These will appear under *.localhost
+networks:
+  main:

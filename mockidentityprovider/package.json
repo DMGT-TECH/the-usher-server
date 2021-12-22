@@ -1,0 +1,35 @@
+{
+  "name": "@dmgt-tech/the-usher-mockidentityprovider",
+  "version": "1.4.0",
+  "description": "Mock Identity Provider Server for The Usher Testing",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --file test/* --timeout 10000",
+    "start": "nodemon -L --watch mockidentityprovider-openapi-spec.yaml --watch ./ index.js",
+    "debug": "nodemon -L --watch mockidentityprovider-openapi-spec.yaml --watch ./src --watch ./index.js --inspect=0.0.0.0:9229 index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:DMGT-TECH/the-usher.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "10.0.0",
+    "express": "4.17.1",
+    "express-jwt": "6.1.0",
+    "helmet": "4.6.0",
+    "helmet-csp": "3.4.0",
+    "http-errors": "1.8.0",
+    "js-yaml": "4.1.0",
+    "jwks-rsa": "2.0.5",
+    "moment": "2.29.1",
+    "nodemon": "2.0.14",
+    "oas-tools": "2.1.8",
+    "pem-jwk": "2.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^9.1.2"
+  }
+}
