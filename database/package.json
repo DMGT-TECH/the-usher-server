@@ -1,5 +1,5 @@
 {
-  "name": "@dmgt-tech/the-usher-database",
+  "name": "@dmgt-tech/the-usher-server-database",
   "version": "1.4.2",
   "description": "Database layer for TheUsher",
   "scripts": {
