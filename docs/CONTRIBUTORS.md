@@ -9,5 +9,7 @@ As The Usher was developed, its design and implementation benefitted from contri
 * Arkadiy Goykhberg (https://github.com/arkadiyg)
 * Chris Barnett (https://github.com/chrisbarnettlmk)
 * Sindhu Tatenene (https://github.com/sindhute)
+* Deniz S. Ozkaynak (https://github.com/murkantilism)
+* Keyvan Chamani (https://github.com/k1ch)
 
 Please submit a pull request or contact us if you'd like your name added.
