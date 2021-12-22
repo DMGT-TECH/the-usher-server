@@ -77,8 +77,8 @@ The following two methods consist of the general steps to get the Usher project 
 
 ```bash
 npm init
-npm install --save @dmgt-tech/database@npm:@dmgt-tech/the-usher-database@1.3.4
-npm install --save @dmgt-tech/the-usher-server@1.3.4
+npm install --save @dmgt-tech/database@npm:@dmgt-tech/the-usher-server-database@1.4.2
+npm install --save @dmgt-tech/the-usher-server@1.4.2
 ```
 
 To run, you can `cd node_modules/@dmgt-tech/the-usher-server/`, add a `.env` file, and then `npm start`.
@@ -97,11 +97,11 @@ cd ../database
 npm install
 ```
 
-### Deploy and/or Run as a Lambda 
+### Deploy and/or Run as a Lambda
 
 The Usher's express.js server is wrapped with the `serverless-http` library to allow it to be used as a "handler" for an AWS Lambda function.
 
-### Deploy and/or Run as a NodeJS Express App 
+### Deploy and/or Run as a NodeJS Express App
 
 **Before running `npm start` make sure you have a `.env` file set up under the `/server` folder. See `env.sample` for the environment variables that must be set and example values.**
 
