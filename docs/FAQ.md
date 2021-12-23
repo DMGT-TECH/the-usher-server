@@ -12,7 +12,6 @@ Auth0 provides an excellent service for authentication in applications.  The Ush
 
 Here are a few differences between The Usher and Auth0 (with its authorization extension):
 
-- **Auth0 has an access token size limit.** Auth0 returns access tokens in the response header, which limits their size.
 - **Auth0 has no cross-app endpoints.** Auth0 does not have an API to support portal-style apps that need to ask about all the apps the user is entitled to.  This is because Auth0 authorization endpoints are client-specific.  The Usher addresses this by offering a `/self/clients` endpoint which lists all client applications on which the user has at least one role or permission.
 - **No client endpoints.** If an app just wanted to get a list of roles for the user on a client application (do they have "admin?"), Auth0 does not offer such an endpoint to client apps.  The API that Auth0 offers is a management API (see next point).
 - **No user-based admin API access** To allow a user to manage roles for a user for a particular client application you'd have to use the Auth0 Authorization Extension API which requires you to create a machine-to-machine application .  This means authorization to this API is not managed at the user level.  If you wanted to control which users had access, you would have to create some kind of function app/lambda to interface between the user and the machine-to-machine application.  And handle the authorizations to this app (which means you will have written The Usher -- just with added dependence on Auth0, which serves as a database.)
