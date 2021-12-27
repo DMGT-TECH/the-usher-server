@@ -105,7 +105,7 @@ async function verifyRoleGroupAccess (subClaim, userContext, clientId, requiredR
   return roleAccess || idpGroupsAccess
 }
 
-/*
+/**
  * This function checks the JWT for validity for /self/ API endpoints.
  * In particular, it checks that the persona (sub) or claimed groups are
  * managed on this server for the tenant.

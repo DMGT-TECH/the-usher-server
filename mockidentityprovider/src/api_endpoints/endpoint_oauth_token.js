@@ -56,12 +56,9 @@ async function createSignedToken (claims) {
 async function issueOauthToken (req, res, next) {
   // calculate the duration of the new access token to be issued
   const accessTokenDurationSeconds = 3600
-
-  const signedIdentityToken = '<id_token>'
-
   const id = mockServerData.filter(x => x.username == req.body.username && x.password == req.body.password)[0]
 
-  accessTokenClaims = {
+  const accessTokenClaims = {
     "iss": `http://${req.headers.host}/`,
     "sub": id.sub,
     "aud": [
@@ -74,7 +71,7 @@ async function issueOauthToken (req, res, next) {
     "gty": 'password'
   }
 
-  idTokenClaims = {
+  const idTokenClaims = {
     "email": id.username,
     "email_verified": false,
     "iss": `http://${req.headers.host}/`,

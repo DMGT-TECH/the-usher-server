@@ -2,9 +2,7 @@ const createError = require('http-errors')
 const jwtDecoder = require('jsonwebtoken')
 const moment = require('moment')
 const dbSessions = require('database/layer/admin-session')
-const dbSelect = require('database/layer/view-select-relationships')
 const tokenUtils = require('../utils/token-utils')
-const isNullOrWhiteSpace = require('../utils/lang-utils').isNullOrWhiteSpace
 const env = require('../../server-env')
 
 async function issueSelfToken (req, res, next) {
