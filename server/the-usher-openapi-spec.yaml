@@ -447,7 +447,7 @@ paths:
                 client_id:
                   type: string
                   maxLength: 50
-                  pattern: ^[a-z0-9-]*$
+                  pattern: ^[a-z0-9-_]*$
                 name:
                   type: string
                   maxLength: 50

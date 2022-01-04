@@ -5,7 +5,6 @@ const postRoles = require('../layer/admin-role')
 const postPermissions = require('../layer/admin-permission')
 const postPersonas = require('../layer/admin-persona')
 // Require relationships
-const postTenantClients = require('../layer/admin-tenantclient')
 const postPersonaRoles = require('../layer/admin-personarole')
 const postRolePermissions = require('../layer/admin-rolepermission')
 const postPersonaPermissions = require('../layer/admin-personapermission')
