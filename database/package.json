@@ -6,7 +6,6 @@
     "test": "mocha",
     "db-reset-test-data": "node ./init/reset_testdata.js",
     "db-drop-create-schema": "node ./init/drop-create-schema.js",
-    "db-security-test-data": "node ./init/load_security_test_data.js",
     "db-scenario1": "node ./init/load_sample_data_scenario1.js",
     "db-create-schema-if-not-exists": "node ./init/create_schema_if_not_exists.js",
     "migrate:make": "knex migrate:make",

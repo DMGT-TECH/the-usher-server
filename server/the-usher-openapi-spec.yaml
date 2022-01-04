@@ -426,12 +426,58 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
-
-  /clients/{client_id}:
-    get:
+  /clients:
+    post:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: createClient
+      summary: Create a new Client
       tags:
         - Client Admin APIs
       security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_name:
+                  type: string
+                client_id:
+                  type: string
+                  maxLength: 50
+                  pattern: ^[a-z0-9-]*$
+                name:
+                  type: string
+                  maxLength: 50
+                description:
+                  type: string
+                secret:
+                  type: string
+              required:
+                - tenant_name
+                - client_id
+                - name
+      responses:
+        201:
+          description: The newly created Client object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        400:
+          $ref: '#/components/responses/BadRequest'
+
+  /clients/{client_id}:
+    get:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: getClient
+      summary: Get a single Client
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerAdminAuth: []
         - bearerClientAdminAuth: []
       parameters:
         - $ref: '#/components/parameters/clientIdPathParam'
@@ -441,7 +487,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/Client'
+        404:
+          $ref: '#/components/responses/NotFound'
 
   /clients/{client_id}/roles:
     parameters:
