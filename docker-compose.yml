@@ -25,11 +25,6 @@ services:
       - ./:/app
     environment:
       - PGURI=${USHER_PGURI:-postgres://postgres:tehsecure@usher-db:5432/postgres?sslmode=disable}
-    links:
-      - "mockidentityprovider-server:idp.dmgt.com.mock.localhost"
-      - "mockidentityprovider-server:branded-idp-alias.dmgt.com.mock"
-      - "mockidentityprovider-server:notwhitelisted.labs.dmgt.com.mock"
-      - "mockidentityprovider-server:whitelisted-but-not-aliased.labs.dmgt.com.mock"
     networks:
       main:
         aliases:
@@ -47,10 +42,9 @@ services:
       main:
         aliases:
           - mockidentityprovider
-          - idp.dmgt.com.mock
-          - branded-idp-alias.dmgt.com.mock
-          - notwhitelisted.labs.dmgt.com.mock
-          - whitelisted-but-not-aliased.labs.dmgt.com.mock
-          # These will appear under *.localhost
+          - idp.dmgt.com.mock.localhost
+          - branded-idp-alias.dmgt.com.mock.localhost
+          - notwhitelisted.labs.dmgt.com.mock.localhost
+          - whitelisted-but-not-aliased.labs.dmgt.com.mock.localhost
 networks:
   main:

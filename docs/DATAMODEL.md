@@ -10,7 +10,6 @@ The following entity relationship diagram provides a high level view of The Ushe
 
 To use The Usher, some initial information needs to be loaded into the Usher's database in order for the Usher to be configured and start up correctly. The table below lists the tables that need to be populated, and describes what data to populate it with.
 
-
 | Object | Description | Table | Attributes |
 |-|-|-|-|
 | Tenant | The tenant that will be issuing JWT Authentication tokens | tenants | name: Unique name for Tenant iss_claim:  iss value as url jwks_uri: jwks URI |
@@ -21,4 +20,4 @@ To use The Usher, some initial information needs to be loaded into the Usher's d
 | Persona Role Join | Associate First Persona to Usher Admin Role | personaroles | personakey: personas.key foreign key for First Persona rolekey: roles.key foreign key for Usher Admin |
 | Tenant Client Join | Associate Usher Client with Tenant | tenantclients | tenantkey: tenants.key foreign key for Tenant clientkey: clients.key foreign key for Usher Client |
 
-For more detail, see https://github.com/DMGT-TECH/the-usher-server/blob/main/database/init/load_sample_data.js
+For more detail, see [database/init/load_sample_data.js](../database/init/load_sample_data.js)
