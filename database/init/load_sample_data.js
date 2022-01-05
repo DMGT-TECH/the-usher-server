@@ -5,7 +5,6 @@ const postRoles = require('../layer/admin-role')
 const postPermissions = require('../layer/admin-permission')
 const postPersonas = require('../layer/admin-persona')
 // Require relationships
-const postTenantClients = require('../layer/admin-tenantclient')
 const postPersonaRoles = require('../layer/admin-personarole')
 const postRolePermissions = require('../layer/admin-rolepermission')
 const postPersonaPermissions = require('../layer/admin-personapermission')
@@ -19,7 +18,6 @@ async function loadSampleData () {
     await loadClientData()
     await loadRoleData()
     await loadPermissionData()
-    await loadTenantClientData()
     await loadRolePermissionData()
     await loadPersonaRoleData()
     await loadPersonaPermissionData()
@@ -32,11 +30,10 @@ async function loadSampleData () {
 
 async function loadClientData () {
   try {
-    await postClients.insertClient('the-usher', 'The Usher', 'This Resource Authorization Server', 'isurnviuvapivruybas')
-    await postClients.insertClient('site-iq', 'Site IQ', 'Site IQ Product', 'hsvkjhtksdikfuosiuy')
-    await postClients.insertClient('exposure-iq', 'Exposure IQ', 'Exposure IQ Product', 'sdjkhfbvsnsdfas')
-    await postClients.insertClient('risk-modeller', 'Risk Modeller', 'Model risks', 'srasudcnsakmnhijt')
-    await postClients.insertClient('tessl', 'Tessl', '', 'oouyoylljkjlkjohkkouu')
+    await postClients.insertClient('DMGT OOCTO', 'the-usher', 'The Usher', 'This Resource Authorization Server', 'isurnviuvapivruybas')
+    await postClients.insertClient('DMGT OOCTO', 'site-iq', 'Site IQ', 'Site IQ Product', 'hsvkjhtksdikfuosiuy')
+    await postClients.insertClient('DMGT OOCTO', 'exposure-iq', 'Exposure IQ', 'Exposure IQ Product', 'sdjkhfbvsnsdfas')
+    await postClients.insertClient('DMGT OOCTO', 'tessl', 'Tessl', '', 'oouyoylljkjlkjohkkouu')
     return null
   } catch (error) {
     throw new Error('Client data failed to load ' + error.message)
@@ -107,14 +104,6 @@ async function loadPersonaData () {
     await postPersonas.insertPersona('DMGT OOCTO', 'https://dmgt-prod.auth0.com/', 'anya@dmgt.com', '')
   } catch (error) {
     throw new Error('Persona data failed to load ' + error.message)
-  }
-}
-
-async function loadTenantClientData () {
-  try {
-    await postTenantClients.insertTenantClient('DMGT OOCTO', 'https://dmgt-prod.auth0.com/', 'the-usher')
-  } catch (error) {
-    throw new Error('Tenant Client data failed to load ' + error.message)
   }
 }
 

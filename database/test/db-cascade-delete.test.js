@@ -9,7 +9,6 @@ const postGroups = require('../layer/admin-group')
 const postPersonas = require('../layer/admin-persona')
 const postSessions = require('../layer/admin-session')
 // Require relationships
-const postTenantClients = require('../layer/admin-tenantclient')
 const postPersonaRoles = require('../layer/admin-personarole')
 const postGroupRoles = require('../layer/admin-grouprole')
 const postRolePermissions = require('../layer/admin-rolepermission')
@@ -21,7 +20,7 @@ describe('Cascade deletes', function () {
     try {
       // Insert Entities
       await postTenants.insertTenant('dummy_tenant', 'https://dummytenant', 'https://dummytenant/.well-known/jwks.json')
-      await postClients.insertClient('dummy_client', 'Dummy Client', 'Dummy client for testing', 'secretsecretdonttell')
+      await postClients.insertClient('dummy_tenant', 'dummy_client', 'Dummy Client', 'Dummy client for testing', 'secretsecretdonttell')
       await postPersonas.insertPersona('dummy_tenant', 'https://dummytenant', 'dummy_subclaim', '')
       await postRoles.insertRoleByClientId('dummy_client', 'dummy_role:dummyA', 'Dummy Role A for testing')
       await postPermissions.insertPermissionByClientId('dummy_client', 'dummy_permission:dummyA', 'Dummy Permssion A for testing')
@@ -42,7 +41,6 @@ describe('Cascade deletes', function () {
       )
 
       // Insert relationships
-      await postTenantClients.insertTenantClient('dummy_tenant', 'https://dummytenant', 'dummy_client')
       await postPersonaRoles.insertPersonaRole('dummy_tenant', 'https://dummytenant', 'dummy_subclaim', '', 'dummy_client', 'dummy_role:dummyA')
       await postGroupRoles.insertGroupRole('dummy_group', 'dummy_client', 'dummy_role:dummyA')
       await postRolePermissions.insertRolePermissionByClientId('dummy_client', 'dummy_role:dummyA', 'dummy_permission:dummyA')

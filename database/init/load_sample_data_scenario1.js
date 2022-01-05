@@ -45,7 +45,6 @@ async function loadSampleDataScenario1 () {
     await loadPersonaRoleDataPhase2()
 
     await loadClientDataPhase3()
-    await loadTenantClientDataPhase3()
     await loadRoleDataPhase3()
     await loadPersonaDataPhase3()
     await loadPersonaRoleDataPhase3()
@@ -68,9 +67,10 @@ async function loadTenantData () {
 
 async function loadClientData () {
   try {
-    await postClients.insertClient('the-usher', 'The Usher', 'This Resource Authorization Server', 'tvZ50HzITKwj7YmDc1Uoocktod1lo0Df')
+    await postClients.insertClient('xyz-tenant', 'the-usher', 'The Usher', 'This Resource Authorization Server', 'tvZ50HzITKwj7YmDc1Uoocktod1lo0Df')
   } catch (error) {
-    throw new Error('Client data failed to load ' + error.message)
+    // do not throw error
+    console.log('the-usher client may already have been created')
   }
 }
 
@@ -198,20 +198,11 @@ async function loadPersonaRoleDataPhase2 () {
 
 async function loadClientDataPhase3 () {
   try {
-    await postClients.insertClient('balloon-battle', 'Balloon Battle', 'The Balloon Battle product', 'IXZzF33ZcT7M2T40SRCIKBaTCYbxF4AW')
-    await postClients.insertClient('cheese-challenge', 'Cheese Challenge', 'The Cheese Challenge product', 't2y2XORAo4yWfAZEwWmcpnDnKLurVQce')
+    await postClients.insertClient('xyz-tenant', 'balloon-battle', 'Balloon Battle', 'The Balloon Battle product', 'IXZzF33ZcT7M2T40SRCIKBaTCYbxF4AW')
+    await postClients.insertClient('xyz-tenant', 'cheese-challenge', 'Cheese Challenge', 'The Cheese Challenge product', 't2y2XORAo4yWfAZEwWmcpnDnKLurVQce')
     return null
   } catch (error) {
     throw new Error('Client data failed to load phase 3 ' + error.message)
-  }
-}
-
-async function loadTenantClientDataPhase3 () {
-  try {
-    await postTenantClients.insertTenantClient('xyz-tenant', 'http://auth.labs.dmgt.com.mock:3002/', 'balloon-battle')
-    await postTenantClients.insertTenantClient('xyz-tenant', 'http://auth.labs.dmgt.com.mock:3002/', 'cheese-challenge')
-  } catch (error) {
-    throw new Error('Tenant Client data failed to load ' + error.message)
   }
 }
 
