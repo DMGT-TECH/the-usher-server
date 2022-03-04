@@ -13,7 +13,7 @@ This document outlines the steps necessary to deploy the Usher to a production e
 
 On the database server, run the following command to create the schema that will be used by the Usher.
 
-```
+```sh
 create schema usher
 ```
 
@@ -34,11 +34,9 @@ npm run migrate:latest
 
 The above steps that run the database migrations will ensure the database schema is deployed and up to date.
 
-
 ### Populate Database
 
 Populate The Usher's database according with the appropriate data given the [data model](./DATAMODEL.md).
-
 
 ## Set up The Usher Server
 
@@ -62,7 +60,7 @@ The following variables are required to be configured.
 | TOKEN_LIFETIME_SECONDS   | Number of seconds Access Token is valid                  |
 | SESSION_LIFETIME_SECONDS | Number of seconds Refresh Token is valid                 |
 | ISSUER_WHITELIST         | Comma separated list of authorized Issuer Servers        |
-| THEUSHER_AUD_CLAIMS      | Comma separated list of authorized audience (aud) claims |
+| THEUSHER_AUD_CLAIMS      | (Optional) Comma separated list of authorized audience (aud) claims |
 | PRESET_SERVER_URL        | (Optional) URI to use as `iss` claim for issued tokens   |
 | ISSUER_ALIASES           | (Optional && Experimental) [Hostname aliases](USAGE.md#migrating-idenitity-provider-domain-names-issuer-aliases-experimental) for IdP tokens issuer |
 
@@ -117,4 +115,4 @@ The Usher's express.js server is wrapped with the `serverless-http` library to a
 
 ## Conclusion
 
-With the database up and running and populated (according to the [data model](./DATAMODEL.md)), and The Usher launched with a configuration to point to it (based on https://github.com/DMGT-TECH/the-usher-server/blob/main/server/.env.sample), you're now ready to start requesting tokens!
+With the database up and running and populated (according to the [data model](./DATAMODEL.md)), and The Usher launched with a configuration based on [.env.sample](../server/.env.sample), you're now ready to start requesting tokens!

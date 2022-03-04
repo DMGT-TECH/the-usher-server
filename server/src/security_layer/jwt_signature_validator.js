@@ -43,14 +43,12 @@ async function verifyAndDecodeToken (token) {
     audience = audience[0]
   }
 
-  let whitelistedAudienceURLs = []
+  // Optional check to verify the *audience* claim
   if (env.THEUSHER_AUD_CLAIMS) {
-    whitelistedAudienceURLs = env.THEUSHER_AUD_CLAIMS.split(',')
-  } else {
-    throw createError(500, 'Internal Server Error: accepted audience claims not configured (THEUSHER_AUD_CLAIMS).')
-  }
-  if (!whitelistedAudienceURLs.includes(audience)) {
-    throw createError(403, `Forbidden: JWT contains an aud claim (${audience}) not meant for this application.`)
+    const whitelistedAudienceURLs = env.THEUSHER_AUD_CLAIMS.split(',')
+    if (!whitelistedAudienceURLs.includes(audience)) {
+      throw createError(403, `Forbidden: JWT contains an aud claim (${audience}) not meant for this application.`)
+    }
   }
 
   const jwksUri = tenant[0].jwks_uri

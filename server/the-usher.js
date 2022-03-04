@@ -56,7 +56,7 @@ const optionsObject = {
 
 function preInitCheck () {
   let missingKeyEnvVars = false
-  if (!env.ISSUER_WHITELIST || !env.THEUSHER_AUD_CLAIMS) {
+  if (!env.ISSUER_WHITELIST) {
     missingKeyEnvVars = true
   }
   return missingKeyEnvVars
