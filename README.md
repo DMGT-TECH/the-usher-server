@@ -6,7 +6,7 @@ The Usher authorizes access by looking up roles and permissions in The Usher's d
 
 The Usher is based on there being a clear distinction between authorization and authentication. In particular, it is not possible to do authentication or otherwise manage identity with The Usher.
 
-![](./docs/the-usher-logo-wide.png)
+![The Usher Logo](./docs/the-usher-logo-wide.png)
 
 ## Using The Usher for Authorization in an Application
 
@@ -52,37 +52,36 @@ This list of links is written for developers that would like to contribute to Th
 
 ## What currently works
 
-
-- Tokens
-  - [X] Obtain tokens from The Usher with requested permissions as a scope
-  - [X] Obtain tokens from The Usher with all available permissions (blank scope request)
-  - [X] The Usher's tokens contain roles corresponding to scoped permissions
-  - [X] Refresh tokens with sessions (currently limited to one session per persona)
-- Data Model
-  - [X] Permissions assigned to personas via role assigment
-  - [X] Permissions assigned directly to personas
-  - [X] Support for individual personas (each identified by same `sub` claim) to have multiple optional "user_contexts"
-- API
-  - [X] OpenAPI 3 Spec for documentation
-  - [X] OpenAPI 3 Spec for implementation (`oas-tools` routes endpoints to code, endpoints can be easily renamed)
-  - [X] App portal support endpoint (`/self/clients`) that returns all clients to which a persona has access (i.e., any permissions)
-- Security
-  - [X] Identity providers must be whitelisted to be accepted by The Usher (token's `iss` claim)
-  - [X] All endpoints except for `/.well-known/jwks.json` require an access token from an identity provider
-  - [X] Support for multiple identity provider names (`iss` aliases) [experimental]
-- Code/CI/CD
-  - [X] Unit tests for all endpoints
-  - [X] Mock identity provider server
+* Tokens
+  * [X] Obtain tokens from The Usher with requested permissions as a scope
+  * [X] Obtain tokens from The Usher with all available permissions (blank scope request)
+  * [X] The Usher's tokens contain roles corresponding to scoped permissions
+  * [X] Refresh tokens with sessions (currently limited to one session per persona)
+* Data Model
+  * [X] Permissions assigned to personas via role assigment
+  * [X] Permissions assigned directly to personas
+  * [X] Support for individual personas (each identified by same `sub` claim) to have multiple optional "user_contexts"
+* API
+  * [X] OpenAPI 3 Spec for documentation
+  * [X] OpenAPI 3 Spec for implementation (`oas-tools` routes endpoints to code, endpoints can be easily renamed)
+  * [X] App portal support endpoint (`/self/clients`) that returns all clients to which a persona has access (i.e., any permissions)
+* Security
+  * [X] Identity providers must be whitelisted to be accepted by The Usher (token's `iss` claim)
+  * [X] All endpoints except for `/.well-known/jwks.json` require an access token from an identity provider
+  * [X] Support for multiple identity provider names (`iss` aliases) [experimental]
+* Code/CI/CD
+  * [X] Unit tests for all endpoints
+  * [X] Mock identity provider server
 
 ## What is in progress
 
-- [ ] Implement Groups functionality (see https://github.com/DMGT-TECH/the-usher-server/issues/2)
+* [ ] Implement Groups functionality (see https://github.com/DMGT-TECH/the-usher-server/issues/2)
 
 ## What could be added
 
-- [ ] Signing key rotation (automatic and/or via an admin API endpoint)
-- [ ] Sessions and refresh tokens per persona-client (or persona-device)
-- [ ] Serverless database layer (e.g., Firestore or DynamoDB)
-- [ ] Scopes based on identity provider groups
-- [ ] Full admin API to manage client applications, personas, roles, and permissions
-- [ ] API endpoint to return a list of `user_contexts` available for a persona
+* [ ] Signing key rotation (automatic and/or via an admin API endpoint)
+* [ ] Sessions and refresh tokens per persona-client (or persona-device)
+* [ ] Serverless database layer (e.g., Firestore or DynamoDB)
+* [ ] Scopes based on identity provider groups
+* [ ] Full admin API to manage client applications, personas, roles, and permissions
+* [ ] API endpoint to return a list of `user_contexts` available for a persona

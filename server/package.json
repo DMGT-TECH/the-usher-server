@@ -1,6 +1,6 @@
 {
   "name": "@dmgt-tech/the-usher-server",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "The Usher Authorization Server",
   "engines": {
     "node": ">=14"
