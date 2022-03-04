@@ -237,23 +237,27 @@ async function selectClientRoles (clientId = '*', rolename = '*') {
   }
 }
 
-async function selectSelfRoles (subClaim = '*', userContext = '*', clientId = '*') {
-  let sql = `SELECT DISTINCT r.name AS role
+/**
+ * Get a list of roles for a given sub claim (Persona).
+ *
+ * @param {string} subClaim The unique sub claim id to look up roles for
+ * @param {string} userContext Optional user context for the given sub claim
+ * @param {*} clientId
+ * @returns
+ */
+async function selectSelfRoles (subClaim, userContext = '*', clientId = '*') {
+  const params = [subClaim]
+  let paramCount = 1
+  let sql = `SELECT DISTINCT r.key, r.clientkey, r.name, r.description
   FROM usher.tenants t
   JOIN usher.tenantclients tc ON t.key = tc.tenantkey
   JOIN usher.clients c ON c.key = tc.clientkey
   JOIN usher.roles r ON r.clientkey = c.key
   JOIN usher.personaroles ur ON ur.rolekey = r.key
   JOIN usher.personas p ON ur.personakey = p.key AND p.tenantkey = t.key
-  WHERE 1=1`
-  const params = []
-  let paramCount = 0
+  WHERE p.sub_claim = $1 `
+
   try {
-    if (subClaim !== '*') {
-      params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
-    }
     if (userContext !== '*') {
       params.push(userContext)
       paramCount++
@@ -348,6 +352,10 @@ async function selectSelfScope (subClaim = '*', userContext = '*', clientId = '*
   }
 }
 
+/**
+ * @deprecated
+ * @returns
+ */
 function getClientRolePermissionsView () {
   return `SELECT DISTINCT c.client_id, c.name AS clientname, r.name AS rolename, r.description AS roledescription,
                 pm.name AS permissionname, pm.description AS permissiondescription
@@ -360,6 +368,12 @@ function getClientRolePermissionsView () {
               pm.clientkey = r.clientkey`
 }
 
+/**
+ * @deprecated
+ * @param {*} clientId
+ * @param {*} rolename
+ * @returns
+ */
 async function selectClientRolePermissions (clientId = '*', rolename = '*') {
   try {
     let sql = getClientRolePermissionsView() + ' WHERE 1=1'
