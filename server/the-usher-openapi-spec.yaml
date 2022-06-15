@@ -1,18 +1,18 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: The Usher
   description: |
     The Usher server allows a business to authorize an identified user for access to resources or services offered by the business.
-  termsOfService: replace_with_url
   contact:
-    email: theusher@dmgt.com
+    name: The Usher Support Page
+    url: https://github.com/DMGT-TECH/the-usher-server/issues
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.0.1
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 1.0.0
 externalDocs:
-  description: Requirements doc
-  url: https://dmgtcloud-my.sharepoint.com/:w:/g/personal/patryk_laurent_dmgt_com/Eb2xvNe6YA1LqSySXfqgn-4BUjBadg3nX_AEKnmH1xK1XA?e=RletVi
+  description: GitHub Repository
+  url: https://github.com/DMGT-TECH/the-usher-server
 servers:
     - url: https://localhost:3001
     - url: https://o07e9wdidk.execute-api.us-east-1.amazonaws.com/prod

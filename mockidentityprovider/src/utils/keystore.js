@@ -1,10 +1,9 @@
 const fs = require('fs').promises
 const STORE_FILENAME = "./keystore.json"
 
-/*
+/**
  * A minimalist keystore, storing in a local file.
  */
-
 async function selectLatestKey() {
   const store = await selectAllKeys()
   const sorted = store.sort(function (a,b) {
@@ -43,4 +42,3 @@ async function selectAllKeys() {
 }
 
 module.exports = { insertKey, selectAllKeys, selectLatestKey }
-
