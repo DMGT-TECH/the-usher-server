@@ -24,7 +24,7 @@
     "helmet-csp": "3.4.0",
     "http-errors": "2.0.0",
     "js-yaml": "4.1.0",
-    "moment": "2.29.3",
+    "moment": "2.29.4",
     "nodemon": "2.0.16",
     "oas-tools": "2.2.2",
     "pem-jwk": "2.0.0"
