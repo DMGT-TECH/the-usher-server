@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "16.0.3",
-    "knex": "0.95.15",
+    "knex": "2.3.0",
     "pg": "8.8.0",
     "uuid": "9.0.0"
   },
