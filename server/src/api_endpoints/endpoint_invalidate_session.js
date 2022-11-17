@@ -12,10 +12,8 @@ async function invalidateSession (req, res, next) {
     return next(createError(400, 'Bad request: Query parameter "iss" must have a value.'))
   }
 
+  // Implementation supports this query param not being submitted, no need to check if null/undefined
   const ucx = req.query.ucx
-  if (isNullOrWhiteSpace(ucx) && ucx !== '') {
-    return next(createError(400, 'Bad request: Query parameter "ucx" must have a value or be empty.'))
-  }
 
   // check the iss in the token matches iss in delete body
   if (req.user.iss !== iss) {

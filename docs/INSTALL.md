@@ -71,7 +71,7 @@ The following two methods consist of the general steps to get the Usher project 
 ### Installing from GitHub Release Packages
 
 1. Create an empty folder
-1. In that folder, create a file `.npmrc` and add the line `registry=https://npm.pkg.github.com/DMGT-TECH` to it. The numbers below specify the version you would like to install. Please see the [GitHub repo](https://github.com/DMGT-TECH/theusher-server/packages) for the latest published packages.
+1. In that folder, create a file `.npmrc` and add the line `registry=https://npm.pkg.github.com/DMGT-TECH` to it. The numbers below specify the version you would like to install. Please see the [GitHub repo](https://github.com/DMGT-TECH/the-usher-server/packages) for the latest published packages.
 
 ```bash
 npm init

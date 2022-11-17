@@ -143,7 +143,7 @@ describe('Accept IdP Tokens with Original and Aliased Issuer Claims', () => {
       const statusCode = response.status
 
       // assert
-      assert(statusCode === 401, `Expected response status code to be 400 but was ${statusCode}`)
+      assert(statusCode === 401, `Expected response status code to be 401 but was ${statusCode}`)
       assert(json.message.startsWith('Unauthorized: Authorization is not valid. ForbiddenError: Forbidden: JWT provided by non-whitelisted issuer'), `Actual response body: ${json}`)
     })
   })
@@ -171,7 +171,7 @@ describe('Accept IdP Tokens with Original and Aliased Issuer Claims', () => {
       const statusCode = response.status
 
       // assert
-      assert(statusCode === 401, `Expected response status code to be 400 but was ${statusCode}`)
+      assert(statusCode === 401, `Expected response status code to be 401 but was ${statusCode}`)
       assert(json.message.includes('Could not determine IdP JWKS for IdP token issuer'), `Actual response body: ${json}`)
     })
   })
