@@ -1,8 +1,6 @@
 # Contributing to The Usher
 
-
 ## Governance
-
 
 Governance of The Usher is conducted by The Usher's Technical Steering Committee, which currently includes the following members:
 
@@ -21,5 +19,3 @@ After you have agreed upon an implementation strategy for your feature or patch 
 Once your pull request against the The Usher Repository has been merged, your corresponding changes will be automatically included in the next The Usher release. Every change is listed in the The Usher release notes and Changelog.
 
 Congratulations, you have just contributed to The Usher. We appreciate your contribution!
-
-

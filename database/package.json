@@ -17,17 +17,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:DMGT-TECH/the-usher-server.git"
+    "url": "git@github.com:DMGT-TECH/the-usher-server.git",
+    "directory": "database"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "10.0.0",
-    "knex": "0.95.15",
-    "pg": "8.7.1",
-    "uuid": "8.3.2"
+    "dotenv": "16.0.3",
+    "knex": "2.3.0",
+    "pg": "8.8.0",
+    "uuid": "9.0.0"
   },
   "devDependencies": {
-    "mocha": "^9.2.1"
+    "mocha": "^10.1.0"
   }
 }

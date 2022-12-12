@@ -57,7 +57,7 @@ paths:
     get:
       'x-swagger-router-controller': 'endpoint_jwksjson'
       operationId: getJwks
-      summary: Returns this server’s public key in JSON Web Key Set (JWKS) format.
+      summary: Returns this server's public key in JSON Web Key Set (JWKS) format.
       tags:
         - Server Configuration
       description: "Returns public key information that can be used to verify the signature on tokens (JWTs) issued by this server."
@@ -506,9 +506,12 @@ paths:
             $ref: '#/components/schemas/EntityNameDef'
           required: true
         - name: ucx
+          description: Optional user context
           in: query
           schema:
-            $ref: '#/components/schemas/EntityNameDef'
+            type: string
+            nullable: true # Can't use shared schema with nullable in 3.0.x
+            maxLength: 50
           required: false
         - name: iss
           in: query

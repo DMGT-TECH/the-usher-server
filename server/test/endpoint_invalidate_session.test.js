@@ -13,7 +13,7 @@ describe('Invalidate session', () => {
   let headers = {}
   let idpToken = ''
 
-  before(async function () {
+  beforeEach(async function () {
     // GET IDENTITY-PROVIDER TOKEN (ADMIN)
     idpToken = await getAdmin1IdPToken()
 
@@ -36,7 +36,7 @@ describe('Invalidate session', () => {
     await postSessions.insertSessionBySubIss(subClaim, '', issClaim, uuidv4(), new Date(), idpExpirationDateTime, 'scope', 'eydsagdsadahdhwwgywqrwqrqrwqwqy')
   })
 
-  after(async function () {
+  afterEach(async function () {
     const subClaim = 'mockauth0|5e472b2d8a409e0e62026856'
     const issClaim = 'http://idp.dmgt.com.mock.localhost:3002/'
     try {
@@ -125,6 +125,19 @@ describe('Invalidate session', () => {
 
       // act
       const response = await fetch(`${url}?sub=${subClaim}&ucx=${userContext}&iss=${issClaim}`, { method: method, headers: headers })
+      const statusCode = response.status
+
+      // assert
+      assert(statusCode === 200, `Expected response status code to be 200 but was ${statusCode}`)
+    })
+
+    it('should return a successful response without user context param', async function () {
+      // arrange
+      const subClaim = 'mockauth0|5e472b2d8a409e0e62026856'
+      const issClaim = 'http://idp.dmgt.com.mock.localhost:3002/'
+
+      // act
+      const response = await fetch(`${url}?sub=${subClaim}&iss=${issClaim}`, { method, headers })
       const statusCode = response.status
 
       // assert

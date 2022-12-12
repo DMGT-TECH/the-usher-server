@@ -7,8 +7,8 @@
 If you have Docker (and Docker Compose), it is fairly easy to take The Usher for a test drive.  Here's how you set up The Usher from the latest source code:
 
 ```sh
-git clone https://github.com/DMGT-TECH/theusher-server
-cd theusher-server
+git clone https://github.com/DMGT-TECH/the-usher-server
+cd the-usher-server
 docker-compose up   # Ubuntu: requires apt install docker.io docker-compose
 ```
 
