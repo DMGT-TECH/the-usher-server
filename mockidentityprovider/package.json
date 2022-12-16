@@ -1,6 +1,6 @@
 {
   "name": "@dmgt-tech/the-usher-mockidentityprovider",
-  "version": "1.4.0",
+  "version": "1.6.0",
   "description": "Mock Identity Provider Server for The Usher Testing",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "dotenv": "16.0.3",
     "express": "4.18.2",
     "express-jwt": "7.7.7",
-    "helmet": "6.0.0",
+    "helmet": "6.0.1",
     "helmet-csp": "3.4.0",
     "http-errors": "2.0.0",
     "js-yaml": "4.1.0",
