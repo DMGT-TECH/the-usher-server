@@ -32,7 +32,7 @@
     "js-yaml": "4.1.0",
     "jwks-rsa": "3.0.0",
     "moment": "2.29.4",
-    "node-fetch": "3.3.0",
+    "node-fetch": "2.6.7",
     "nodemon": "2.0.20",
     "oas-tools": "2.2.2",
     "pem-jwk": "2.0.0",
