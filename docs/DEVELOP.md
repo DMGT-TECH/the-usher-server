@@ -105,6 +105,6 @@ The following is the process for publishing a new version of The Usher. The proc
 
 1. Update the package version by incrementing the value of the `version` key in the `package.json` file within both the database and server folders.
 1. Run an `npm install` to ensure each associated `package-lock.json` file is updated with the updated value.
-1. Commit and push the above changes that contain the new version numbers to master branch.
+1. Commit and push the above changes that contain the new version numbers to `main` branch.
 1. Create a [new release](https://github.com/DMGT-TECH/the-usher-server/releases/new), for the Tag Version and Release title use a format of vX.Y.Z, ie. v1.2.0 . In the Description field, describe what was changed in the release with headers for "Features & Updates" and "Library & Security Updates".
 1. After the new GitHub release has been created, this will trigger a [GitHub Action](https://github.com/DMGT-TECH/the-usher-server/actions?query=workflow%3A%22Publish+npm+package%22) to automatically publish the two new packages to GitHub.
