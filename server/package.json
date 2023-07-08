@@ -34,7 +34,7 @@
     "moment": "2.29.4",
     "node-fetch": "2.6.7",
     "nodemon": "2.0.20",
-    "oas-tools": "2.2.2",
+    "oas-tools": "3.1.0",
     "pem-jwk": "2.0.0",
     "pg": "8.8.0",
     "serverless-http": "3.1.0",
