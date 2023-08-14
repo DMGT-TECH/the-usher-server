@@ -196,7 +196,8 @@ describe('Insert Update and Delete tests', function () {
       it('Should insert a single relationship', async function () {
         const insertResult = await postPersonaRoles.insertPersonaRole('dummy_tenant', 'https://dummytenant', 'dummy_subclaim', '', 'dummy_client', 'dummy_role:dummyA')
         assert.strictEqual(insertResult, 'Insert successful')
-        await postPersonaRoles.deletePersonaRole('dummy_tenant', 'https://dummytenant', 'dummy_subclaim', '', 'dummy_client', 'dummy_role:dummyA')
+        const deleteResult = await postPersonaRoles.deletePersonaRole('dummy_tenant', 'https://dummytenant', 'dummy_subclaim', '', 'dummy_client', 'dummy_role:dummyA')
+        assert.strictEqual(deleteResult, 'Delete successful')
       })
       it('Should fail to insert where persona tenant is different than role and client tenant', async function () {
         const insertResult = await postPersonaRoles.insertPersonaRole('dummy_tenant', 'https://dummytenant', 'dummy_subclaim', '', 'the-usher', 'the-usher:usher-admin')
