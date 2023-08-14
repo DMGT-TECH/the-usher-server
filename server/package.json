@@ -1,6 +1,6 @@
 {
   "name": "@dmgt-tech/the-usher-server",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "The Usher Authorization Server",
   "engines": {
     "node": ">=14"
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:DMGT-TECH/the-usher-server.git",
+    "url": "https://github.com/DMGT-TECH/the-usher-server.git",
     "directory": "server"
   },
   "author": "",
