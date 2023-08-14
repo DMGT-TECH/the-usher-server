@@ -3,7 +3,7 @@
   "version": "1.6.1",
   "description": "The Usher Authorization Server",
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "main": "the-usher.js",
   "scripts": {
