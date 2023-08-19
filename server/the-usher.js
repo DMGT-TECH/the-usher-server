@@ -1,5 +1,3 @@
-// The Usher -- An Authorisation Server
-const env = require('./server-env')
 const createError = require('http-errors')
 const usherCors = require('cors')
 const express = require('express')
@@ -10,8 +8,10 @@ const jsyaml = require('js-yaml')
 const oasTools = require('oas-tools')
 const path = require('path')
 const serverless = require('serverless-http')
-const keystore = require('database/layer/db-keys')
+
+const env = require('./server-env')
 const keygen = require('./src/api_endpoints/endpoint_generate_new_keys')
+const keystore = require('database/layer/db-keys')
 const { verifyTokenForAdmin, verifyTokenForSelf, verifyTokenForClientAdmin } = require('./src/security_layer/jwt_signature_validator')
 const winstonLogger = require('./src/logging/winston-logger')
 
