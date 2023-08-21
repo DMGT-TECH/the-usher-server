@@ -61,6 +61,15 @@ oasTools.initialize(expressApp, oasOptions).then(() => {
   http.createServer(expressApp).listen(port, () => {
     console.log('🚀 Mock Identity Server up and running!')
   })
+
+  // Default route to handle not found endpoints but return 405 for security
+  expressApp.use((req, res, next) => {
+    const notFoundResponse = {
+      code: 405,
+      message: 'Method Not Allowed'
+    }
+    res.status(405).send(notFoundResponse)
+  })
 })
 
 expressApp.use((err, req, res, next) => {
@@ -84,16 +93,5 @@ expressApp.use((err, req, res, next) => {
       message: err.message || 'General App Error'
     })
 })
-
-// Default route to handle not found endpoints but return 405 for security
-// TODO: Figure out why this is overriding all other API URLs and everything returns 405
-// It should be the catch-all and return a 405 for URLs that don't match above.
-// expressApp.use((req, res, next) => {
-//   const notFoundResponse = {
-//     code: 405,
-//     message: 'Method Not Allowed'
-//   }
-//   res.status(405).send(notFoundResponse)
-// })
 
 seedKeysIfDbIsEmpty()
