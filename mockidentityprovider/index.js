@@ -1,16 +1,15 @@
 // Mock Identity Provider for The Usher
 require('dotenv').config()
 const createError = require('http-errors')
-const keystore = require('./src/utils/keystore.js')
-const keygen = require('./src/api_endpoints/endpoint_generate_new_keys.js')
 const usherCors = require('cors')
 const express = require('express')
-const fs = require('fs')
 const helmet = require('helmet')
-const http = require('http')
-const jsyaml = require('js-yaml')
-const oasTools = require('oas-tools')
-const path = require('path')
+const http = require('node:http')
+const oasTools = require('@oas-tools/core')
+const path = require('node:path')
+
+const keystore = require('./src/utils/keystore.js')
+const keygen = require('./src/api_endpoints/endpoint_generate_new_keys.js')
 
 // Normalizes a port into a number, string, or false
 function normalizePort (val) {
@@ -31,33 +30,36 @@ async function seedKeysIfDbIsEmpty () {
   }
 }
 
-const optionsObject = {
-  controllers: path.join(__dirname, 'src/api_endpoints'),
-  checkControllers: false,
-  loglevel: 'info',
-  logfile: './logs.txt',
-  strict: true,
-  router: true,
-  validator: true,
-  docs: null, // Swap this line with next if you want hosted Swagger docs (may not work deployed as cloud function)
-  // docs: { apiDocs: '/api-docs', apiDocsPrefix: '', swaggerUi: '/docs', swaggerUiPrefix: '' },
-  ignoreUnknownFormats: true,
-  oasSecurity: false,
-  customErrorHandling: true
+const oasOptions = {
+  oasFile: 'mockidentityprovider-openapi-spec.yaml',
+  logger: {
+    loglevel: 'info',
+    logFile: 'logs.txt',
+    logFilePath: '.'
+  },
+  middleware: {
+    router: {
+      controllers: path.join(__dirname, 'src/api_endpoints')
+    },
+    swagger: {
+      disable: false,
+      path: '/docs'
+    },
+    validator: {
+      strict: true
+    }
+  }
 }
 
-const spec = fs.readFileSync('mockidentityprovider-openapi-spec.yaml', 'utf8')
-const oasDoc = jsyaml.load(spec)
 const expressApp = express()
 expressApp.use(helmet())
 expressApp.use(express.json())
 expressApp.use(usherCors())
-oasTools.configure(optionsObject)
 
-oasTools.initialize(oasDoc, expressApp, function () {
+oasTools.initialize(expressApp, oasOptions).then(() => {
   const port = normalizePort(process.env.PORT || '3002')
-  http.createServer(expressApp).listen(port, function () {
-    console.log('Mock Identity Server up and running!')
+  http.createServer(expressApp).listen(port, () => {
+    console.log('🚀 Mock Identity Server up and running!')
   })
 })
 
@@ -70,7 +72,7 @@ expressApp.use((err, req, res, next) => {
   next(err)
 })
 
-expressApp.use(function (err, req, res, next) {
+expressApp.use((err, req, res, next) => {
   // handle case if headers have already been sent to client
   if (res.headersSent) {
     return next(err)
@@ -84,12 +86,14 @@ expressApp.use(function (err, req, res, next) {
 })
 
 // Default route to handle not found endpoints but return 405 for security
-expressApp.use(function (req, res, next) {
-  const notFoundResponse = {
-    code: 405,
-    message: 'Method Not Allowed'
-  }
-  res.status(405).send(notFoundResponse)
-})
+// TODO: Figure out why this is overriding all other API URLs and everything returns 405
+// It should be the catch-all and return a 405 for URLs that don't match above.
+// expressApp.use((req, res, next) => {
+//   const notFoundResponse = {
+//     code: 405,
+//     message: 'Method Not Allowed'
+//   }
+//   res.status(405).send(notFoundResponse)
+// })
 
 seedKeysIfDbIsEmpty()

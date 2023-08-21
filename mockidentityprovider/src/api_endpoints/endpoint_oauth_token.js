@@ -86,6 +86,7 @@ async function issueOauthToken (req, res, next) {
 
   res.append('Cache-Control', 'no-store')
   res.append('Pragma', 'no-cache')
+  res.append('Content-Type', 'application/json;charset=utf-8')
 
   res.status(200).send({
     token_type: 'Bearer',
