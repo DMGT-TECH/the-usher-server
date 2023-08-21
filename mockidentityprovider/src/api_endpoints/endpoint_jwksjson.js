@@ -10,6 +10,8 @@ async function getJwks (req, res) {
     return item
   })
   const result = { keys: publicKeys }
+
+  res.append('Content-Type', 'application/json;charset=utf-8')
   res.status(200).send(result)
 }
 

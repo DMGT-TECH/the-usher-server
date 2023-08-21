@@ -75,7 +75,7 @@ This list of links is written for developers that would like to contribute to Th
 
 ## What is in progress
 
-* [ ] Implement Groups functionality (see https://github.com/DMGT-TECH/the-usher-server/issues/2)
+* [ ] Implement Groups functionality (see <https://github.com/DMGT-TECH/the-usher-server/issues/2>)
 
 ## What could be added
 

@@ -1,7 +1,6 @@
 const moment = require('moment')
 const jwt = require('jsonwebtoken')
 const keystore = require('./keystore.js')
-const env = process.env
 
 /**
  * Calculate the unix dates for a token's claims (iat, exp) based on the
@@ -30,7 +29,7 @@ async function createSignedAccessToken (sub, azp, roles, scope, secondsUntilExpi
 
   const signedAccessToken = jwt.sign(
     {
-      iss: env.SERVER_URL,
+      iss: process.env.SERVER_URL,
       sub: sub,
       azp: azp,
       roles: roles,

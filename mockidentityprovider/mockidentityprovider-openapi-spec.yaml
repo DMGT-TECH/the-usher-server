@@ -25,7 +25,7 @@ paths:
   /:
     get:
       operationId: getConfiguration
-      'x-swagger-router-controller': 'endpoint_root'
+      x-router-controller: 'endpoint_root'
       summary: Returns basic information about this server.
       description: This endpoint returns a JSON object with URIs for an authenticated persona to obtain an access token, and for an API or client application to get this server's JSON Web Key Set (JWKS).
       security: [] # public endpoint
@@ -43,7 +43,7 @@ paths:
 
   /.well-known/jwks.json:
     get:
-      'x-swagger-router-controller': 'endpoint_jwksjson'
+      'x-router-controller': 'endpoint_jwksjson'
       operationId: getJwks
       summary: Returns this server's public key in JSON Web Key Set (JWKS) format.
       tags:
@@ -62,7 +62,7 @@ paths:
 
   /oauth/token:
     post:
-      'x-swagger-router-controller': 'endpoint_oauth_token'
+      'x-router-controller': 'endpoint_oauth_token'
       operationId: issueOauthToken  #  https://tools.ietf.org/html/rfc7523#section-2.1
       summary: Issue an access token (JWT) containing permissions for the logged-in persona to cover the requested scope, and an ID token.
       description: |
