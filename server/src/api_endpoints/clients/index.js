@@ -23,8 +23,8 @@ module.exports = {
   try {
     const client = await dbAdminRole.insertClient(tenantName, clientId, name, description, secret)
     // change error handling to thrown exception
-    if ((typeof client === 'string' || client instanceof String) && client.startsWith('Insert failed')) {
-      throw new Error('Error creating client')
+    if (!client?.client_id) {
+      throw new Error(`Error creating client: ${client}`)
     }
 
     res.status(201).send({
