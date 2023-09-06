@@ -14,7 +14,7 @@ services:
         aliases:
           - usher-db
   mockidentityprovider-server:
-    image: node:14.21.1-alpine
+    image: node:18-alpine
     expose: [3002]
     entrypoint: ["sh", "/app/scripts/run_for_development_mockidentityprovider.sh"]
     ports:

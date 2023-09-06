@@ -376,6 +376,7 @@ paths:
       - $ref: '#/components/parameters/roleKeyPathParam'
     get:
       'x-swagger-router-controller': 'roles/role_key'
+      summary: Get a single Role
       operationId: getRole
       tags:
         - Admin APIs
@@ -392,6 +393,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     patch:
       'x-swagger-router-controller': 'roles/role_key'
+      summary: Update a single Role
       operationId: patchRole
       tags:
         - Admin APIs
@@ -415,6 +417,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     delete:
       'x-swagger-router-controller': 'roles/role_key'
+      summary: Delete a single Role
       operationId: deleteRole
       tags:
         - Admin APIs

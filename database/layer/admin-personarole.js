@@ -31,9 +31,21 @@ async function insertPersonaRole (tenantName, issClaim, subClaim, userContext, c
 }
 
 async function deletePersonaRole (tenantName, issClaim, subClaim, userContext, clientId, rolename) {
-  const sql = `DELETE FROM usher.personaroles pr
-  WHERE EXISTS (SELECT t.key FROM usher.tenants t JOIN usher.personas p ON (t.key = p.tenantkey) WHERE t.key = pr.tenantkey AND t.name = $1 AND t.iss_claim = $2 AND p.sub_claim = $3 AND p.user_context = $4)
-  AND EXISTS (SELECT c.key FROM usher.clients c JOIN usher.roles r ON r.clientkey = c.key WHERE r.key = pr.rolekey AND c.client_id = $5 AND r.name = $6 AND r.key = rp.rolekey)`
+  const sql = `DELETE FROM usher.personaroles
+    WHERE (personakey, rolekey) IN (
+      SELECT p.KEY, r.KEY
+      FROM usher.roles r
+        JOIN usher.clients c ON (c.key = r.clientkey)
+        JOIN usher.tenantclients tc ON (c.key = tc.clientkey)
+        JOIN usher.tenants t ON (t.key = tc.tenantkey)
+        JOIN usher.personas p ON (p.tenantkey = t.key)
+      WHERE t.name = $1
+        AND t.iss_claim = $2
+        AND p.sub_claim = $3
+        AND p.user_context = $4
+        AND c.client_id = $5
+        AND r.name = $6
+    );`
   const sqlParams = [tenantName, issClaim, subClaim, userContext, clientId, rolename]
   try {
     const results = await pool.query(sql, sqlParams)

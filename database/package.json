@@ -1,6 +1,6 @@
 {
   "name": "@dmgt-tech/the-usher-server-database",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Database layer for TheUsher",
   "scripts": {
     "test": "mocha",
@@ -16,15 +16,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:DMGT-TECH/the-usher-server.git",
+    "url": "https://github.com/DMGT-TECH/the-usher-server.git",
     "directory": "database"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "16.0.3",
-    "knex": "2.3.0",
-    "pg": "8.8.0",
+    "dotenv": "16.3.1",
+    "knex": "2.5.1",
+    "pg": "8.11.3",
     "uuid": "9.0.0"
   },
   "devDependencies": {
