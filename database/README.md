@@ -39,7 +39,18 @@ npm run seed:run
 npm run db-reset-test-data
 ```
 
-### How to add db change (migration)
+### How to upgrade to new Postgres major version
+
+To upgrade between major versions of Postgres, ie. from 13 -> 14, you will have to use a command like [pg_upgrade](https://www.postgresql.org/docs/current/pgupgrade.html) or `pg_dumpall`. If you want to preserve the data from your current database, you can follow [this guide](https://thomasbandt.com/postgres-docker-major-version-upgrade).
+
+If you don't care about preserving the data, then you can simply follow the below steps.
+
+1. stop the docker compose stack
+1. delete the `storage` folder
+1. Update the version number in the docker-compose file
+1. start the docker compose stack again
+
+## How to add db change (migration)
 
 To add a change to the existing database schema, ie. a new table, column, etc you must first create a new db migration using knex. The main point to keep in mind is that each migration file is an incremental change to the schema. This allows someone to re-build the database by running all migration files in the correct (timestamp) order.
 

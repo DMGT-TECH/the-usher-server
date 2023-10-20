@@ -9,10 +9,10 @@ If you have Docker (and Docker Compose), it is fairly easy to take The Usher for
 ```sh
 git clone https://github.com/DMGT-TECH/the-usher-server
 cd the-usher-server
-docker-compose up   # Ubuntu: requires apt install docker.io docker-compose
+docker compose up
 ```
 
-Done. This will launch three containers: The Usher server, its database (seeded with test data), and a mock identity server.  All three are accessible via port forwarding on the machine where `docker-compose up` was run.
+Done. 🚀 This will launch three containers: The Usher server, its database (seeded with test data), and a mock identity server.  All three are accessible via port forwarding on the machine where `docker compose up` was run.
 
 ## The Test Drive
 
@@ -26,11 +26,11 @@ The Usher ships with a mock identity provider that simulates Auth0's API endpoin
 
 ```json
 {
-   "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UVkVOVUV5TkVZelJrWkZNekpDTURrek5UZzJSRGRGUWpSQ05rWTROemhFUkRaR00wSTFNdyJ9.eyJpc3MiOiJodHRwczovL2RtZ3QtdGVzdC5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NWU0NzJiMmQ4YTQwOWUwZTYyMDI2ODU2IiwiYXVkIjpbImh0dHBzOi8vdXMtY2VudHJhbDEtZG1ndC1vb2N0by5jbG91ZGZ1bmN0aW9ucy5uZXQvdGhlLXVzaGVyIiwiaHR0cHM6Ly9kbWd0LXRlc3QuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTYxODk1Njc5MiwiZXhwIjoxNjE5MDQzMTkyLCJhenAiOiJTWHZLN3ByUGtSUER5RWxFQ0xPMXJ6TEJLUTNiaE11ciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIiwiZ3R5IjoicGFzc3dvcmQifQ.tGGVnuYGv33G-tov581SUSpt-rDDLNYLhS7Olyp6g6cXnuvg-BWco5csy7MsY_SMhMIM5MslK5PN7n42CPZpSbSb-kcb-QqOXCAdkuNDchXrw-8gtnno7fhvWX8rmV8O4yCbfFyi0giTUJHKzEJozp6IQbKOqRSX38rOic7enKnuPueJ9-Ate78p02qT3EH06tjHtBk7xzgokwPf-EZyDsO9Phk_MJiEAalE-S0a4_ymbAt0-HVn78TpOD5gisGDBWmOXGE557Gs1d2DSB8IW5wP-YLv-StR9AdS1SKf24nPcw76FD_1CxN02zqR3nDAvHtnICcKcVvnpug1mFP61A",
-   "expires_in" : 86400,
-   "id_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UVkVOVUV5TkVZelJrWkZNekpDTURrek5UZzJSRGRGUWpSQ05rWTROemhFUkRaR00wSTFNdyJ9.eyJlbWFpbCI6InRlc3QtdXNlcjFAZG1ndG9vY3RvLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly9kbWd0LXRlc3QuYXV0aDAuY29tLyIsInN1YiI6ImF1dGgwfDVlNDcyYjJkOGE0MDllMGU2MjAyNjg1NiIsImF1ZCI6IlNYdks3cHJQa1JQRHlFbEVDTE8xcnpMQktRM2JoTXVyIiwiaWF0IjoxNjE4OTU2NzkyLCJleHAiOjE2MTg5OTI3OTJ9.ayecXkRqmq8Llb-Lm_BOKuUk9t0Ovcdacx8ojUB7EC_oNlh6fhIrMTnb6yfkGC4v1CRJmZ-WhiTKvlC5GzWI8Fl6xV_iCX6KrdhuaDyHLA5aHH_1VEGbluzpW39LIpxOkQi1aT6X9LX625-6lO20GKxNnVxTzryCbfUPhcfX0_Uo8zEU-mKycu3ujFB3_D6lQ5Rh1NLHQeFlY1NfUAVqzAVsoHA8xaGAro7gKIq19QPXgj1lvPKDbOMN2z_uK9pTLcd_loxoUP0GiJnplPNOx_9YRbq8Uk69XDacYsZoz58pDLIG59LeBC7UVqECOP97ChGgIHiqZVkqddcKt3feMQ",
-   "scope" : "openid email",
-   "token_type" : "Bearer"
+  "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UVkVOVUV5TkVZelJrWkZNekpDTURrek5UZzJSRGRGUWpSQ05rWTROemhFUkRaR00wSTFNdyJ9.eyJpc3MiOiJodHRwczovL2RtZ3QtdGVzdC5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NWU0NzJiMmQ4YTQwOWUwZTYyMDI2ODU2IiwiYXVkIjpbImh0dHBzOi8vdXMtY2VudHJhbDEtZG1ndC1vb2N0by5jbG91ZGZ1bmN0aW9ucy5uZXQvdGhlLXVzaGVyIiwiaHR0cHM6Ly9kbWd0LXRlc3QuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTYxODk1Njc5MiwiZXhwIjoxNjE5MDQzMTkyLCJhenAiOiJTWHZLN3ByUGtSUER5RWxFQ0xPMXJ6TEJLUTNiaE11ciIsInNjb3BlIjoib3BlbmlkIGVtYWlsIiwiZ3R5IjoicGFzc3dvcmQifQ.tGGVnuYGv33G-tov581SUSpt-rDDLNYLhS7Olyp6g6cXnuvg-BWco5csy7MsY_SMhMIM5MslK5PN7n42CPZpSbSb-kcb-QqOXCAdkuNDchXrw-8gtnno7fhvWX8rmV8O4yCbfFyi0giTUJHKzEJozp6IQbKOqRSX38rOic7enKnuPueJ9-Ate78p02qT3EH06tjHtBk7xzgokwPf-EZyDsO9Phk_MJiEAalE-S0a4_ymbAt0-HVn78TpOD5gisGDBWmOXGE557Gs1d2DSB8IW5wP-YLv-StR9AdS1SKf24nPcw76FD_1CxN02zqR3nDAvHtnICcKcVvnpug1mFP61A",
+  "expires_in" : 86400,
+  "id_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UVkVOVUV5TkVZelJrWkZNekpDTURrek5UZzJSRGRGUWpSQ05rWTROemhFUkRaR00wSTFNdyJ9.eyJlbWFpbCI6InRlc3QtdXNlcjFAZG1ndG9vY3RvLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly9kbWd0LXRlc3QuYXV0aDAuY29tLyIsInN1YiI6ImF1dGgwfDVlNDcyYjJkOGE0MDllMGU2MjAyNjg1NiIsImF1ZCI6IlNYdks3cHJQa1JQRHlFbEVDTE8xcnpMQktRM2JoTXVyIiwiaWF0IjoxNjE4OTU2NzkyLCJleHAiOjE2MTg5OTI3OTJ9.ayecXkRqmq8Llb-Lm_BOKuUk9t0Ovcdacx8ojUB7EC_oNlh6fhIrMTnb6yfkGC4v1CRJmZ-WhiTKvlC5GzWI8Fl6xV_iCX6KrdhuaDyHLA5aHH_1VEGbluzpW39LIpxOkQi1aT6X9LX625-6lO20GKxNnVxTzryCbfUPhcfX0_Uo8zEU-mKycu3ujFB3_D6lQ5Rh1NLHQeFlY1NfUAVqzAVsoHA8xaGAro7gKIq19QPXgj1lvPKDbOMN2z_uK9pTLcd_loxoUP0GiJnplPNOx_9YRbq8Uk69XDacYsZoz58pDLIG59LeBC7UVqECOP97ChGgIHiqZVkqddcKt3feMQ",
+  "scope" : "openid email",
+  "token_type" : "Bearer"
 }
 ```
 
@@ -48,10 +48,10 @@ curl -X POST "http://localhost:3001/self/token" -H "Content-type: application/js
 
 ```json
 {
-   "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIwMjEtMDQtMTlUMTg6NDk6MTkuMzM2KzAwOjAwIn0.eyJpc3MiOiIkU0VSVkVSX1VSTCIsInN1YiI6ImF1dGgwfDVlNDcyYjJkOGE0MDllMGU2MjAyNjg1NiIsImF6cCI6InRlc3QtY2xpZW50MSIsInJvbGVzIjoidGVzdC1jbGllbnQxOnRlc3Qtcm9sZTEgdGVzdC1jbGllbnQxOnRlc3Qtcm9sZTIgIiwic2NvcGUiOiJ0ZXN0LXBlcm1pc3Npb24xIHRlc3QtcGVybWlzc2lvbjIgdGVzdC1wZXJtaXNzaW9uMyB0ZXN0LXBlcm1pc3Npb240IHRlc3QtcGVybWlzc2lvbjgiLCJleHAiOjE2MTg5NjA2MjEsImlhdCI6MTYxODk1NzAyMX0.XhkKZKF9ob23NcRwYUFd40DoSPMPu9r_ka_fM3boaAqp3i6J74oISjUN8ygWlMbYSZXXjdmvLsfyhbRIqBGO_oFTfiiJYSwVI7peGwDC-rsi6R3mapdMXDWwVsU5omtG4DO_k5TOS1jvQXKQSfXj-D2bNpDzYm0x121TXfE4ZLW1rf2TCNO29Smbm-BBp8xckvp8hq3-XrQG_BeRm2-EnpX5boYnQgHGad7mfjU1gAELx1ryiEwv5-9DgUgkEzAXQuFzGb0_7dob8WMLzsKVdORDj-Rm76mQHVO4OVbIPhn_R0xMXgUaZW80ksTdKagh01y-Y-hWdW62DRRFglyv6A",
-   "expires_in" : 3600,
-   "refresh_token" : "f697eabc-2d9d-47af-afc0-b186a83a983a",
-   "token_type" : "Bearer"
+  "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIwMjEtMDQtMTlUMTg6NDk6MTkuMzM2KzAwOjAwIn0.eyJpc3MiOiIkU0VSVkVSX1VSTCIsInN1YiI6ImF1dGgwfDVlNDcyYjJkOGE0MDllMGU2MjAyNjg1NiIsImF6cCI6InRlc3QtY2xpZW50MSIsInJvbGVzIjoidGVzdC1jbGllbnQxOnRlc3Qtcm9sZTEgdGVzdC1jbGllbnQxOnRlc3Qtcm9sZTIgIiwic2NvcGUiOiJ0ZXN0LXBlcm1pc3Npb24xIHRlc3QtcGVybWlzc2lvbjIgdGVzdC1wZXJtaXNzaW9uMyB0ZXN0LXBlcm1pc3Npb240IHRlc3QtcGVybWlzc2lvbjgiLCJleHAiOjE2MTg5NjA2MjEsImlhdCI6MTYxODk1NzAyMX0.XhkKZKF9ob23NcRwYUFd40DoSPMPu9r_ka_fM3boaAqp3i6J74oISjUN8ygWlMbYSZXXjdmvLsfyhbRIqBGO_oFTfiiJYSwVI7peGwDC-rsi6R3mapdMXDWwVsU5omtG4DO_k5TOS1jvQXKQSfXj-D2bNpDzYm0x121TXfE4ZLW1rf2TCNO29Smbm-BBp8xckvp8hq3-XrQG_BeRm2-EnpX5boYnQgHGad7mfjU1gAELx1ryiEwv5-9DgUgkEzAXQuFzGb0_7dob8WMLzsKVdORDj-Rm76mQHVO4OVbIPhn_R0xMXgUaZW80ksTdKagh01y-Y-hWdW62DRRFglyv6A",
+  "expires_in" : 3600,
+  "refresh_token" : "f697eabc-2d9d-47af-afc0-b186a83a983a",
+  "token_type" : "Bearer"
 }
 ```
 
@@ -77,12 +77,12 @@ curl -X GET "http://localhost:3001/self/permissions" -H "Content-type: applicati
 
 ```json
 {
-   "permission" : [
-      "test-permission1",
-      "test-permission2",
-      "test-permission3",
-      "test-permission4"
-   ]
+  "permission" : [
+    "test-permission1",
+    "test-permission2",
+    "test-permission3",
+    "test-permission4"
+  ]
 }
 ```
 
@@ -92,7 +92,7 @@ Notice from the decoded token above, The Usher's server name is not configured a
 
 Here's how to configure it manually:
 
-1. Take down the server using Ctrl-C or docker-compose down.
+1. Take down the server using Ctrl-C or `docker compose down`.
 1. List your docker containers with docker ps -a  and delete them docker rm ######
 
    ```sh
@@ -107,7 +107,7 @@ Here's how to configure it manually:
 
 1. Copy server/.env.sample to server/.env
 1. Add a line to configure the server url equal to your desired issuer:  `PRESET_SERVER_URL=http://dmgt-oocto.com`
-1. docker-compose up
+1. docker compose up
 
 Note you could ssh into the docker container using `docker exec -it [usher-server-Container-Id] sh` , edit the configuration, and re-launch it.
 
@@ -119,10 +119,10 @@ curl -X POST "http://localhost:3001/self/token" -H "Content-type: application/js
 
 ```json
 {
-   "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIwMjEtMDQtMTlUMTg6NDk6MTkuMzM2KzAwOjAwIn0.eyJpc3MiOiJodHRwOi8vZG1ndC1vb2N0by5jb20iLCJzdWIiOiJhdXRoMHw1ZTQ3MmIyZDhhNDA5ZTBlNjIwMjY4NTYiLCJhenAiOiJ0ZXN0LWNsaWVudDEiLCJyb2xlcyI6InRlc3QtY2xpZW50MTp0ZXN0LXJvbGUxIHRlc3QtY2xpZW50MTp0ZXN0LXJvbGUyICIsInNjb3BlIjoidGVzdC1wZXJtaXNzaW9uMSB0ZXN0LXBlcm1pc3Npb24yIHRlc3QtcGVybWlzc2lvbjMgdGVzdC1wZXJtaXNzaW9uNCB0ZXN0LXBlcm1pc3Npb244IiwiZXhwIjoxNjE4OTYyNDQzLCJpYXQiOjE2MTg5NTg4NDN9.t7m9KtbakZxrWD4ALuVk0UgmQuYv2SGgx8H9SyFsxX7fjAXvQMOJ7P91BUjNLYPGnBG5TCmO2oaC3PqNGiRDLMfKzUa0S9lrepdkf6zFTlL93ScEnFaxrJuKty3UVyk-iDP_2CC46gxu6ihIr28zDu73TawQQjzr1UT4LYhNOK9Zq7tGDHE8WZPuXitbzr4WlhxiXEXxr1D8R6FS6unpp0xCsOl-XKaRMUAVwERk5S3Cub1FFFKJrKJ22PwD4Uss8lQN0WyHlJ6zWlPvDf3TieNVlm1wsxaPTYDbEbbS6CKYMRotC0xRE0xbaggZ-wBEJWzH78ub5TyGMjhdG1FZ2Q",
-   "expires_in" : 3600,
-   "refresh_token" : "629fa7a8-3d73-4143-99ef-b7cf8bfd3291",
-   "token_type" : "Bearer"
+  "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjIwMjEtMDQtMTlUMTg6NDk6MTkuMzM2KzAwOjAwIn0.eyJpc3MiOiJodHRwOi8vZG1ndC1vb2N0by5jb20iLCJzdWIiOiJhdXRoMHw1ZTQ3MmIyZDhhNDA5ZTBlNjIwMjY4NTYiLCJhenAiOiJ0ZXN0LWNsaWVudDEiLCJyb2xlcyI6InRlc3QtY2xpZW50MTp0ZXN0LXJvbGUxIHRlc3QtY2xpZW50MTp0ZXN0LXJvbGUyICIsInNjb3BlIjoidGVzdC1wZXJtaXNzaW9uMSB0ZXN0LXBlcm1pc3Npb24yIHRlc3QtcGVybWlzc2lvbjMgdGVzdC1wZXJtaXNzaW9uNCB0ZXN0LXBlcm1pc3Npb244IiwiZXhwIjoxNjE4OTYyNDQzLCJpYXQiOjE2MTg5NTg4NDN9.t7m9KtbakZxrWD4ALuVk0UgmQuYv2SGgx8H9SyFsxX7fjAXvQMOJ7P91BUjNLYPGnBG5TCmO2oaC3PqNGiRDLMfKzUa0S9lrepdkf6zFTlL93ScEnFaxrJuKty3UVyk-iDP_2CC46gxu6ihIr28zDu73TawQQjzr1UT4LYhNOK9Zq7tGDHE8WZPuXitbzr4WlhxiXEXxr1D8R6FS6unpp0xCsOl-XKaRMUAVwERk5S3Cub1FFFKJrKJ22PwD4Uss8lQN0WyHlJ6zWlPvDf3TieNVlm1wsxaPTYDbEbbS6CKYMRotC0xRE0xbaggZ-wBEJWzH78ub5TyGMjhdG1FZ2Q",
+  "expires_in" : 3600,
+  "refresh_token" : "629fa7a8-3d73-4143-99ef-b7cf8bfd3291",
+  "token_type" : "Bearer"
 }
 ```
 
