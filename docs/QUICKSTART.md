@@ -37,7 +37,7 @@ The Usher ships with a mock identity provider that simulates Auth0's API endpoin
 Let's keep a copy of an access token using jq to grab it from the JSON output:
 
 ```sh
-export IDP_TOKEN=`./server/scripts/get_jwt_for_test_tenant.sh | jq --raw-output .access_token`
+export IDP_TOKEN=`./server/scripts/get_idp_token_from_mockserver.sh | jq --raw-output .access_token`
 ```
 
 Now let's use the IdP token to get an access token from The Usher:
