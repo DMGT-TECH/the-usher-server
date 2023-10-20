@@ -71,9 +71,9 @@ The Usher requires access to a PostgreSQL database. You may run a database insta
 
 See the full database set up and usage instructions in the [database README](../../database).
 
-### Development Environment Setup Using docker-compose
+### Development Environment Setup using docker compose
 
-Here are more details on our preferred development configuration, using docker-compose.  To start a ready-to-go development environment, issue the following command `docker-compose up` in the root directory of the project (above server/ and database/). This command fires up *docker-compose* which runs 3 instances:
+Here are more details on our preferred development configuration, using docker compose.  To start a ready-to-go development environment, issue the following command `docker compose up` in the root directory of the project (above server/ and database/). This command fires up *docker-compose* which runs 3 instances:
 
 1. Postgres database
 2. The Usher server
@@ -87,7 +87,7 @@ When Usher server is running, the following ports will be exposed:
 1. **3002** - Mock identity server
 1. **9229** - Inspector. You may attach your debugger to this port
 
-To exit the process you may use `ctrl-c` or run `docker-compose down`.
+To exit the process you may use `ctrl-c` or run `docker compose down`.
 
 ### Run new database migration / seed / reset db
 
