@@ -1,18 +1,7 @@
-version: '3.8'
+include:
+  - docker-compose-ci.yml
+
 services:
-  db:
-    image: postgres:12.9-alpine
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=${PGUSER:-postgres}
-      - POSTGRES_PASSWORD=${PGPASSWORD:-tehsecure}
-    volumes:
-      - ./storage/postgres:/var/lib/postgresql/data
-    networks:
-      main:
-        aliases:
-          - usher-db
   usher-server:
     image: node:18-alpine
     expose: [3001, 9229]
@@ -35,21 +24,3 @@ services:
         aliases:
           - usher-server
     restart: on-failure
-  mockidentityprovider-server:
-    image: node:18-alpine
-    expose: [3002]
-    entrypoint: ["sh", "/app/scripts/run_for_development_mockidentityprovider.sh"]
-    ports:
-      - 3002:3002
-    volumes:
-      - ./:/app
-    networks:
-      main:
-        aliases:
-          - mockidentityprovider
-          - idp.dmgt.com.mock.localhost
-          - branded-idp-alias.dmgt.com.mock.localhost
-          - notwhitelisted.labs.dmgt.com.mock.localhost
-          - whitelisted-but-not-aliased.labs.dmgt.com.mock.localhost
-networks:
-  main:

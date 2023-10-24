@@ -29,6 +29,8 @@ tags:
 #Default security scheme:
 security:
   - bearerSelfAuth: []
+  - bearerAdminAuth: []
+  - bearerClientAdminAuth: []
 
 paths:
   /:
@@ -512,6 +514,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CollectionOfRoles'
+        404:
+          $ref: '#/components/responses/NotFound'
     post:
       'x-swagger-router-controller': 'clients/roles'
       operationId: createClientRole
@@ -540,6 +544,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
+        404:
+          $ref: '#/components/responses/NotFound'
 
   /sessions:
     delete:

@@ -48,7 +48,7 @@ You can run the sample client and resource servers, or host them somewhere.  Dur
 This list of links is written for developers that would like to contribute to The Usher's codebase.
 
 * [CONTRIBUTING](./docs/CONTRIBUTING.md) (governance model and process for contributing)
-* [DEVELOP](./docs/DEVELOP.md) (use docker-compose to bring up your dev environment)
+* [DEVELOP](./docs/DEVELOP.md) (use docker compose to bring up your dev environment)
 
 ## What currently works
 

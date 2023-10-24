@@ -19,7 +19,7 @@ jobs:
       PGSCHEMA: usher
     steps:
     - run: sudo ethtool -K eth0 tx off rx off
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-node@v3
       with:
         node-version: 18
@@ -28,8 +28,8 @@ jobs:
           database/package-lock.json
           server/package-lock.json
           mockidentityprovider/package-lock.json
-    - name: build docker-compose stack
-      run: docker-compose -f docker-compose-ci.yml up -d
+    - name: build docker compose stack
+      run: docker compose -f docker-compose-ci.yml up -d
     - name: Check running containers
       run: docker ps
     - name: database npm ci
