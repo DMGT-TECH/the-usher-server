@@ -18,7 +18,15 @@ Done. 🚀 This will launch three containers: The Usher server, its database (se
 
 The next step is to get a token from an identity provider to use with The Usher.  For short, we refer to this as an IdP Token.
 
-The Usher ships with a mock identity provider that simulates Auth0's API endpoint (`/oauth/token`) and issues IdP tokens for a few hardcoded users with username and password authentication (these users are the ones in the test seed data for The Usher's database). We have provided a script to obtain a token from the mock identity server:
+The Usher ships with a mock identity provider that simulates Auth0's API endpoint (`/oauth/token`) and issues IdP tokens for a few hardcoded users with username and password authentication (these users are the ones in the test seed data for The Usher's database).
+
+The mock identity provider is fairly simple, and returns tokens with the `iss` (issuer) claim set based on the hostname you use when accessing it.  For the purposes of this quickstart, given the identities in the test database, you should ensure the mock identity provider is accessible via the hostname `idp.dmgt.com.mock.localhost`.  Depending on your operating system, `docker compose` may create an alias (check this by running `ping idp.dmgt.com.mock.localhost`).  However, if it does not, then manually add to `/etc/hosts` an entry like:
+
+```
+127.0.0.1 idp.dmgt.com.mock.localhost
+```
+
+Then, call the following script to obtain a token from the mock identity server:
 
 ```sh
 ./server/scripts/get_idp_token_from_mockserver.sh | json_pp
