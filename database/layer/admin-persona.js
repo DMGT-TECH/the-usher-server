@@ -1,13 +1,15 @@
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
+const { usherDb } = require('../../database/layer/knex')
 
 module.exports = {
   insertPersona,
   deletePersona,
-  updatePersona
+  updatePersona,
+  insertPersonaByTenantKey
 }
 
-async function insertPersona (tenantName, issClaim, subClaim, userContext) {
+async function insertPersona(tenantName, issClaim, subClaim, userContext) {
   const sql = `INSERT INTO usher.personas (tenantkey, sub_claim, user_context)
   SELECT key, $3, $4
   FROM usher.tenants
@@ -30,7 +32,7 @@ async function insertPersona (tenantName, issClaim, subClaim, userContext) {
   }
 }
 
-async function deletePersona (tenantName, issClaim, subClaim, userContext) {
+async function deletePersona(tenantName, issClaim, subClaim, userContext) {
   const sql = `DELETE FROM usher.personas p
     WHERE EXISTS (SELECT 1 FROM usher.tenants t WHERE t.KEY = p.tenantkey AND t.name = $1 and t.iss_claim = $2)
     AND p.sub_claim = $3 AND p.user_context = $4`
@@ -48,7 +50,7 @@ async function deletePersona (tenantName, issClaim, subClaim, userContext) {
   }
 }
 
-async function updatePersona (tenantName, issClaim, oldSubClaim, newSubClaim, oldUserContext, newUserContext) {
+async function updatePersona(tenantName, issClaim, oldSubClaim, newSubClaim, oldUserContext, newUserContext) {
   const sql = `UPDATE usher.personas p SET sub_claim = $4, user_context = $6
     WHERE EXISTS (SELECT 1 FROM usher.tenants t WHERE t.KEY = p.tenantkey AND t.name = $1 and t.iss_claim = $2)
     AND p.sub_claim = $3 AND p.user_context = $5`
@@ -63,5 +65,24 @@ async function updatePersona (tenantName, issClaim, oldSubClaim, newSubClaim, ol
     }
   } catch (error) {
     return `Update failed: ${error.message}`
+  }
+}
+
+async function insertPersonaByTenantKey(tenantKey, subClaim, userContext = '') {
+  try {
+    const [persona] = await usherDb('personas')
+      .insert({ tenantkey: tenantKey, sub_claim: subClaim, user_context: userContext })
+      .returning('*');
+    return persona;
+  } catch (err) {
+    // handle error when tenant key does not exist with 404 error tenant does not exist
+    // also handle the 409 when trying to create the same persona 
+    console.error({
+      message: 'Unexpected error at insertPersonaByTenantKey',
+      stack: err,
+    });
+    throw {
+      message: 'Failed to insert a persona in DB!',
+    };
   }
 }
