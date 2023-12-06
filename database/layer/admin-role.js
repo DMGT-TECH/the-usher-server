@@ -18,15 +18,14 @@ async function insertRoleByClientId (clientId, rolename, roledescription) {
       const role = await pool.query(sql, [clientId, rolename])
       return role.rows[0]
     } else {
-      const errClientDoesNotExist = `Client does not exist matching client_id ${clientId}`
-      return `Insert failed: ${errClientDoesNotExist}`
+      throw new Error(`Client does not exist matching client_id ${clientId}`)
     }
   } catch (error) {
     if (error.message === 'duplicate key value violates unique constraint "roles_name_clientkey_uq"') {
       const errClientRoleAlreadyExists = `A role ${rolename} already exists matching client_id ${clientId}`
-      return `Insert failed: ${errClientRoleAlreadyExists}`
+      return errClientRoleAlreadyExists
     }
-    return `Insert failed: ${error.message}`
+    return error.message
   }
 }
 

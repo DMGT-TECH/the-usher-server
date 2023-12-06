@@ -50,6 +50,6 @@ async function getClient (req, res, next) {
       secret: client.secret
     })
   } catch (err) {
-    return next(createError(500, err))
+    return next(createError(404, err))
   }
 }

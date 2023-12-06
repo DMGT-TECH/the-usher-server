@@ -60,9 +60,12 @@ async function insertClient (tenantName, clientId, clientName, clientDescription
   const sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id = $1'
   try {
     const results = await pool.query(sql, [clientId])
+    if(results.rowCount === 0) {
+      throw new Error(`No results for client_id ${clientId}`)
+    }
     return results.rows[0]
   } catch (error) {
-    // TODO throw not found error
+    throw error
   }
 }
 
