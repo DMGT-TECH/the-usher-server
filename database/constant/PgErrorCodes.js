@@ -1,4 +1,4 @@
-export const PgErrorCodes = {
+const PgErrorCodes = {
   // Class 08 - Connection Exception
   ConnectionException: '08000',
   ConnectionDoesNotExist: '08003',
@@ -48,4 +48,8 @@ export const PgErrorCodes = {
   // Class 54 - Program Limit Exceeded
   ProgramLimitExceeded: '54000',
   StatementTooComplex: '54001',
+};
+
+module.exports = {
+  PgErrorCodes,
 };

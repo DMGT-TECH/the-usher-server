@@ -1,6 +1,7 @@
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
 const { usherDb } = require('../../database/layer/knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
 module.exports = {
   insertPersona,
@@ -75,14 +76,6 @@ async function insertPersonaByTenantKey(tenantKey, subClaim, userContext = '') {
       .returning('*');
     return persona;
   } catch (err) {
-    // handle error when tenant key does not exist with 404 error tenant does not exist
-    // also handle the 409 when trying to create the same persona 
-    console.error({
-      message: 'Unexpected error at insertPersonaByTenantKey',
-      stack: err,
-    });
-    throw {
-      message: 'Failed to insert a persona in DB!',
-    };
+    throw pgErrorHandler(err);
   }
 }

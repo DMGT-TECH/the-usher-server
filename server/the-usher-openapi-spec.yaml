@@ -467,8 +467,10 @@ paths:
                 $ref: "#/components/schemas/Persona"
         400:
           $ref: '#/components/responses/BadRequest'
-        500: 
-          $ref: '#/components/responses/Default'
+        409: 
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalError'
 
 
   /clients/{client_id}:
@@ -1054,6 +1056,16 @@ components:
             code: 404
             message: Not Found
 
+    Conflict:
+      description: Resource already exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Resource already exist!
+
     UnsupportedMediaType:
       description: The request entity has a media type which the server or resource does not support
       content:
@@ -1073,6 +1085,17 @@ components:
           example:
             code: 429
             message: Too Many Requests
+    
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Internal Error!
+
     Default:
       description: Unexpected error
       content:
