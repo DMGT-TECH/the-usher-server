@@ -1,6 +1,7 @@
 const { describe, it } = require('mocha')
 const assert = require('assert')
 const postPersonas = require('../layer/admin-persona.js')
+const { usherDb } = require('../layer/knex')
 
 describe('Admin persona view', function () {
   describe('Test INSERT personas', function () {
@@ -18,6 +19,13 @@ describe('Admin persona view', function () {
       const result = await postPersonas.insertPersona('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'test-dmgt-oocto-x@dmgtoocto.com', '')
       assert.strictEqual(result, 'Insert failed: A persona (sub_claim = test-dmgt-oocto-x@dmgtoocto.com; user_context = ) already exists on tenantname test-tenant1 iss_claim http://idp.dmgt.com.mock.localhost:3002/')
       await postPersonas.deletePersona('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'test-dmgt-oocto-x@dmgtoocto.com', '')
+    })
+    it('Should insertPersonaByTenantKey without an exception', async () => {
+      const subClaim = 'test-user@the-usher.com'
+      const [tenant] = await usherDb('tenants').select('*').limit(1)
+      const persona = await postPersonas.insertPersonaByTenantKey(tenant.key, subClaim)
+      assert.strictEqual(persona.sub_claim, subClaim)
+      await usherDb('personas').where({ key: persona.key }).del()
     })
   })
 
