@@ -2,16 +2,16 @@ const { describe, it, before, afterEach } = require('mocha')
 const fetch = require('node-fetch')
 const assert = require('assert')
 
-const { getTestUser1IdPToken } = require('./lib/tokens')
+const { getAdmin1IdPToken } = require('./lib/tokens')
 const { getServerUrl } = require('./lib/urls')
 const { usherDb } = require('../../database/layer/knex')
 
 describe('Admin Personas', () => {
-  let requestHeaders;
+  let requestHeaders
   const url = `${getServerUrl()}`
 
   before(async () => {
-    const userAccessToken = await getTestUser1IdPToken()
+    const userAccessToken = await getAdmin1IdPToken()
     requestHeaders = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${userAccessToken}`,

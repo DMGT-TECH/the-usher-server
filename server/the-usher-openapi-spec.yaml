@@ -438,8 +438,8 @@ paths:
       operationId: createPersona
       tags:
         - Admin APIs
-      # security:
-      #   - bearerAdminAuth: []
+      security:
+        - bearerAdminAuth: []
       requestBody:
         required: true
         content:
@@ -460,7 +460,7 @@ paths:
                 - sub_claim
       responses:
         201:
-          description: Returns the created personas
+          description: Returns the created persona
           content:
             application/json:
               schema:

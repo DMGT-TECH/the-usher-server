@@ -48,8 +48,8 @@ const PgErrorCodes = {
   // Class 54 - Program Limit Exceeded
   ProgramLimitExceeded: '54000',
   StatementTooComplex: '54001',
-};
+}
 
 module.exports = {
   PgErrorCodes,
-};
+}

@@ -3,7 +3,7 @@
   "version": "1.6.1",
   "description": "Database layer for TheUsher",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --exit",
     "db-reset-test-data": "node ./init/reset_testdata.js",
     "db-drop-create-schema": "node ./init/drop-create-schema.js",
     "db-security-test-data": "node ./init/load_security_test_data.js",
