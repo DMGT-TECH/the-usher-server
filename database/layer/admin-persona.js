@@ -1,6 +1,6 @@
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
-const { usherDb } = require('../../database/layer/knex')
+const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
 const insertPersona = async (tenantName, issClaim, subClaim, userContext) => {
@@ -66,7 +66,7 @@ const insertPersonaByTenantKey = async (tenantKey, subClaim, userContext = '') =
   try {
     const [persona] = await usherDb('personas')
       .insert({ tenantkey: tenantKey, sub_claim: subClaim, user_context: userContext })
-      .returning('*')
+      .returning(['key', 'sub_claim', 'tenantkey', 'user_context', 'created_at'])
     return persona
   } catch (err) {
     throw pgErrorHandler(err)

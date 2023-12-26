@@ -799,8 +799,6 @@ components:
         - client_id: client-app2
           clientname: Client Application 2
 
-# PERSONAS
-#---------------------
     Persona:
       type: object
       properties:
@@ -1057,14 +1055,14 @@ components:
             message: Not Found
 
     Conflict:
-      description: Resource already exist
+      description: Resource already exists
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             code: 409
-            message: Resource already exist!
+            message: Resource already exists!
 
     UnsupportedMediaType:
       description: The request entity has a media type which the server or resource does not support
