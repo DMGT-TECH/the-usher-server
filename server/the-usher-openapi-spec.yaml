@@ -431,6 +431,47 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+  /personas:
+    post:
+      'x-swagger-router-controller': 'personas/persona'
+      summary: Create a single persona
+      operationId: createPersona
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_key:
+                  type: number
+                  minimum: 1
+                  format: int32
+                sub_claim:
+                  type: string
+                user_context:
+                  type: string
+              required:
+                - tenant_key
+                - sub_claim
+      responses:
+        201:
+          description: Returns the created persona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Persona"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        409: 
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalError'
+
 
   /clients/{client_id}:
     get:
@@ -758,6 +799,31 @@ components:
         - client_id: client-app2
           clientname: Client Application 2
 
+    Persona:
+      type: object
+      properties:
+        key:
+          type: integer
+          minimum: 1
+          format: int32
+        tenantkey:
+          type: integer
+          minimum: 1
+          format: int32
+        user_context:
+          type: string
+          nullable: true
+        sub_claim:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+      required:
+        - key
+        - tenantkey
+        - sub_claim
+
 # SCOPE
 #---------------------
     ArrayOfScope:
@@ -988,6 +1054,16 @@ components:
             code: 404
             message: Not Found
 
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Resource already exists!
+
     UnsupportedMediaType:
       description: The request entity has a media type which the server or resource does not support
       content:
@@ -1007,6 +1083,17 @@ components:
           example:
             code: 429
             message: Too Many Requests
+    
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Internal Error!
+
     Default:
       description: Unexpected error
       content:

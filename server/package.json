@@ -7,7 +7,7 @@
   },
   "main": "the-usher.js",
   "scripts": {
-    "test": "mocha --file test/* --timeout 10000",
+    "test": "mocha --exit --file test/*",
     "start": "nodemon -L --watch the-usher-openapi-spec.yaml --watch ./ --watch ../database/layer the-usher.js",
     "debug": "nodemon -L --watch the-usher-openapi-spec.yaml --watch ./src --watch ./the-usher.js --watch ../database/layer --inspect=0.0.0.0:9229 the-usher.js"
   },
