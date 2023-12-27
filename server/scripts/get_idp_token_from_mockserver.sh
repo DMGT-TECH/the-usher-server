@@ -7,5 +7,4 @@ curl -X POST -H "Content-Type: application/json" -d '{
       "password": "password12345!",
        "grant_type": "http://auth0.com/oauth/grant-type/password-realm",
         "realm": "Username-Password-Authentication"
-      }' "http://localhost:3002/oauth/token"
-      # }' "http://idp.dmgt.com.mock.localhost:3002/oauth/token"
+      }' "http://idp.dmgt.com.mock.localhost:3002/oauth/token"
