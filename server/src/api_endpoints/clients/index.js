@@ -1,11 +1,6 @@
 const createError = require('http-errors')
 const dbAdminRole = require('database/layer/admin-client')
 
-module.exports = {
-  createClient,
-  getClient
-}
-
 /**
  * Client Admin function to create a Client
  *
@@ -13,7 +8,7 @@ module.exports = {
  * @param {*} res
  * @param {*} next
  */
- async function createClient (req, res, next) {
+ const createClient = async (req, res, next) => {
   const tenantName = req.body.tenant_name
   const clientId = req.body.client_id
   const name = req.body.name
@@ -38,7 +33,21 @@ module.exports = {
   }
 }
 
-async function getClient (req, res, next) {
+const deleteClient = async (req, res, next) => {
+  const clientId = req.params.client_id
+
+  try {
+    const result = await dbAdminRole.deleteClientByClientId(clientId)
+    if (result != 'Delete successful') {
+      throw new Error(`Error deleting Client ${clientId}`)
+    }
+    res.status(204).send()
+  } catch (err) {
+    return next(createError(404, err))
+  }
+}
+
+const getClient = async (req, res, next) => {
   const clientId = req.params.client_id
 
   try {
@@ -52,4 +61,10 @@ async function getClient (req, res, next) {
   } catch (err) {
     return next(createError(404, err))
   }
+}
+
+module.exports = {
+  createClient,
+  deleteClient,
+  getClient
 }

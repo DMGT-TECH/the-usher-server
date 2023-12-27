@@ -475,6 +475,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
 
   /clients/{client_id}:
+    parameters:
+      - $ref: '#/components/parameters/clientIdPathParam'
     get:
       'x-swagger-router-controller': 'clients/index'
       operationId: getClient
@@ -484,8 +486,6 @@ paths:
       security:
         - bearerAdminAuth: []
         - bearerClientAdminAuth: []
-      parameters:
-        - $ref: '#/components/parameters/clientIdPathParam'
       responses:
         200:
           description: Return details for the given Client object
@@ -493,6 +493,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Client'
+        404:
+          $ref: '#/components/responses/NotFound'
+    delete:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: deleteClient
+      summary: Delete a Client and associated data
+      description: In addition to deleting the Client, any roles belonging to this Client
+        are also deleted.
+      tags:
+        -  Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+        - bearerClientAdminAuth: []
+      responses:
+        204:
+          description: Successfully deleted the Client and data
         404:
           $ref: '#/components/responses/NotFound'
 
@@ -506,6 +522,7 @@ paths:
       tags:
         - Client Admin APIs
       security:
+        - bearerAdminAuth: []
         - bearerClientAdminAuth: []
       responses:
         200:
@@ -697,9 +714,6 @@ components:
       maxLength: 100
       pattern: '[0-9a-zA-Z-_:\*]{1,100}'
 
-
-# ROLES
-#---------------------
     Role:
       type: object
       properties:
@@ -944,9 +958,8 @@ components:
         jwks_uri: $SERVER_URL/.well-known/jwks.json
         the-usher-package-version: 1.2.0
 
-# RESPONSE SCHEMAS
-#---------------------
-    # Success response body
+    # RESPONSE SCHEMAS
+    #---------------------
     Success:
       type: object
       additionalProperties: false

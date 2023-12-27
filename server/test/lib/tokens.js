@@ -25,7 +25,7 @@ const getTokenFromIssuerHost = async function (username, password, issuerHost) {
     grant_type: 'http://auth0.com/oauth/grant-type/password-realm',
     realm: 'Username-Password-Authentication'
   })
-  const issuerUri = (issuerHost.startsWith("http://") || issuerHost.startsWith("https://") ? issuerHost : 'https://' + issuerHost) + (issuerHost.endsWith("/") ? "" : "/")
+  const issuerUri = (issuerHost.startsWith("http://") || issuerHost.startsWith("https://") ? issuerHost : `https://${issuerHost}`) + (issuerHost.endsWith("/") ? "" : "/")
   const response = await fetch(`${issuerUri}oauth/token`, { method: 'POST', headers: headers, body: body }).then(res => res.json())
   return response.access_token
 }
