@@ -1,8 +1,8 @@
 const { describe, it, before, after } = require('mocha')
-const fetch = require('node-fetch')
 const assert = require('assert')
+const crypto = require('node:crypto')
+const fetch = require('node-fetch')
 const jwtDecoder = require('jsonwebtoken')
-const { v4: uuidv4 } = require('uuid')
 const postSessions = require('database/layer/admin-session')
 
 const { getTestUser1IdPToken } = require('./lib/tokens')
@@ -19,7 +19,7 @@ describe('Issue Self Refresh Token', () => {
   })
 
   describe('Error responses', () => {
-    const expiredEventId = uuidv4()
+    const expiredEventId = crypto.randomUUID()
     const subClaim = 'mockauth0|5e472b2d8a409e0e62026856'
 
     before(async function () {
@@ -128,7 +128,7 @@ describe('Issue Self Refresh Token', () => {
   })
 
   describe('Excess responses', () => {
-    const excessJwtLifetimeEventId = uuidv4()
+    const excessJwtLifetimeEventId = crypto.randomUUID()
     const subClaim = 'mockauth0|5e472b2d8a409e0e62026856'
 
     before(async function () {
@@ -186,7 +186,7 @@ describe('Issue Self Refresh Token', () => {
   })
 
   describe('Success responses', () => {
-    const validEventId = uuidv4()
+    const validEventId = crypto.randomUUID()
     const subClaim = 'mockauth0|5e472b2d8a409e0e62026856'
 
     before(async function () {
