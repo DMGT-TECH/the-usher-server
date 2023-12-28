@@ -1,7 +1,7 @@
 const { describe, it } = require('mocha')
-const fetch = require('node-fetch')
 const assert = require('assert')
-const { v4: uuidv4 } = require('uuid')
+const crypto = require('node:crypto')
+const fetch = require('node-fetch')
 const postSessions = require('database/layer/admin-session')
 
 const { getAdmin1IdPToken } = require('./lib/tokens')
@@ -33,7 +33,7 @@ describe('Invalidate session', () => {
     // insert session
     const idpExpirationDateTime = new Date()
     idpExpirationDateTime.setMinutes(idpExpirationDateTime.getMinutes() + 30)
-    await postSessions.insertSessionBySubIss(subClaim, '', issClaim, uuidv4(), new Date(), idpExpirationDateTime, 'scope', 'eydsagdsadahdhwwgywqrwqrqrwqwqy')
+    await postSessions.insertSessionBySubIss(subClaim, '', issClaim, crypto.randomUUID(), new Date(), idpExpirationDateTime, 'scope', 'eydsagdsadahdhwwgywqrwqrqrwqwqy')
   })
 
   afterEach(async function () {

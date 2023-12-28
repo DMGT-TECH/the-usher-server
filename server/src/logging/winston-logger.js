@@ -2,7 +2,6 @@ const winston = require('winston')
 const expressWinston = require('express-winston')
 const fs = require('fs')
 const WinstonCloudWatch = require('winston-aws-cloudwatch') // Winston-CloudWatch package
-const Postgres = require('winston-postgres').Postgres // Winston-Postgres package
 require('dotenv').config()
 const env = require('../../server-env')
 
@@ -40,20 +39,6 @@ function getLoggingTransports () {
     } else {
       console.log('CloudWatch Error!! the logs cannot be exported to CloudWatch. Please add the credentials')
     }
-  }
-
-  if (process.env.WINSTON_LOGS_DB === 'true') {
-    transports.push(new Postgres({
-      ssl: false,
-      connectionString: `${env.PGURI}`,
-      poolConfig: {
-        connectionTimeoutMillis: 0,
-        idleTimeoutMillis: 0,
-        max: 10
-      },
-      timestamp: true,
-      tableName: 'usher.performancelogs'
-    }))
   }
   return transports
 }
