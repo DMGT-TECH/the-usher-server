@@ -33,7 +33,7 @@ async function seedKeysIfDbIsEmpty () {
 const oasOptions = {
   oasFile: 'mockidentityprovider-openapi-spec.yaml',
   logger: {
-    loglevel: 'info',
+    level: 'info',
     logFile: 'logs.txt',
     logFilePath: '.'
   },
