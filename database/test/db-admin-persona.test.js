@@ -75,7 +75,7 @@ describe('Admin persona view', () => {
       const personaPermissions = await adminPersonas.getPersonaPermissions(personakey)
       assert.equal(!!personaPermissions.length, true)
     })
-    it('Should return an empty array', async function () {
+    it('Should return an empty array', async () => {
       const personaPermissions = await adminPersonas.getPersonaPermissions(invalidPersonaKey)
       assert.equal(personaPermissions.length, 0)
     })

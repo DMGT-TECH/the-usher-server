@@ -476,13 +476,15 @@ paths:
     get:
       'x-swagger-router-controller': 'personas/permissions'
       operationId: getPersonaPermissions
+      parameters:
+      - $ref: '#/components/parameters/personaKeyPathParam'
       tags:
         - Admin APIs
       security:
         - bearerAdminAuth: []
       responses:
         200:
-          description: Returns the list of permission for the subject persona
+          description: Returns a list of permissions for the subject persona
           content:
             application/json:
               schema:
@@ -767,7 +769,7 @@ components:
           $ref: '#/components/schemas/EntityDescriptionDef'
       required:
         - permission
-#---------------------
+
     PermissionObject:
       type: object
       properties:

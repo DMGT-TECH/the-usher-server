@@ -2,7 +2,7 @@ const { describe, it, before } = require('mocha')
 const fetch = require('node-fetch')
 const assert = require('assert')
 
-const { getAdmin1IdPToken } = require('./lib/tokens')
+const { getAdmin1IdPToken, getTestUser1IdPToken } = require('./lib/tokens')
 const { getServerUrl } = require('./lib/urls')
 const { usherDb } = require('../../database/layer/knex')
 
@@ -12,10 +12,10 @@ describe('Admin Personas Permissions', () => {
   const url = `${getServerUrl()}`
 
   before(async () => {
-    const userAccessToken = await getAdmin1IdPToken()
+    const adminAccessToken = await getAdmin1IdPToken()
     requestHeaders = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${userAccessToken}`,
+      Authorization: `Bearer ${adminAccessToken}`,
     }
   })
 
@@ -53,6 +53,18 @@ describe('Admin Personas Permissions', () => {
         headers: requestHeaders,
       })
       assert.equal(response.status, 404)
+    })
+
+    it('should return 401 due to lack of proper token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await fetch(`${url}/personas/${validPersonaWithNoPermissions}/permissions`, {
+        method: 'GET',
+        headers: {
+          ...requestHeaders,
+          Authorization: `Bearer ${userAccessToken}`
+        },
+      })
+      assert.equal(response.status, 401)
     })
   })
 })
