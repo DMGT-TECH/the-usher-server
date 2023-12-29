@@ -13,6 +13,20 @@ const getPersonaPermissions = async (req, res, next) => {
   }
 }
 
+const createPersonaPermissions = async (req, res, next) => {
+  try {
+    const { persona_key: personaKey } = req.params
+    await checkPersonaExists(personaKey)
+    await dbAdminPersona.insertPersonaPermissions(personaKey, req.body)
+    const locationUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`
+    res.set('Location', locationUrl)
+    res.status(201).send()
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   getPersonaPermissions,
+  createPersonaPermissions,
 }
