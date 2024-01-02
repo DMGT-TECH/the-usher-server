@@ -93,6 +93,27 @@ const getPersonaPermissions = async (personaKey) => {
   }
 }
 
+/**
+ * Insert multiple records for persona permissions
+ *
+ * @param {number} personaKey - The persona key
+ * @param {number[]} permissionKeys - An array of permission keys
+ * @returns {Promise<Object[]>} - A promise that resolves to an array of inserted personapermissions records
+ */
+const insertPersonaPermissions = async (personaKey, permissionKeys) => {
+  try {
+    const personaPermissions = permissionKeys.map((permissionkey) => {
+      return {
+        personakey: personaKey,
+        permissionkey
+      }
+    })
+    return await usherDb('personapermissions').insert(personaPermissions).returning('*')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertPersona,
   deletePersona,
@@ -100,4 +121,5 @@ module.exports = {
   insertPersonaByTenantKey,
   getPersona,
   getPersonaPermissions,
+  insertPersonaPermissions,
 }
