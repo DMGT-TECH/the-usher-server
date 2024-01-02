@@ -9,7 +9,7 @@ async function getSelfClients (req, res, next) {
 
   const clientsRows = await dbSelect.selectTenantPersonaClients(subClaim, req.header('user_context'), req.header('client_id'))
   const clientsArray = []
-  clientsRows.forEach(function (p) {
+  clientsRows.forEach( (p) => {
     clientsArray.push({ client_id: p.client_id, clientname: p.clientname })
   })
   res.status(200).send(clientsArray)

@@ -95,7 +95,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfClients'
+                $ref: '#/components/schemas/ArrayOfSelfClients'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -916,7 +916,7 @@ components:
       properties:
         client_id:
           $ref: '#/components/schemas/EntityNameDef'
-        clientname:
+        name:
           $ref: '#/components/schemas/EntityNameDef'
         description:
           $ref: '#/components/schemas/EntityDescriptionDef'
@@ -925,25 +925,27 @@ components:
           maxLength: 50
       required:
         - client_id
-        - clientname
+        - name
       example:
         client_id: newsletter-app
-        clientname: The Newsletter App
+        name: The Newsletter App
         description: Application for reading the newsletter on a mobile device
         secret: secretphraseused
 
-    ArrayOfClients:
+    ArrayOfSelfClients:
       type: array
       items:
-        $ref: '#/components/schemas/Client'
+        type: object
+        properties:
+          client_id:
+            $ref: '#/components/schemas/EntityNameDef'
+          clientname:
+            $ref: '#/components/schemas/EntityNameDef'
       example:
         - client_id: the-usher
           clientname: The Usher
-          description: This Resource Authorization Server
         - client_id: client-app1
           clientname: Client Application 1
-          description: An application for calling data APIs
-          secret: shhhhhhhhhhhhhh
         - client_id: client-app2
           clientname: Client Application 2
 

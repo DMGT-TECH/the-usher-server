@@ -26,7 +26,7 @@ const dbAdminRole = require('database/layer/admin-client')
 
     res.status(201).send({
       client_id: client.client_id,
-      clientname: client.name,
+      name: client.name,
       description: client.description || '',
       secret: client.secret
     })
@@ -56,7 +56,7 @@ const getClient = async (req, res, next) => {
     const client = await dbAdminRole.getClient(clientId)
     res.send({
       client_id: client.client_id,
-      clientname: client.name,
+      name: client.name,
       description: client.description || '',
       secret: client.secret
     })
