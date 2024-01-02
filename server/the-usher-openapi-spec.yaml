@@ -524,10 +524,12 @@ paths:
               schema:
                 type: string
         400:
-          $ref: '#/components/responses/BadRequest'        
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
-        409: 
+        409:
           $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalError'
