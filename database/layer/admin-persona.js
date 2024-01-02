@@ -73,9 +73,53 @@ const insertPersonaByTenantKey = async (tenantKey, subClaim, userContext = '') =
   }
 }
 
+const getPersona = async (personaKey) => {
+  try {
+    return await usherDb('personas').select('*').where({ key: personaKey }).first();
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+const getPersonaPermissions = async (personaKey) => {
+  try {
+    return await usherDb('permissions')
+      .select('permissions.key', 'permissions.name', 'permissions.description', 'permissions.clientkey')
+      .join('personapermissions', 'permissions.key', 'personapermissions.permissionkey')
+      .join('personas', 'personapermissions.personakey', 'personas.key')
+      .where('personas.key', personaKey)
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+/**
+ * Insert multiple records for persona permissions
+ *
+ * @param {number} personaKey - The persona key
+ * @param {number[]} permissionKeys - An array of permission keys
+ * @returns {Promise<Object[]>} - A promise that resolves to an array of inserted personapermissions records
+ */
+const insertPersonaPermissions = async (personaKey, permissionKeys) => {
+  try {
+    const personaPermissions = permissionKeys.map((permissionkey) => {
+      return {
+        personakey: personaKey,
+        permissionkey
+      }
+    })
+    return await usherDb('personapermissions').insert(personaPermissions).returning('*')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertPersona,
   deletePersona,
   updatePersona,
   insertPersonaByTenantKey,
+  getPersona,
+  getPersonaPermissions,
+  insertPersonaPermissions,
 }

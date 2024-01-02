@@ -472,6 +472,70 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
+  /personas/{persona_key}/permissions:
+    get:
+      'x-swagger-router-controller': 'personas/permissions'
+      operationId: getPersonaPermissions
+      summary: Get a list of permissions assigned to the given Persona
+      parameters:
+      - $ref: '#/components/parameters/personaKeyPathParam'
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        200:
+          description: Returns a list of permissions for the subject persona
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PermissionObject"
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+    post:
+      'x-swagger-router-controller': 'personas/permissions'
+      operationId: createPersonaPermissions
+      summary: Add one or more permissions to the given Persona
+      parameters:
+        - $ref: '#/components/parameters/personaKeyPathParam'
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              items:
+                type: integer
+                minimum: 1
+              uniqueItems: true
+      responses:
+        201:
+          description: Successfully created permissions for the subject persona
+          headers:
+            Location:
+              description: The URL to get all the persona permissions
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalError'
+
   /clients:
     post:
       'x-swagger-router-controller': 'clients/index'
@@ -697,6 +761,13 @@ components:
       required: true
       schema:
         type: integer
+    personaKeyPathParam:
+      name: persona_key
+      description: The unique persona identifier
+      in: path
+      required: true
+      schema:
+        type: integer
     # user_context
     userContextParam:
       name: user_context
@@ -798,6 +869,26 @@ components:
           $ref: '#/components/schemas/EntityDescriptionDef'
       required:
         - permission
+
+    PermissionObject:
+      type: object
+      properties:
+        key:
+          type: integer
+          minimum: 1
+          format: int32
+        clientkey:
+          type: integer
+          minimum: 1
+          format: int32
+        name:
+          $ref: '#/components/schemas/EntityNameDef'
+        description:
+          $ref: '#/components/schemas/EntityDescriptionDef'
+      required:
+        - key
+        - name
+        - clientkey
 #---------------------
     ArrayOfPermissions:
       type: array

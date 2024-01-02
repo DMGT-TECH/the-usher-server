@@ -20,7 +20,7 @@ jobs:
     steps:
     - run: sudo ethtool -K eth0 tx off rx off
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
         node-version: 18
         cache: 'npm'
