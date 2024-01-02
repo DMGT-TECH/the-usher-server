@@ -911,8 +911,6 @@ components:
           items:
             $ref: '#/components/schemas/EntityNameDef'
 
-# CLIENTS
-#---------------------
     Client:
       type: object
       properties:
@@ -933,7 +931,7 @@ components:
         clientname: The Newsletter App
         description: Application for reading the newsletter on a mobile device
         secret: secretphraseused
-#---------------------
+
     ArrayOfClients:
       type: array
       items:

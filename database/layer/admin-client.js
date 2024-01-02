@@ -14,12 +14,12 @@ module.exports = {
  *
  * @param {string} tenantName Unique tenant to associate Client to
  * @param {string} clientId The unique id for the new Client to create
- * @param {string} clientName Client Name
- * @param {string} clientDescription Optional description for the Client
+ * @param {string} name Client Name
+ * @param {string} description Optional description for the Client
  * @param {string} secret
  * @returns Record with the newly created object
  */
-async function insertClient (tenantName, clientId, clientName, clientDescription, secret) {
+async function insertClient (tenantName, clientId, name, description, secret) {
   try {
     // validate tenant name and get tenant key
     let sql = 'SELECT t.key from usher.tenants t WHERE t.name = $1'
@@ -31,7 +31,7 @@ async function insertClient (tenantName, clientId, clientName, clientDescription
 
     // insert client record
     sql = 'INSERT INTO usher.clients (client_id, name, description, secret) VALUES ($1, $2, $3, $4) returning key'
-    const results = await pool.query(sql, [clientId, clientName, clientDescription, secret])
+    const results = await pool.query(sql, [clientId, name, description, secret])
     const clientKey = results.rows[0].key
     // relate client to tenant
     sql = 'INSERT INTO usher.tenantclients (tenantkey, clientkey) VALUES ($1, $2)'
@@ -69,10 +69,10 @@ async function insertClient (tenantName, clientId, clientName, clientDescription
   }
 }
 
-async function updateClientByClientId (clientId, clientname, clientdescription, secret) {
+async function updateClientByClientId (clientId, name, description, secret) {
   const sql = 'UPDATE usher.clients SET name = $1, description = $2, secret = $3 WHERE client_id = $4'
   try {
-    const results = await pool.query(sql, [clientname, clientdescription, secret, clientId])
+    const results = await pool.query(sql, [name, description, secret, clientId])
     if (results.rowCount === 1) {
       return 'Update successful'
     } else {
