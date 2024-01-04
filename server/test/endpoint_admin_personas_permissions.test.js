@@ -10,8 +10,9 @@ const { usherDb } = require('../../database/layer/knex')
 describe('Admin Personas Permissions', () => {
   let requestHeaders
   let testPersonaKey
+  let validPermissionKey
   const url = `${getServerUrl()}`
-  const invalidPersona = 0
+  const invalidPersona = 999999
 
   before(async () => {
     const adminAccessToken = await getAdmin1IdPToken()
@@ -22,6 +23,8 @@ describe('Admin Personas Permissions', () => {
     const { key: tenantkey } = await usherDb('tenants').select('key').first()
     const [persona] = await usherDb('personas').insert({ tenantkey, sub_claim: 'personapermission@test' }).returning('key')
     testPersonaKey = persona.key
+    const { key: permissionKey } = await usherDb('permissions').select('key').first()
+    validPermissionKey = permissionKey
   })
 
   describe('GET:/personas/{persona_key}/permissions', () => {
@@ -71,7 +74,6 @@ describe('Admin Personas Permissions', () => {
   })
 
   describe('POST:/personas/{persona_key}/permissions', () => {
-    let validPermissionKey
     const postPersonasPermissions = async (requestPayload, header = requestHeaders, personaKey = testPersonaKey) => {
       return await fetch(`${url}/personas/${personaKey}/permissions`, {
         method: 'POST',
@@ -79,11 +81,6 @@ describe('Admin Personas Permissions', () => {
         body: JSON.stringify(requestPayload)
       })
     }
-
-    before(async () => {
-      const { key: permissionKey } = await usherDb('permissions').select('key').first()
-      validPermissionKey = permissionKey
-    })
 
     it('should return 201, empty response body, and Location header to get all the persona permissions', async () => {
       const response = await postPersonasPermissions([validPermissionKey])
@@ -129,6 +126,63 @@ describe('Admin Personas Permissions', () => {
       await usherDb('personapermissions').insert({ personakey: testPersonaKey, permissionkey: validPermissionKey })
       const response = await postPersonasPermissions([validPermissionKey])
       assert.equal(response.status, 409)
+    })
+
+    afterEach(async () => {
+      await usherDb('personapermissions').where({ personakey: testPersonaKey }).del()
+    })
+  })
+
+  describe('DELETE:/personas/{persona_key}/permissions/{permission_key}', () => {
+    const deletePersonasPermissions = async (permissionKey, personaKey = testPersonaKey, header = requestHeaders) => {
+      return await fetch(`${url}/personas/${personaKey}/permissions/${permissionKey}`, {
+        method: 'DELETE',
+        headers: header,
+      })
+    }
+
+    it('should return 204, successful attempt to delete a persona permission', async () => {
+      const response = await deletePersonasPermissions(validPermissionKey)
+      assert.equal(response.status, 204)
+    })
+
+    it('should return 204, delete a persona permission successfully', async () => {
+      const [newPersonaPermission] = await usherDb('personapermissions')
+        .insert({ personakey: testPersonaKey, permissionkey: validPermissionKey }).returning('*')
+      assert.equal(newPersonaPermission.personakey, testPersonaKey)
+      const response = await deletePersonasPermissions(newPersonaPermission.permissionkey)
+      assert.equal(response.status, 204)
+      const personaPermission = await usherDb('personapermissions').select('*').where({ personakey: testPersonaKey, permissionkey: validPermissionKey })
+      assert.equal(personaPermission.length, 0)
+    })
+
+    it('should return 400, two different invalid requests', async () => {
+      const [invalidPermissionKeyResponse, invalidPersonaKeyResponse] = await Promise.all(
+        [
+          deletePersonasPermissions(0),
+          deletePersonasPermissions(validPermissionKey, 'a'),
+        ]
+      )
+      assert.equal([
+        invalidPermissionKeyResponse.status,
+        invalidPersonaKeyResponse.status].every((status) => status === 400), true)
+    })
+
+    it('should return 401, unauthorized token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await deletePersonasPermissions(
+        validPermissionKey,
+        testPersonaKey,
+        {
+          ...requestHeaders,
+          Authorization: `Bearer ${userAccessToken}`
+        })
+      assert.equal(response.status, 401)
+    })
+
+    it('should return 404, fail to delete persona permissions for an invalid persona', async () => {
+      const response = await deletePersonasPermissions(validPermissionKey, invalidPersona)
+      assert.equal(response.status, 404)
     })
 
     afterEach(async () => {

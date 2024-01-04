@@ -81,61 +81,10 @@ const getPersona = async (personaKey) => {
   }
 }
 
-const getPersonaPermissions = async (personaKey) => {
-  try {
-    return await usherDb('permissions')
-      .select('permissions.key', 'permissions.name', 'permissions.description', 'permissions.clientkey')
-      .join('personapermissions', 'permissions.key', 'personapermissions.permissionkey')
-      .join('personas', 'personapermissions.personakey', 'personas.key')
-      .where('personas.key', personaKey)
-  } catch (err) {
-    throw pgErrorHandler(err)
-  }
-}
-
-/**
- * Insert multiple records for persona permissions
- *
- * @param {number} personaKey - The persona key
- * @param {number[]} permissionKeys - An array of permission keys
- * @returns {Promise<Object[]>} - A promise that resolves to an array of inserted personapermissions records
- */
-const insertPersonaPermissions = async (personaKey, permissionKeys) => {
-  try {
-    const personaPermissions = permissionKeys.map((permissionkey) => {
-      return {
-        personakey: personaKey,
-        permissionkey
-      }
-    })
-    return await usherDb('personapermissions').insert(personaPermissions).returning('*')
-  } catch (err) {
-    throw pgErrorHandler(err)
-  }
-}
-
-/**
- * Delete persona permissions for a specific persona and permission key
- *
- * @param {number} personaKey - The persona key
- * @param {number} permissionKey - The permission key
- * @returns {Promise<number>} - A promise that resolves to the number of deleted records
- */
-const deletePersonaPermissions = async (personaKey, permissionKey) => {
-  try {
-    return await usherDb('personapermissions').where({ personakey: personaKey, permissionkey: permissionKey }).del()
-  } catch (err) {
-    throw pgErrorHandler(err)
-  }
-}
-
 module.exports = {
   insertPersona,
   deletePersona,
   updatePersona,
   insertPersonaByTenantKey,
   getPersona,
-  getPersonaPermissions,
-  insertPersonaPermissions,
-  deletePersonaPermissions,
 }
