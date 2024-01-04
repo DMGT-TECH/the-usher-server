@@ -491,6 +491,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PermissionObject"
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -498,6 +500,7 @@ paths:
     post:
       'x-swagger-router-controller': 'personas/permissions'
       operationId: createPersonaPermissions
+      summary: Assigns permissions to the subject persona
       parameters:
         - $ref: '#/components/parameters/personaKeyPathParam'
       tags:
@@ -531,6 +534,30 @@ paths:
           $ref: '#/components/responses/NotFound'
         409:
           $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /personas/{persona_key}/permissions/{permission_key}:
+    delete:
+      'x-swagger-router-controller': 'personas/permissions'
+      operationId: deletePersonaPermission
+      summary: Removes a permission for subject persona
+      parameters:
+      - $ref: '#/components/parameters/personaKeyPathParam'
+      - $ref: '#/components/parameters/permissionKeyPathParam'
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        204:
+          description: Empty response on success
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
 
@@ -703,6 +730,14 @@ components:
       required: true
       schema:
         type: integer
+    permissionKeyPathParam:
+      name: permission_key
+      description: The unique permission identifier
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
     # user_context
     userContextParam:
       name: user_context
