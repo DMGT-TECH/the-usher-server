@@ -78,13 +78,13 @@ describe('Admin persona permissions view', () => {
     })
 
     it('Should return 0 when there is no personapermissions record to delete', async () => {
-      const numberOfDeletedRecords = await adminPersonaPermissions.deletePersonaPermissions(invalidPersonaKey, validPermissionKey)
+      const numberOfDeletedRecords = await adminPersonaPermissions.deletePersonaPermission(invalidPersonaKey, validPermissionKey)
       assert.equal(numberOfDeletedRecords, 0)
     })
 
     it('Should return 1 when successfully deletes a personapermissions record', async () => {
       await usherDb('personapermissions').insert({ personakey: testPersonaKey, permissionkey: validPermissionKey })
-      const numberOfDeletedRecords = await adminPersonaPermissions.deletePersonaPermissions(testPersonaKey, validPermissionKey)
+      const numberOfDeletedRecords = await adminPersonaPermissions.deletePersonaPermission(testPersonaKey, validPermissionKey)
       assert.equal(numberOfDeletedRecords, 1)
     })
 

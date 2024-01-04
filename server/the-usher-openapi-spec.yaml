@@ -540,7 +540,7 @@ paths:
   /personas/{persona_key}/permissions/{permission_key}:
     delete:
       'x-swagger-router-controller': 'personas/permissions'
-      operationId: deletePersonaPermissions
+      operationId: deletePersonaPermission
       summary: Removes a permission for subject persona
       parameters:
       - $ref: '#/components/parameters/personaKeyPathParam'

@@ -26,14 +26,14 @@ const createPersonaPermissions = async (req, res, next) => {
   }
 }
 
-const deletePersonaPermissions = async (req, res, next) => {
+const deletePersonaPermission = async (req, res, next) => {
   try {
     const { persona_key: personaKey, permission_key: permissionKey } = req.params
     await Promise.all([
       checkPersonaExists(personaKey),
       checkPermissionExists(permissionKey),
     ])
-    await dbAdminPersonaPermissions.deletePersonaPermissions(personaKey, permissionKey)
+    await dbAdminPersonaPermissions.deletePersonaPermission(personaKey, permissionKey)
     res.status(204).send()
   } catch ({ httpStatusCode = 500, message }) {
     return next(createError(httpStatusCode, { message }))
@@ -43,5 +43,5 @@ const deletePersonaPermissions = async (req, res, next) => {
 module.exports = {
   getPersonaPermissions,
   createPersonaPermissions,
-  deletePersonaPermissions,
+  deletePersonaPermission,
 }
