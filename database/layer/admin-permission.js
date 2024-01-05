@@ -1,13 +1,9 @@
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
+const { usherDb } = require('./knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
-module.exports = {
-  insertPermissionByClientId,
-  updatePermissionByPermissionname,
-  deletePermissionByPermissionname
-}
-
-async function insertPermissionByClientId (clientId, permissionname, permissiondescription) {
+const insertPermissionByClientId = async (clientId, permissionname, permissiondescription) => {
   const sql = 'INSERT INTO usher.permissions (clientkey, name, description) SELECT key, $1, $2 FROM usher.clients WHERE client_id = $3'
   const sqlParams = [permissionname, permissiondescription, clientId]
   try {
@@ -22,7 +18,7 @@ async function insertPermissionByClientId (clientId, permissionname, permissiond
   }
 }
 
-async function updatePermissionByPermissionname (clientId, permissionname, permissiondescription) {
+const updatePermissionByPermissionname = async (clientId, permissionname, permissiondescription) => {
   const sql = 'UPDATE usher.permissions p SET description = $1 WHERE EXISTS (SELECT 1 FROM usher.clients c WHERE c.client_id = $2) AND p.name = $3'
   const sqlParams = [permissiondescription, clientId, permissionname]
   try {
@@ -37,7 +33,7 @@ async function updatePermissionByPermissionname (clientId, permissionname, permi
   }
 }
 
-async function deletePermissionByPermissionname (clientId, permissionname) {
+const deletePermissionByPermissionname = async (clientId, permissionname) => {
   const sql = 'DELETE FROM usher.permissions p WHERE EXISTS (SELECT 1 FROM usher.clients c WHERE c.client_id = $1) AND p.name = $2'
   const sqlParams = [clientId, permissionname]
   try {
@@ -50,4 +46,25 @@ async function deletePermissionByPermissionname (clientId, permissionname) {
   } catch (error) {
     return `Delete failed: ${error.message}`
   }
+}
+
+/**
+ * Retrieve a permission by its key
+ *
+ * @param {number} permissionKey - The permission key
+ * @returns {Promise<Object>} - A promise that resolves to the retrieved permission object
+ */
+const getPermission = async (permissionKey) => {
+  try {
+    return await usherDb('permissions').where({ key: permissionKey }).returning('*').first()
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+module.exports = {
+  insertPermissionByClientId,
+  updatePermissionByPermissionname,
+  deletePermissionByPermissionname,
+  getPermission,
 }
