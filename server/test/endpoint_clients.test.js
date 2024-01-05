@@ -9,7 +9,7 @@ describe('Admin Clients Endpoint Test', () => {
   let userAccessToken = ''
   const url = getServerUrl()
   let requestHeaders
-  before(async function () {
+  before(async () => {
     // GET IDENTITY-PROVIDER TOKEN
     userAccessToken = await getAdmin1IdPToken()
     requestHeaders = {
@@ -19,13 +19,13 @@ describe('Admin Clients Endpoint Test', () => {
   })
 
   describe('Create Clients', () => {
-    it('Should return error for missing fields', async function () {
+    it('Should return error for missing fields', async () => {
       let body = { name: 'API Client Name' }
       const response = await fetch(`${url}/clients`, { method: 'POST', body: JSON.stringify(body), headers: requestHeaders })
       const data = await response.json()
       assert.strictEqual(response.status, 400, 'Expected 400 error response code')
     })
-    it('Should return error for invalid tenant name', async function () {
+    it('Should return error for invalid tenant name', async () => {
       let body = {
         tenant_name: 'invalid-name',
         client_id: 'api-client-1',
@@ -37,7 +37,7 @@ describe('Admin Clients Endpoint Test', () => {
       // TODO change to 400 error after error handling update
       assert.strictEqual(response.status, 500, 'Expected 500 error response code')
     })
-    it('Should create a Client', async function () {
+    it('Should create a Client', async () => {
       let body = {
         tenant_name: 'test-tenant1',
         client_id: 'api-client-1',
@@ -51,7 +51,7 @@ describe('Admin Clients Endpoint Test', () => {
       assert.strictEqual(data.client_id, 'api-client-1', 'Expected response to contain client id')
     })
 
-    it('should return an error for invalid client id', async function () {
+    it('should return an error for invalid client id', async () => {
       let body = {
         tenant_name: '',
         client_id: 'name with spaces',
@@ -63,19 +63,19 @@ describe('Admin Clients Endpoint Test', () => {
       assert.strictEqual(response.status, 400, 'Expected 400 response code')
     })
 
-    after(async function () {
+    after(async () => {
       // clean up newly created Clients
       const results = await dbAdminRole.deleteClientByClientId('api-client-1')
     })
   })
 
   describe('Get Client', () => {
-    it('Should return 404 for invalid Client ID', async function () {
+    it('Should return 404 for invalid Client ID', async () => {
       const clientId = 'foo-invalid-id'
       const response = await fetch(`${url}/clients/${clientId}`, { method: 'GET', headers: requestHeaders })
       assert.strictEqual(response.status, 404, 'Expected 404 response code')
     })
-    it('Should allow usher admin to get Client object', async function () {
+    it('Should allow usher admin to get Client object', async () => {
       const clientId = 'test-client1'
       const response = await fetch(`${url}/clients/${clientId}`, { method: 'GET', headers: requestHeaders })
       const data = await response.json()

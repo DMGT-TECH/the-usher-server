@@ -8,7 +8,7 @@ const dbAdminRole = require('database/layer/admin-role')
 describe('Admin Roles API Tests', () => {
   const url = getServerUrl()
   let requestHeaders
-  before(async function () {
+  before(async () => {
     // GET IDENTITY-PROVIDER TOKEN
     const userAccessToken = await getAdmin1IdPToken()
     requestHeaders = {
@@ -59,7 +59,7 @@ describe('Admin Roles API Tests', () => {
         body: JSON.stringify(postBody)
       })
 
-      // delete the second Role
+      // delete the second Role manually. The first is deleted by `afterEach`
       await dbAdminRole.deleteRoleByClientRolename('test-client2', roleName)
 
       assert.strictEqual(res.status, 201)
