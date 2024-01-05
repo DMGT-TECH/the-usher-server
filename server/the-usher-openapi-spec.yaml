@@ -95,7 +95,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfClients'
+                $ref: '#/components/schemas/ArrayOfSelfClients'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -467,7 +467,7 @@ paths:
                 $ref: "#/components/schemas/Persona"
         400:
           $ref: '#/components/responses/BadRequest'
-        409: 
+        409:
           $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalError'
@@ -476,6 +476,7 @@ paths:
     get:
       'x-swagger-router-controller': 'personas/permissions'
       operationId: getPersonaPermissions
+      summary: Get a list of permissions assigned to the given Persona
       parameters:
       - $ref: '#/components/parameters/personaKeyPathParam'
       tags:
@@ -561,22 +562,84 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
+  /clients:
+    post:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: createClient
+      summary: Create a new Client
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_name:
+                  type: string
+                client_id:
+                  type: string
+                  maxLength: 50
+                  pattern: ^[a-z0-9-_]*$
+                name:
+                  type: string
+                  maxLength: 50
+                description:
+                  type: string
+                secret:
+                  type: string
+              required:
+                - tenant_name
+                - client_id
+                - name
+      responses:
+        201:
+          description: The newly created Client object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        400:
+          $ref: '#/components/responses/BadRequest'
+
   /clients/{client_id}:
+    parameters:
+      - $ref: '#/components/parameters/clientIdPathParam'
     get:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: getClient
       summary: Get a single Client
       tags:
         - Client Admin APIs
       security:
+        - bearerAdminAuth: []
         - bearerClientAdminAuth: []
-      parameters:
-        - $ref: '#/components/parameters/clientIdPathParam'
       responses:
         200:
           description: Return details for the given Client object
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/Client'
+        404:
+          $ref: '#/components/responses/NotFound'
+    delete:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: deleteClient
+      summary: Delete a Client and associated data
+      description: In addition to deleting the Client, any roles belonging to this Client
+        are also deleted.
+      tags:
+        -  Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+        - bearerClientAdminAuth: []
+      responses:
+        204:
+          description: Successfully deleted the Client and data
         404:
           $ref: '#/components/responses/NotFound'
 
@@ -590,6 +653,7 @@ paths:
       tags:
         - Client Admin APIs
       security:
+        - bearerAdminAuth: []
         - bearerClientAdminAuth: []
       responses:
         200:
@@ -796,9 +860,6 @@ components:
       maxLength: 100
       pattern: '[0-9a-zA-Z-_:\*]{1,100}'
 
-
-# ROLES
-#---------------------
     Role:
       type: object
       properties:
@@ -861,7 +922,7 @@ components:
       required:
         - key
         - name
-        - clientkey  
+        - clientkey
 #---------------------
     ArrayOfPermissions:
       type: array
@@ -884,14 +945,12 @@ components:
           items:
             $ref: '#/components/schemas/EntityNameDef'
 
-# CLIENTS
-#---------------------
     Client:
       type: object
       properties:
         client_id:
           $ref: '#/components/schemas/EntityNameDef'
-        clientname:
+        name:
           $ref: '#/components/schemas/EntityNameDef'
         description:
           $ref: '#/components/schemas/EntityDescriptionDef'
@@ -900,25 +959,27 @@ components:
           maxLength: 50
       required:
         - client_id
-        - clientname
+        - name
       example:
         client_id: newsletter-app
-        clientname: The Newsletter App
+        name: The Newsletter App
         description: Application for reading the newsletter on a mobile device
         secret: secretphraseused
-#---------------------
-    ArrayOfClients:
+
+    ArrayOfSelfClients:
       type: array
       items:
-        $ref: '#/components/schemas/Client'
+        type: object
+        properties:
+          client_id:
+            $ref: '#/components/schemas/EntityNameDef'
+          clientname:
+            $ref: '#/components/schemas/EntityNameDef'
       example:
         - client_id: the-usher
           clientname: The Usher
-          description: This Resource Authorization Server
         - client_id: client-app1
           clientname: Client Application 1
-          description: An application for calling data APIs
-          secret: shhhhhhhhhhhhhh
         - client_id: client-app2
           clientname: Client Application 2
 
@@ -1088,9 +1149,8 @@ components:
         jwks_uri: $SERVER_URL/.well-known/jwks.json
         the-usher-package-version: 1.2.0
 
-# RESPONSE SCHEMAS
-#---------------------
-    # Success response body
+    # RESPONSE SCHEMAS
+    #---------------------
     Success:
       type: object
       additionalProperties: false
@@ -1206,7 +1266,7 @@ components:
           example:
             code: 429
             message: Too Many Requests
-    
+
     InternalError:
       description: Internal Server Error
       content:

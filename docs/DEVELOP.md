@@ -69,7 +69,7 @@ The Usher requires access to a PostgreSQL database. You may run a database insta
 - *1B. Local Instance*. Install PostgreSQL locally, and configure localhost, username, and password in the `.env` file or environment variables.
 - *1C. Cloud Test Instance.*  Launch a cloud PostgreSQL database, and configure localhost, username, and password in the `.env` file or environment variables.
 
-See the full database set up and usage instructions in the [database README](../../database).
+See the full database set up and usage instructions in the [database README](../database).
 
 ### Development Environment Setup using docker compose
 

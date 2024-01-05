@@ -24,10 +24,10 @@ async function deleteTestData () {
 
 async function loadTestData () {
   try {
+    await loadTenantData()
     await loadClientData()
     await loadRoleData()
     await loadPermissionData()
-    await loadTenantData()
     await loadPersonaData()
     await loadTenantClientData()
     await loadRolePermissionData()
@@ -41,9 +41,9 @@ async function loadTestData () {
 
 async function loadClientData () {
   try {
-    await postClients.insertClient('test-client1', 'Test Client 1', 'For testing', 'aaaaaaaaaaaaaaaa')
-    await postClients.insertClient('test-client2', 'Test Client 2', 'For testing', 'bbbbbbbbbbbbbb')
-    await postClients.insertClient('test-client3', 'Test Client 3', 'For testing', 'cccccccccc')
+    await postClients.insertClient('test-tenant1', 'test-client1', 'Test Client 1', 'For testing', 'aaaaaaaaaaaaaaaa')
+    await postClients.insertClient('test-tenant1', 'test-client2', 'Test Client 2', 'For testing', 'bbbbbbbbbbbbbb')
+    await postClients.insertClient('test-tenant1', 'test-client3', 'Test Client 3', 'For testing', 'cccccccccc')
     return null
   } catch (error) {
     throw new Error('Client data failed to load ' + error.message)
@@ -105,13 +105,10 @@ async function loadPersonaData () {
 
 async function loadTenantClientData () {
   try {
-    await postTenantClients.insertTenantClient('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'test-client1')
     await postTenantClients.insertTenantClient('test-tenant2', 'http://anotheridp.anotherco.com.mock.localhost:3002/', 'test-client1')
-    await postTenantClients.insertTenantClient('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'test-client2')
     await postTenantClients.insertTenantClient('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'the-usher')
     await postTenantClients.insertTenantClient('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'site-iq')
     await postTenantClients.insertTenantClient('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'exposure-iq')
-    await postTenantClients.insertTenantClient('test-tenant1', 'http://idp.dmgt.com.mock.localhost:3002/', 'test-client3')
   } catch (error) {
     throw new Error('Tenant Client data failed to load ' + error.message)
   }

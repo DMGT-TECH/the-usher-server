@@ -1,86 +1,103 @@
 const { describe, it } = require('mocha')
-// const fetch = require('node-fetch')
+const fetch = require('node-fetch')
 const assert = require('assert')
-require('dotenv').config()
-// const { PGPool } = require('database/layer/pg_pool')
-// const pool = new PGPool()
+const { getAdmin1IdPToken } = require('./lib/tokens')
+const { getServerUrl } = require('./lib/urls')
+const dbAdminRole = require('database/layer/admin-client')
 
-// const { getAdmin1IdPToken, getAdmin2IdPToken } = require('./lib/tokens')
-// const { getServerUrl } = require('./lib/urls')
-
-describe('Admin Clients Endpoint Test', function () {
-  // const url = `${getServerUrl()}/clients`
-
-  it.skip('Should identify these tests are commented out during minimal spec development', function () {
-    assert(true, 'Tests not run')
+describe('Admin Clients Endpoint Test', () => {
+  let userAccessToken = ''
+  const url = getServerUrl()
+  let requestHeaders
+  before(async () => {
+    // GET IDENTITY-PROVIDER TOKEN
+    userAccessToken = await getAdmin1IdPToken()
+    requestHeaders = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${userAccessToken}`
+    }
   })
-  // let accessTokenTestAdmin1 = ''
-  // let accessTokenTestAdmin2 = ''
 
-  // before(async function () {
-  //   accessTokenTestAdmin1 = await getAdmin1IdPToken()
-  //   accessTokenTestAdmin2 = await getAdmin2IdPToken()
-  // })
+  describe('Create Clients', () => {
+    it('Should return error for missing fields', async () => {
+      let body = { name: 'API Client Name' }
+      const response = await fetch(`${url}/clients`, { method: 'POST', body: JSON.stringify(body), headers: requestHeaders })
+      const data = await response.json()
+      assert.strictEqual(response.status, 400, 'Expected 400 error response code')
+    })
+    it('Should return error for invalid tenant name', async () => {
+      let body = {
+        tenant_name: 'invalid-name',
+        client_id: 'api-client-1',
+        name: 'API Client Name',
+        description: 'Created by Client Test suite',
+        secret: '123456'
+      }
+      const response = await fetch(`${url}/clients`, { method: 'POST', body: JSON.stringify(body), headers: requestHeaders })
+      // TODO change to 400 error after error handling update
+      assert.strictEqual(response.status, 500, 'Expected 500 error response code')
+    })
+    it('Should create a Client', async () => {
+      let body = {
+        tenant_name: 'test-tenant1',
+        client_id: 'api-client-1',
+        name: 'API Client Name',
+        description: 'Created by Client Test suite',
+        secret: '123456'
+      }
+      const response = await fetch(`${url}/clients`, { method: 'POST', body: JSON.stringify(body), headers: requestHeaders })
+      const data = await response.json()
+      assert.strictEqual(response.status, 201, 'Expected 201 response code')
+      assert.strictEqual(data.client_id, 'api-client-1', 'Expected response to contain client id')
+    })
 
-  // it('The-Usher Admin can see all clients managed on the server', async function () {
-  //   const headers = {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${accessTokenTestAdmin1}`
-  //   }
-  //   const request = await fetch(url, { method: 'GET', headers: headers })
-  //   const data = await request.json()
-  //   const expectedClientIds = (await pool.query('SELECT * FROM usher.clients')).rows.map(x => x.client_id)
+    it('should return an error for invalid client id', async () => {
+      let body = {
+        tenant_name: '',
+        client_id: 'name with spaces',
+        name: 'This should fail',
+        description: 'Created by Client Test suite',
+        secret: '123456'
+      }
+      const response = await fetch(`${url}/clients`, { method: 'POST', body: JSON.stringify(body), headers: requestHeaders })
+      assert.strictEqual(response.status, 400, 'Expected 400 response code')
+    })
 
-  //   const foundClientIds = []
-  //   for (const c of data) {
-  //     foundClientIds.push(c.client_id)
-  //   }
-  //   assert.deepStrictEqual(foundClientIds.sort().join(','), expectedClientIds.sort().join(','), 'Client IDs should match all from database')
-  // })
+    after(async () => {
+      // clean up newly created Clients
+      const results = await dbAdminRole.deleteClientByClientId('api-client-1')
+    })
+  })
 
-  // it('Test-Admin2 can see its clients', async function () {
-  //   const headers = {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${accessTokenTestAdmin2}`,
-  //     client_id: 'site-iq'
-  //   }
-  //   const request = await fetch(url, { method: 'GET', headers: headers })
-  //   const data = await request.json()
-  //   const expectedClientIds = (await pool.query("SELECT * FROM usher.clients WHERE client_id in ('site-iq','exposure-iq')")).rows.map(x => x.client_id)
+  describe('Get Client', () => {
+    it('Should return 404 for invalid Client ID', async () => {
+      const clientId = 'foo-invalid-id'
+      const response = await fetch(`${url}/clients/${clientId}`, { method: 'GET', headers: requestHeaders })
+      assert.strictEqual(response.status, 404, 'Expected 404 response code')
+    })
+    it('Should allow usher admin to get Client object', async () => {
+      const clientId = 'test-client1'
+      const response = await fetch(`${url}/clients/${clientId}`, { method: 'GET', headers: requestHeaders })
+      const data = await response.json()
+      assert.strictEqual(response.status, 200, 'Expected 200 response code')
+      assert.strictEqual(data.client_id, 'test-client1', 'Expected valid client id value')
+    })
+    it('Should allow client admin to get Client object')
+  })
 
-  //   const foundClientIds = []
-  //   for (const c of data) {
-  //     foundClientIds.push(c.client_id)
-  //   }
+  describe('Delete Client', () => {
+    it('Should delete a Client and associated data', async () => {
+      const clientId = 'test-delete-api'
+      //create a client manually
+      const client = await dbAdminRole.insertClient('test-tenant1', clientId, 'Test Client for Delete API', null, '123456')
 
-  //   assert.deepStrictEqual(expectedClientIds.sort().join(','), foundClientIds.sort().join(','), 'Client IDs should match all from database')
-  // })
-
-  // it('The-Usher Admin can add a client on the server', async function () {
-  //   const headers = {
-  //     'Content-Type': 'application/json',
-  //     Authorization: 'Bearer ' + accessTokenTestAdmin1
-  //   }
-  //   const body = {
-  //     client_id: 'test-client-insert',
-  //     name: 'Client Insert Test',
-  //     description: 'A client inserted to test admin functionality',
-  //     secret: 'shhh_dont_tell'
-  //   }
-  //   await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body) })
-
-  //   const expectedClientInserted = (await pool.query("SELECT name FROM usher.clients WHERE client_id = 'test-client-insert'")).rows[0].name
-
-  //   if (expectedClientInserted === 'Client Insert Test') {
-  //     // Replace with delete function when written
-  //     try {
-  //       await pool.query("DELETE FROM usher.clients WHERE client_id = 'test-client-insert'")
-  //       assert(true, 'Client inserted successfully')
-  //     } catch (error) {
-  //       assert(false, error.message)
-  //     }
-  //   } else {
-  //     assert(false, 'Client not successfully inserted')
-  //   }
-  // })
+      const response = await fetch(`${url}/clients/${clientId}`, { method: 'DELETE', headers: requestHeaders })
+      assert.strictEqual(response.status, 204, 'Expected 204 response code')
+    })
+    it('Should return 404 for invalid Client ID', async () => {
+      const clientId = 'foo-invalid-id'
+      const response = await fetch(`${url}/clients/${clientId}`, { method: 'DELETE', headers: requestHeaders })
+      assert.strictEqual(response.status, 404, 'Expected 404 response code')
+    })
+  })
 })

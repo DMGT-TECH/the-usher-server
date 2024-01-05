@@ -43,7 +43,7 @@ describe('Insert Update and Delete tests', function () {
     describe('Test client insert', function () {
       it('Should insert a single specified client', async function () {
         try {
-          await postClients.insertClient('dummy_client', 'Dummy Client', 'Dummy client for testing', 'secretsecretdonttell')
+          await postClients.insertClient('dummy_tenant', 'dummy_client', 'Dummy Client', 'Dummy client for testing', 'secretsecretdonttell')
           assert(true, 'Dummy client inserted')
         } catch (error) {
           assert(false, error.message)
@@ -169,8 +169,6 @@ describe('Insert Update and Delete tests', function () {
   describe('Relationship Table Inserts', function () {
     describe('Test Tenant Client insert', function () {
       it('Should insert a single relationship', async function () {
-        const insertResult = await postTenantClients.insertTenantClient('dummy_tenant', 'https://dummytenant', 'dummy_client')
-        assert.strictEqual(insertResult, 'Insert successful')
         const result2 = await postTenantClients.insertTenantClient('dummy_tenant2', 'https://dummytenant2', 'dummy_client')
         assert.strictEqual(result2, 'Insert successful')
       })
@@ -335,8 +333,6 @@ describe('Insert Update and Delete tests', function () {
     })
     describe('Test client tenant delete', function () {
       it('Should delete a single client tenant', async function () {
-        const deleteResult = await postTenantClients.deleteTenantClient('dummy_tenant', 'https://dummytenant', 'dummy_client')
-        assert.strictEqual(deleteResult, 'Delete successful')
         const result2 = await postTenantClients.deleteTenantClient('dummy_tenant2', 'https://dummytenant2', 'dummy_client')
         assert.strictEqual(result2, 'Delete successful')
       })

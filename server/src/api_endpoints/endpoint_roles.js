@@ -16,6 +16,11 @@ async function createRole (req, res, next) {
   let role
   try {
     role = await dbAdminRole.insertRoleByClientId(req.body.client_id, req.body.name, req.body.description)
+    // TODO another way of handling errors between db and within API, need to standardize
+    // TODO should API responses return the created and updated at timestamp columns
+    if (typeof role === 'string') {
+      throw new Error(role)
+    }
   } catch (err) {
     return next(createError(400, err))
   }

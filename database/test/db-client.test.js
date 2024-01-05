@@ -9,7 +9,7 @@ describe('Clients', function () {
     [{
       client_id: 'test-client1',
       clientname: 'Test Client 1',
-      clientdescription: 'For testing',
+      description: 'For testing',
       secret: 'aaaaaaaaaaaaaaaa'
     }]
 

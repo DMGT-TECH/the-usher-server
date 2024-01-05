@@ -23,14 +23,10 @@ async function selectIssuerJWKS (issClaim = '*') {
   }
 }
 
-function getClientsView () {
-  return `SELECT c.client_id, c.name AS clientname, c.description AS clientdescription, c.secret
-            FROM usher.clients c`
-}
-
 async function selectClients (clientId = '*') {
   try {
-    let sql = getClientsView() + ' where 1=1'
+    let sql = `SELECT c.client_id, c.name as clientname, c.description, c.secret
+      FROM usher.clients c where 1=1 `
     const params = []
     let paramCount = 0
     if (clientId !== '*') {

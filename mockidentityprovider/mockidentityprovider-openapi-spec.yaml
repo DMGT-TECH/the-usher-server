@@ -126,7 +126,7 @@ components:
       pattern: '[0-9a-zA-Z-_:\*]{1,100}'
     ScopeDef:
       type: string
-      pattern: '^((openid|email|read:email)\b\s*)*$'  # Only match scope containing these words
+      pattern: '^((openid|email|profile|read:email)\b\s*)*$'  # Only match scope containing these words
     GrantTypeDef:
       type: string
       enum: ['http://auth0.com/oauth/grant-type/password-realm', 'password']
