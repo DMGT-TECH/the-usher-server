@@ -1,12 +1,9 @@
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
+const { usherDb } = require('./knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
-module.exports = {
-  insertPersonaRole,
-  deletePersonaRole
-}
-
-async function insertPersonaRole (tenantName, issClaim, subClaim, userContext, clientId, rolename) {
+const insertPersonaRole = async (tenantName, issClaim, subClaim, userContext, clientId, rolename) => {
   const sql = `INSERT INTO usher.personaroles (personakey, rolekey)
   SELECT p.KEY, r.KEY
   FROM usher.roles r JOIN usher.clients c ON (c.key = r.clientkey) inner join usher.tenantclients tc ON (c.key = tc.clientkey) inner JOIN usher.tenants t ON (t.key = tc.tenantkey) inner join usher.personas p on (p.tenantkey = t.key)
@@ -30,7 +27,7 @@ async function insertPersonaRole (tenantName, issClaim, subClaim, userContext, c
   }
 }
 
-async function deletePersonaRole (tenantName, issClaim, subClaim, userContext, clientId, rolename) {
+const deletePersonaRole = async (tenantName, issClaim, subClaim, userContext, clientId, rolename) => {
   const sql = `DELETE FROM usher.personaroles
     WHERE (personakey, rolekey) IN (
       SELECT p.KEY, r.KEY
@@ -57,4 +54,28 @@ async function deletePersonaRole (tenantName, issClaim, subClaim, userContext, c
   } catch (error) {
     return `Delete failed: ${error.message}`
   }
+}
+
+/**
+ * Get persona roles for a given persona key.
+ * 
+ * @param {number} personaKey - The persona key.
+ * @returns {Promise<Array>} - A promise that resolves to an array of roles.
+ */
+const getPersonaRoles = async (personaKey) => {
+  try {
+    return await usherDb('roles')
+      .select('roles.key', 'roles.name', 'roles.description', 'roles.clientkey')
+      .join('personaroles', 'roles.key', 'personaroles.rolekey')
+      .join('personas', 'personaroles.personakey', 'personas.key')
+      .where('personas.key', personaKey)
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+module.exports = {
+  insertPersonaRole,
+  deletePersonaRole,
+  getPersonaRoles
 }

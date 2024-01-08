@@ -107,7 +107,6 @@ paths:
         default:
           $ref: '#/components/responses/Default'
 
-
   /self/roles:
     get:
       operationId: getSelfRoles
@@ -215,7 +214,6 @@ paths:
         default:
           $ref: '#/components/responses/Default'
 
-
   /self/token:
     post:
       'x-swagger-router-controller': 'endpoint_self_token'
@@ -262,7 +260,6 @@ paths:
           $ref: '#/components/responses/TooManyRequests'
         default:
           $ref: '#/components/responses/Default'
-
 
   /self/refresh_token:
     post:
@@ -557,6 +554,33 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         400:
           $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /personas/{persona_key}/roles:
+    get:
+      'x-swagger-router-controller': 'personas/roles'
+      operationId: getPersonaRoles
+      summary: Get a list of roles assigned to the given Persona
+      parameters:
+      - $ref: '#/components/parameters/personaKeyPathParam'
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        200:
+          description: Returns a list of roles for the subject persona
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -882,8 +906,10 @@ components:
         - clientkey
         - name
       example:
-        name: usher:admim
-#---------------------
+        key: 10
+        name: usher:admin
+        clientkey: fake-client
+
     CollectionOfRoles:
       type: object
       properties:
@@ -892,8 +918,6 @@ components:
           items:
             $ref: '#/components/schemas/Role'
 
-# PERMISSIONS
-#---------------------
     Permission:
       type: object
       properties:
@@ -923,19 +947,19 @@ components:
         - key
         - name
         - clientkey
-#---------------------
+
     ArrayOfPermissions:
       type: array
       items:
         type: array
         items:
           $ref: '#/components/schemas/EntityNameDef'
-#---------------------
+
     CollectionOfPermissions:
       type: array
       items:
         $ref: '#/components/schemas/Permission'
-#---------------------
+
     DictionaryOfPermissions:
       type: object
       additionalProperties: false
