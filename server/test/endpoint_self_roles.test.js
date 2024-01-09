@@ -7,7 +7,7 @@ const { getServerUrl } = require('./lib/urls')
 
 describe('Get Self Roles', () => {
   let userAccessToken = ''
-  const url = `${getServerUrl()}`
+  const url = getServerUrl()
 
   before(async function () {
     // GET IDENTITY-PROVIDER TOKEN

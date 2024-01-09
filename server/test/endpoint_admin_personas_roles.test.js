@@ -10,7 +10,7 @@ const { usherDb } = require('../../database/layer/knex')
 describe('Admin Personas Roles', () => {
   let requestHeaders
   let testPersonaKey
-  const url = `${getServerUrl()}`
+  const url = getServerUrl()
   const invalidPersona = 999999
 
   before(async () => {

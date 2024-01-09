@@ -11,7 +11,7 @@ describe('Admin Personas Permissions', () => {
   let requestHeaders
   let testPersonaKey
   let validPermissionKey
-  const url = `${getServerUrl()}`
+  const url = getServerUrl()
   const invalidPersona = 999999
 
   before(async () => {

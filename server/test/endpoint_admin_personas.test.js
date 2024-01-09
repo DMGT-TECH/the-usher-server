@@ -8,7 +8,7 @@ const { usherDb } = require('../../database/layer/knex')
 
 describe('Admin Personas', () => {
   let requestHeaders
-  const url = `${getServerUrl()}`
+  const url = getServerUrl()
 
   before(async () => {
     const userAccessToken = await getAdmin1IdPToken()
