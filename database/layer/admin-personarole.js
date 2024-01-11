@@ -74,8 +74,58 @@ const getPersonaRoles = async (personaKey) => {
   }
 }
 
+/**
+ * Retrieves roles for the persona within the same tenant
+ *
+ * @param {number} personaKey - The key of the persona
+ * @param {Array<number>} roleKeys - An array of role keys
+ * @returns {Promise<Roles>} - A promise that resolves with the retrieved roles
+ * @throws {Error} - If there's an error during the database operation.
+ */
+const selectPersonaRolesInTheSameTenant = async (personaKey, roleKeys) => {
+  try {
+    const roles = await usherDb('roles as r')
+      .select('r.*')
+      .join('clients as c', 'r.clientkey', '=', 'c.key')
+      .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
+      .whereExists(function () {
+        this.select('p.tenantkey')
+          .from('personas as p')
+          .whereRaw('p.key = ?', personaKey)
+          .andWhereRaw('tc.tenantkey = p.tenantkey')
+      })
+      .whereIn('r.key', roleKeys)
+    return roles
+  } catch (error) {
+    throw pgErrorHandler(error)
+  }
+}
+
+/**
+ * Insert multiple records for persona roles
+ *
+ * @param {number} personaKey - The persona key
+ * @param {number[]} roleKeys - An array of role keys
+ * @returns {Promise<Object[]>} - A promise that resolves to an array of inserted personaroles records
+ */
+const insertPersonaRoles = async (personaKey, roleKeys) => {
+  try {
+    const personaRoles = roleKeys.map((rolekey) => {
+      return {
+        personakey: personaKey,
+        rolekey,
+      }
+    })
+    return await usherDb('personaroles').insert(personaRoles).returning('*')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertPersonaRole,
   deletePersonaRole,
-  getPersonaRoles
+  getPersonaRoles,
+  selectPersonaRolesInTheSameTenant,
+  insertPersonaRoles,
 }
