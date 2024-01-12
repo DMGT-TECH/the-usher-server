@@ -1,6 +1,6 @@
 const createError = require('http-errors')
 const dbAdminPersonaPermissions = require('database/layer/admin-personapermission')
-const { checkPersonaExists, checkPermissionExists } = require('./utils')
+const { checkPersonaExists, checkPermissionExists, checkPersonaPermissionsValidity } = require('./utils')
 
 const getPersonaPermissions = async (req, res, next) => {
   try {
@@ -16,8 +16,12 @@ const getPersonaPermissions = async (req, res, next) => {
 const createPersonaPermissions = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
-    await checkPersonaExists(personaKey)
-    await dbAdminPersonaPermissions.insertPersonaPermissions(personaKey, req.body)
+    const permissionKeys = req.body
+    await Promise.all([
+      checkPersonaExists(personaKey),
+      checkPersonaPermissionsValidity(personaKey, permissionKeys),
+    ])
+    await dbAdminPersonaPermissions.insertPersonaPermissions(personaKey, permissionKeys)
     const locationUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`
     res.set('Location', locationUrl)
     res.status(201).send()

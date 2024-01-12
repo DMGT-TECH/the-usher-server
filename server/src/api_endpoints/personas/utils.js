@@ -1,6 +1,7 @@
 const dbAdminPersona = require('database/layer/admin-persona')
 const dbAdminPermission = require('database/layer/admin-permission')
 const dbAdminPersonaRoles = require('database/layer/admin-personarole')
+const dbAdminPersonaPermissions = require('database/layer/admin-personapermission')
 
 const checkPersonaExists = async (personaKey) => {
   const persona = await dbAdminPersona.getPersona(personaKey)
@@ -40,8 +41,27 @@ const checkPersonaRolesValidity = async (personaKey, roleKeys) => {
   }
 }
 
+/**
+ * Checks if provided permission keys are valid for the given persona key
+ * Throws an error if any of the permissions are invalid
+ *
+ * @param {number} personaKey - The key of the persona
+ * @param {number[]} permissionKeys - An array of permission keys to check for validity
+ * @throws {object} Error object with httpStatusCode and message properties if invalid permissions are found
+ */
+const checkPersonaPermissionsValidity = async (personaKey, permissionKeys) => {
+  const validPermissions = await dbAdminPersonaPermissions.selectPersonaPermissionsInTheSameTenant(personaKey, permissionKeys)
+  if (validPermissions.length !== permissionKeys.length) {
+    throw {
+      httpStatusCode: 400,
+      message: 'Make sure to provide valid permission keys which are associated with clients in the same tenant!',
+    }
+  }
+}
+
 module.exports = {
   checkPersonaExists,
   checkPermissionExists,
   checkPersonaRolesValidity,
+  checkPersonaPermissionsValidity,
 }
