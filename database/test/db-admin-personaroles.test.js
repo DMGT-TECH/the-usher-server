@@ -21,4 +21,100 @@ describe('Admin persona roles view', () => {
       assert.equal(personaRoles.length, 0)
     })
   })
+
+  describe('Test Insert personas roles', () => {
+    let testPersonaKey
+    let validRoleKey
+    const invalidPersonaKey = 0
+    const invalidRoleKey = 0
+    before(async () => {
+      const { key: roleKey } = await usherDb('roles').select('key').first()
+      validRoleKey = roleKey
+      const { key: tenantkey } = await usherDb('tenants').select('key').first()
+      const [persona] = await usherDb('personas').insert({ tenantkey, sub_claim: 'personarole@test' }).returning('key')
+      testPersonaKey = persona.key
+    })
+
+    it('Should return an array of inserted personaroles records', async () => {
+      const personaRoles = await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [validRoleKey])
+      assert.equal(personaRoles.length, 1)
+      assert.equal(personaRoles[0].personakey, testPersonaKey)
+      assert.equal(personaRoles[0].rolekey, validRoleKey)
+    })
+
+    it('Should fail due to invalid persona key', async () => {
+      try {
+        await adminPersonaRoles.insertPersonaRoles(invalidPersonaKey, [validRoleKey])
+      } catch (err) {
+        assert.equal(!!err, true)
+      }
+    })
+
+    it('Should fail due to invalid role key', async () => {
+      try {
+        await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [invalidRoleKey])
+      } catch (err) {
+        assert.equal(!!err, true)
+      }
+    })
+
+    it('Should fail due to duplicate role', async () => {
+      try {
+        await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [validRoleKey, validRoleKey])
+      } catch (err) {
+        assert.equal(!!err, true)
+      }
+    })
+
+    afterEach(async () => {
+      await usherDb('personaroles').where({ personakey: testPersonaKey }).del()
+    })
+
+    after(async () => {
+      await usherDb('personas').where({ key: testPersonaKey }).del()
+    })
+  })
+
+  describe('Test selectPersonaRolesInTheSameTenant', () => {
+    let testPersonaKey
+    const validTenantKey = 1
+    let validTenantRoles
+    let inValidTenantRole
+    before(async () => {
+      validTenantRoles = await usherDb('roles as r')
+        .select('r.*')
+        .join('clients as c', 'r.clientkey', '=', 'c.key')
+        .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
+        .whereRaw(`tc.tenantkey = ${validTenantKey}`)
+      inValidTenantRole = await usherDb('roles as r')
+        .select('r.*')
+        .whereNotIn('r.key', validTenantRoles.map(({ key }) => key))
+        .first()
+      const [persona] = await usherDb('personas').insert({ tenantkey: validTenantKey, sub_claim: 'personarole@test' }).returning('key')
+      testPersonaKey = persona.key
+    })
+
+    it('Should return roles that belong to the clients in the same tenant as the persona', async () => {
+      const roleKeys = validTenantRoles.map((r) => r.key)
+      const selectedRoles = await adminPersonaRoles.selectPersonaRolesInTheSameTenant(testPersonaKey, roleKeys)
+      assert.equal(selectedRoles?.length, roleKeys.length)
+      assert.ok(selectedRoles.every(({ key }) => roleKeys.includes(key)))
+    })
+
+    it('Should not include a role that does not belong to the tenant in the response', async () => {
+      const roleKeys = validTenantRoles.map((r) => r.key)
+      const selectedRoles = await adminPersonaRoles.selectPersonaRolesInTheSameTenant(testPersonaKey, [...roleKeys, inValidTenantRole.key])
+      assert.equal(selectedRoles?.length, roleKeys.length)
+      assert.ok(selectedRoles.every(({ key }) => roleKeys.includes(key)))
+    })
+
+    it('Should return an empty array since the requested role does not belong to a client in the same tenant', async () => {
+      const selectedRoles = await adminPersonaRoles.selectPersonaRolesInTheSameTenant(testPersonaKey, [inValidTenantRole.key])
+      assert.equal(selectedRoles?.length, 0)
+    })
+
+    after(async () => {
+      await usherDb('personas').where({ key: testPersonaKey }).del()
+    })
+  })
 })

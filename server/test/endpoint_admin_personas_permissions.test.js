@@ -11,6 +11,9 @@ describe('Admin Personas Permissions', () => {
   let requestHeaders
   let testPersonaKey
   let validPermissionKey
+  let validTenantPermissions
+  let inValidTenantPermission
+  const validTenantKey = 1
   const url = getServerUrl()
   const invalidPersona = 999999
 
@@ -20,11 +23,19 @@ describe('Admin Personas Permissions', () => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${adminAccessToken}`,
     }
-    const { key: tenantkey } = await usherDb('tenants').select('key').first()
-    const [persona] = await usherDb('personas').insert({ tenantkey, sub_claim: 'personapermission@test' }).returning('key')
+    validTenantPermissions = await usherDb('permissions as p')
+      .select('p.*')
+      .join('clients as c', 'p.clientkey', '=', 'c.key')
+      .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
+      .whereRaw(`tc.tenantkey = ${validTenantKey}`)
+    inValidTenantPermission = await usherDb('permissions as p')
+      .select('p.*')
+      .join('clients as c', 'p.clientkey', '=', 'c.key')
+      .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
+      .whereRaw(`tc.tenantkey != ${validTenantKey}`).first()
+    validPermissionKey = validTenantPermissions[0].key
+    const [persona] = await usherDb('personas').insert({ tenantkey: validTenantKey, sub_claim: 'personapermission@test' }).returning('key')
     testPersonaKey = persona.key
-    const { key: permissionKey } = await usherDb('permissions').select('key').first()
-    validPermissionKey = permissionKey
   })
 
   describe('GET:/personas/{persona_key}/permissions', () => {
@@ -83,11 +94,16 @@ describe('Admin Personas Permissions', () => {
     }
 
     it('should return 201, empty response body, and Location header to get all the persona permissions', async () => {
-      const response = await postPersonasPermissions([validPermissionKey])
+      const response = await postPersonasPermissions(validTenantPermissions.map(({ key }) => key))
       assert.equal(response.status, 201)
       assert.equal(response.headers.get('Location'), response.url)
       const responseBody = await response.text()
       assert.equal(responseBody, '')
+    })
+
+    it('should return 400, a permission from a client which does not belong to the same tenant cannot be assigned to persona', async () => {
+      const response = await postPersonasPermissions([...validTenantPermissions, invalidPersona].map(({ key }) => key))
+      assert.equal(response.status, 400)
     })
 
     it('should return 400, for four different invalid request payloads', async () => {

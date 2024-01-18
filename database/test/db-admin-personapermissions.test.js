@@ -92,4 +92,47 @@ describe('Admin persona permissions view', () => {
       await usherDb('personas').where({ key: testPersonaKey }).del()
     })
   })
+
+  describe('Test selectPersonaPermissionsInTheSameTenant', () => {
+    let testPersonaKey
+    let validTenantPermissions
+    let inValidTenantPermission
+    const validTenantKey = 1
+    before(async () => {
+      validTenantPermissions = await usherDb('permissions as p')
+        .select('p.*')
+        .join('clients as c', 'p.clientkey', '=', 'c.key')
+        .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
+        .whereRaw(`tc.tenantkey = ${validTenantKey}`)
+      inValidTenantPermission = await usherDb('permissions as p')
+        .select('p.*')
+        .whereNotIn('p.key', validTenantPermissions.map(({ key }) => key))
+        .first()
+      const [persona] = await usherDb('personas').insert({ tenantkey: validTenantKey, sub_claim: 'personapermission@test' }).returning('key')
+      testPersonaKey = persona.key
+    })
+
+    it('Should return permissions that belong to the clients in the same tenant as the persona', async () => {
+      const permissionKeys = validTenantPermissions.map((p) => p.key)
+      const selectedPermissions = await adminPersonaPermissions.selectPersonaPermissionsInTheSameTenant(testPersonaKey, permissionKeys)
+      assert.equal(selectedPermissions?.length, permissionKeys.length)
+      assert.ok(selectedPermissions.every(({ key }) => permissionKeys.includes(key)))
+    })
+
+    it('Should not include a permission that does not belong to the tenant in the response', async () => {
+      const permissionKeys = validTenantPermissions.map((p) => p.key)
+      const selectedPermissions = await adminPersonaPermissions.selectPersonaPermissionsInTheSameTenant(testPersonaKey, [...permissionKeys, inValidTenantPermission.key])
+      assert.equal(selectedPermissions?.length, permissionKeys.length)
+      assert.ok(selectedPermissions.every(({ key }) => permissionKeys.includes(key)))
+    })
+
+    it('Should return an empty array since the requested permission does not belong to a client in the same tenant', async () => {
+      const selectedPermissions = await adminPersonaPermissions.selectPersonaPermissionsInTheSameTenant(testPersonaKey, [inValidTenantPermission.key])
+      assert.equal(selectedPermissions?.length, 0)
+    })
+
+    after(async () => {
+      await usherDb('personas').where({ key: testPersonaKey }).del()
+    })
+  })
 })
