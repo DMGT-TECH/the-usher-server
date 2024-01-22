@@ -24,6 +24,7 @@ describe('Admin persona permissions view', () => {
     let testPersonaKey
     let validPermissionKey
     const invalidPersonaKey = 0
+    const invalidPermissionKey = 0
     before(async () => {
       const { key: permissionKey } = await usherDb('permissions').select('key').first()
       validPermissionKey = permissionKey
@@ -39,17 +40,24 @@ describe('Admin persona permissions view', () => {
       assert.equal(personaPermissions[0].permissionkey, validPermissionKey)
     })
 
+    it('Should ignore the duplicate permission keys', async () => {
+      const personaPermissions = await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [validPermissionKey, validPermissionKey])
+      assert.equal(personaPermissions.length, 1)
+    })
+
     it('Should fail due to invalid persona key', async () => {
       try {
         await adminPersonaPermissions.insertPersonaPermissions(invalidPersonaKey, [validPermissionKey])
+        assert.fail('Should fail to insertPersonaPermissions!')
       } catch (err) {
         assert.equal(!!err, true)
       }
     })
 
-    it('Should fail due to duplicate permission', async () => {
+    it('Should fail due to invalid permission key', async () => {
       try {
-        await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [validPermissionKey, validPermissionKey])
+        await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [invalidPermissionKey])
+        assert.fail('Should fail to insertPersonaPermissions!')
       } catch (err) {
         assert.equal(!!err, true)
       }

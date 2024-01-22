@@ -72,7 +72,7 @@ const getPersonaPermissions = async (personaKey) => {
 }
 
 /**
- * Insert multiple records for persona permissions
+ * Insert multiple records for persona permissions and ignore conflicts
  *
  * @param {number} personaKey - The persona key
  * @param {number[]} permissionKeys - An array of permission keys
@@ -86,7 +86,11 @@ const insertPersonaPermissions = async (personaKey, permissionKeys) => {
         permissionkey
       }
     })
-    return await usherDb('personapermissions').insert(personaPermissions).returning('*')
+    return await usherDb('personapermissions')
+      .insert(personaPermissions)
+      .onConflict(['personakey', 'permissionkey'])
+      .ignore()
+      .returning('*')
   } catch (err) {
     throw pgErrorHandler(err)
   }
