@@ -102,7 +102,7 @@ const selectPersonaRolesInTheSameTenant = async (personaKey, roleKeys) => {
 }
 
 /**
- * Insert multiple records for persona roles
+ * Insert multiple records for persona roles and ignore conflicts
  *
  * @param {number} personaKey - The persona key
  * @param {number[]} roleKeys - An array of role keys
@@ -116,7 +116,11 @@ const insertPersonaRoles = async (personaKey, roleKeys) => {
         rolekey,
       }
     })
-    return await usherDb('personaroles').insert(personaRoles).returning('*')
+    return await usherDb('personaroles')
+      .insert(personaRoles)
+      .onConflict(['personakey', 'rolekey'])
+      .ignore()
+      .returning('*')
   } catch (err) {
     throw pgErrorHandler(err)
   }

@@ -16,7 +16,7 @@ const getPersonaRoles = async (req, res, next) => {
 const createPersonaRoles = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
-    const roleKeys = req.body
+    const roleKeys = Array.from((new Set(req.body)))
     await Promise.all([
       checkPersonaExists(personaKey),
       checkPersonaRolesValidity(personaKey, roleKeys)
@@ -24,7 +24,7 @@ const createPersonaRoles = async (req, res, next) => {
     await dbAdminPersonaRoles.insertPersonaRoles(personaKey, roleKeys)
     const locationUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`
     res.set('Location', locationUrl)
-    res.status(201).send()
+    res.status(204).send()
   } catch ({ httpStatusCode = 500, message }) {
     return next(createError(httpStatusCode, { message }))
   }

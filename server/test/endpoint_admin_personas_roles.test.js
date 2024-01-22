@@ -30,9 +30,8 @@ describe('Admin Personas Roles', () => {
       .whereRaw(`tc.tenantkey = ${validTenantKey}`)
     inValidTenantRole = await usherDb('roles as r')
       .select('r.*')
-      .join('clients as c', 'r.clientkey', '=', 'c.key')
-      .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
-      .whereRaw(`tc.tenantkey != ${validTenantKey}`).first()
+      .whereNotIn('r.key', validTenantRoles.map(({ key }) => key))
+      .first()
     validRoleKey = validTenantRoles[0].key
     const [persona] = await usherDb('personas').insert({ tenantkey: validTenantKey, sub_claim: 'personaroles@test' }).returning('key')
     testPersonaKey = persona.key
@@ -84,47 +83,56 @@ describe('Admin Personas Roles', () => {
     })
   })
 
-  describe('POST:/personas/{persona_key}/roles', () => {
-    const postPersonasRoles = async (requestPayload, header = requestHeaders, personaKey = testPersonaKey) => {
+  describe('PUT:/personas/{persona_key}/roles', () => {
+    const putPersonasRoles = async (requestPayload, header = requestHeaders, personaKey = testPersonaKey) => {
       return await fetch(`${url}/personas/${personaKey}/roles`, {
-        method: 'POST',
+        method: 'PUT',
         headers: header,
         body: JSON.stringify(requestPayload)
       })
     }
 
-    it('should return 201, empty response body, and Location header to get all the persona roles', async () => {
-      const response = await postPersonasRoles(validTenantRoles.map(({ key }) => key))
-      assert.equal(response.status, 201)
+    it('should return 204, empty response body, and Location header to get all the persona roles', async () => {
+      const response = await putPersonasRoles(validTenantRoles.map(({ key }) => key))
+      assert.equal(response.status, 204)
       assert.equal(response.headers.get('Location'), response.url)
       const responseBody = await response.text()
       assert.equal(responseBody, '')
     })
 
+    it('should return 204, should be able to handle duplicated keys in the body', async () => {
+      const response = await putPersonasRoles([validRoleKey, validRoleKey])
+      assert.equal(response.status, 204)
+    })
+
+    it('should return 204, ignore to create persona roles that already exist', async () => {
+      await usherDb('personaroles').insert({ personakey: testPersonaKey, rolekey: validRoleKey })
+      const response = await putPersonasRoles([validRoleKey])
+      assert.equal(response.status, 204)
+    })
+
     it('should return 400, a role from a client which does not belong to the same tenant cannot be assigned to persona', async () => {
-      const response = await postPersonasRoles([...validTenantRoles, invalidPersona].map(({ key }) => key))
+      const response = await putPersonasRoles([...validTenantRoles, inValidTenantRole].map(({ key }) => key))
       assert.equal(response.status, 400)
     })
 
     it('should return 400, for four different invalid request payloads', async () => {
-      const [emptyBodyResponse, invalidBodyResponse, invalidRoleResponse, nonUniqueRolesResponse] = await Promise.all(
+      const [emptyBodyResponse, invalidBodyResponse, invalidRoleResponse] = await Promise.all(
         [
-          postPersonasRoles(),
-          postPersonasRoles({}),
-          postPersonasRoles([0]),
-          postPersonasRoles([1, 1])
+          putPersonasRoles(),
+          putPersonasRoles({}),
+          putPersonasRoles([0]),
         ]
       )
       assert.equal([
         emptyBodyResponse.status,
         invalidBodyResponse.status,
-        invalidRoleResponse.status,
-        nonUniqueRolesResponse.status].every((status) => status === 400), true)
+        invalidRoleResponse.status].every((status) => status === 400), true)
     })
 
     it('should return 401, unauthorized token', async () => {
       const userAccessToken = await getTestUser1IdPToken()
-      const response = await postPersonasRoles(
+      const response = await putPersonasRoles(
         [validRoleKey],
         {
           ...requestHeaders,
@@ -134,14 +142,8 @@ describe('Admin Personas Roles', () => {
     })
 
     it('should return 404, fail to create persona roles for an invalid persona', async () => {
-      const response = await postPersonasRoles([validRoleKey], requestHeaders, invalidPersona)
+      const response = await putPersonasRoles([validRoleKey], requestHeaders, invalidPersona)
       assert.equal(response.status, 404)
-    })
-
-    it('should return 409, fail to create persona roles due to duplication', async () => {
-      await usherDb('personaroles').insert({ personakey: testPersonaKey, rolekey: validRoleKey })
-      const response = await postPersonasRoles([validRoleKey])
-      assert.equal(response.status, 409)
     })
 
     afterEach(async () => {

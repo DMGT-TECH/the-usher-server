@@ -42,9 +42,15 @@ describe('Admin persona roles view', () => {
       assert.equal(personaRoles[0].rolekey, validRoleKey)
     })
 
+    it('Should ignore the duplicate role keys', async () => {
+      const personaRoles = await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [validRoleKey, validRoleKey])
+      assert.equal(personaRoles.length, 1)
+    })
+
     it('Should fail due to invalid persona key', async () => {
       try {
         await adminPersonaRoles.insertPersonaRoles(invalidPersonaKey, [validRoleKey])
+        assert.fail('Should fail to insertPersonaRoles!')
       } catch (err) {
         assert.equal(!!err, true)
       }
@@ -53,14 +59,7 @@ describe('Admin persona roles view', () => {
     it('Should fail due to invalid role key', async () => {
       try {
         await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [invalidRoleKey])
-      } catch (err) {
-        assert.equal(!!err, true)
-      }
-    })
-
-    it('Should fail due to duplicate role', async () => {
-      try {
-        await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [validRoleKey, validRoleKey])
+        assert.fail('Should fail to insertPersonaRoles!')
       } catch (err) {
         assert.equal(!!err, true)
       }
