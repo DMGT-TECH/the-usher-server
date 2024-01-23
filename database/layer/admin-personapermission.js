@@ -72,7 +72,7 @@ const getPersonaPermissions = async (personaKey) => {
 }
 
 /**
- * Insert multiple records for persona permissions
+ * Insert multiple records for persona permissions and ignore conflicts
  *
  * @param {number} personaKey - The persona key
  * @param {number[]} permissionKeys - An array of permission keys
@@ -86,7 +86,11 @@ const insertPersonaPermissions = async (personaKey, permissionKeys) => {
         permissionkey
       }
     })
-    return await usherDb('personapermissions').insert(personaPermissions).returning('*')
+    return await usherDb('personapermissions')
+      .insert(personaPermissions)
+      .onConflict(['personakey', 'permissionkey'])
+      .ignore()
+      .returning('*')
   } catch (err) {
     throw pgErrorHandler(err)
   }
@@ -108,10 +112,38 @@ const deletePersonaPermission = async (personaKey, permissionKey) => {
   }
 }
 
+/**
+ * Retrieves permissions for the persona within the same tenant
+ *
+ * @param {number} personaKey - The key of the persona
+ * @param {Array<number>} permissionKeys - An array of permission keys
+ * @returns {Promise<permissions>} - A promise that resolves with the retrieved permissions
+ * @throws {Error} - If there's an error during the database operation.
+ */
+const selectPersonaPermissionsInTheSameTenant = async (personaKey, permissionKeys) => {
+  try {
+    const permissions = await usherDb('permissions as p')
+      .select('p.*')
+      .join('clients as c', 'p.clientkey', '=', 'c.key')
+      .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
+      .whereExists(function () {
+        this.select('pe.tenantkey')
+          .from('personas as pe')
+          .whereRaw('pe.key = ?', personaKey)
+          .andWhereRaw('tc.tenantkey = pe.tenantkey')
+      })
+      .whereIn('p.key', permissionKeys)
+    return permissions
+  } catch (error) {
+    throw pgErrorHandler(error)
+  }
+}
+
 module.exports = {
   insertPersonaPermissionByClientId,
   deletePersonaPermissionByClientId,
   insertPersonaPermissions,
   deletePersonaPermission,
   getPersonaPermissions,
+  selectPersonaPermissionsInTheSameTenant,
 }

@@ -11,6 +11,9 @@ describe('Admin Personas Permissions', () => {
   let requestHeaders
   let testPersonaKey
   let validPermissionKey
+  let validTenantPermissions
+  let inValidTenantPermission
+  const validTenantKey = 1
   const url = getServerUrl()
   const invalidPersona = 999999
 
@@ -20,11 +23,18 @@ describe('Admin Personas Permissions', () => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${adminAccessToken}`,
     }
-    const { key: tenantkey } = await usherDb('tenants').select('key').first()
-    const [persona] = await usherDb('personas').insert({ tenantkey, sub_claim: 'personapermission@test' }).returning('key')
+    validTenantPermissions = await usherDb('permissions as p')
+      .select('p.*')
+      .join('clients as c', 'p.clientkey', '=', 'c.key')
+      .join('tenantclients as tc', 'c.key', '=', 'tc.clientkey')
+      .whereRaw(`tc.tenantkey = ${validTenantKey}`)
+    inValidTenantPermission = await usherDb('permissions as p')
+      .select('p.*')
+      .whereNotIn('p.key', validTenantPermissions.map(({ key }) => key))
+      .first()
+    validPermissionKey = validTenantPermissions[0].key
+    const [persona] = await usherDb('personas').insert({ tenantkey: validTenantKey, sub_claim: 'personapermission@test' }).returning('key')
     testPersonaKey = persona.key
-    const { key: permissionKey } = await usherDb('permissions').select('key').first()
-    validPermissionKey = permissionKey
   })
 
   describe('GET:/personas/{persona_key}/permissions', () => {
@@ -73,42 +83,56 @@ describe('Admin Personas Permissions', () => {
     })
   })
 
-  describe('POST:/personas/{persona_key}/permissions', () => {
-    const postPersonasPermissions = async (requestPayload, header = requestHeaders, personaKey = testPersonaKey) => {
+  describe('PUT:/personas/{persona_key}/permissions', () => {
+    const putPersonasPermissions = async (requestPayload, header = requestHeaders, personaKey = testPersonaKey) => {
       return await fetch(`${url}/personas/${personaKey}/permissions`, {
-        method: 'POST',
+        method: 'PUT',
         headers: header,
         body: JSON.stringify(requestPayload)
       })
     }
 
-    it('should return 201, empty response body, and Location header to get all the persona permissions', async () => {
-      const response = await postPersonasPermissions([validPermissionKey])
-      assert.equal(response.status, 201)
+    it('should return 204, empty response body, and Location header to get all the persona permissions', async () => {
+      const response = await putPersonasPermissions(validTenantPermissions.map(({ key }) => key))
+      assert.equal(response.status, 204)
       assert.equal(response.headers.get('Location'), response.url)
       const responseBody = await response.text()
       assert.equal(responseBody, '')
     })
 
+    it('should return 204, should be able to handle duplicate keys in the body', async () => {
+      const response = await putPersonasPermissions([validPermissionKey, validPermissionKey])
+      assert.equal(response.status, 204)
+    })
+
+    it('should return 204, ignore to create persona permissions that already exist', async () => {
+      await usherDb('personapermissions').insert({ personakey: testPersonaKey, permissionkey: validPermissionKey })
+      const response = await putPersonasPermissions([validPermissionKey])
+      assert.equal(response.status, 204)
+    })
+
+    it('should return 400, a permission from a client which does not belong to the same tenant cannot be assigned to persona', async () => {
+      const response = await putPersonasPermissions([...validTenantPermissions, inValidTenantPermission].map(({ key }) => key))
+      assert.equal(response.status, 400)
+    })
+
     it('should return 400, for four different invalid request payloads', async () => {
-      const [emptyBodyResponse, invalidBodyResponse, invalidPermissionResponse, nonUniquePermissionsResponse] = await Promise.all(
+      const [emptyBodyResponse, invalidBodyResponse, invalidPermissionResponse] = await Promise.all(
         [
-          postPersonasPermissions(),
-          postPersonasPermissions({}),
-          postPersonasPermissions([0]),
-          postPersonasPermissions([validPermissionKey, validPermissionKey])
+          putPersonasPermissions(),
+          putPersonasPermissions({}),
+          putPersonasPermissions([0]),
         ]
       )
       assert.equal([
         emptyBodyResponse.status,
         invalidBodyResponse.status,
-        invalidPermissionResponse.status,
-        nonUniquePermissionsResponse.status].every((status) => status === 400), true)
+        invalidPermissionResponse.status].every((status) => status === 400), true)
     })
 
     it('should return 401, unauthorized token', async () => {
       const userAccessToken = await getTestUser1IdPToken()
-      const response = await postPersonasPermissions(
+      const response = await putPersonasPermissions(
         [validPermissionKey],
         {
           ...requestHeaders,
@@ -118,14 +142,8 @@ describe('Admin Personas Permissions', () => {
     })
 
     it('should return 404, fail to create persona permissions for an invalid persona', async () => {
-      const response = await postPersonasPermissions([validPermissionKey], requestHeaders, invalidPersona)
+      const response = await putPersonasPermissions([validPermissionKey], requestHeaders, invalidPersona)
       assert.equal(response.status, 404)
-    })
-
-    it('should return 409, fail to create persona permissions due to duplication', async () => {
-      await usherDb('personapermissions').insert({ personakey: testPersonaKey, permissionkey: validPermissionKey })
-      const response = await postPersonasPermissions([validPermissionKey])
-      assert.equal(response.status, 409)
     })
 
     afterEach(async () => {
