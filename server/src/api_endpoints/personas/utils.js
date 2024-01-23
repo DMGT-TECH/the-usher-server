@@ -1,3 +1,4 @@
+const dbAdminRole = require('database/layer/admin-role')
 const dbAdminPersona = require('database/layer/admin-persona')
 const dbAdminPermission = require('database/layer/admin-permission')
 const dbAdminPersonaRoles = require('database/layer/admin-personarole')
@@ -59,9 +60,20 @@ const checkPersonaPermissionsValidity = async (personaKey, permissionKeys) => {
   }
 }
 
+const checkRoleExists = async (roleKey) => {
+  const role = await dbAdminRole.getRole(roleKey)
+  if (!role) {
+    throw {
+      httpStatusCode: 404,
+      message: 'Role does not exist!'
+    }
+  }
+}
+
 module.exports = {
   checkPersonaExists,
   checkPermissionExists,
   checkPersonaRolesValidity,
   checkPersonaPermissionsValidity,
+  checkRoleExists,
 }

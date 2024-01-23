@@ -1,6 +1,6 @@
 const createError = require('http-errors')
 const dbAdminPersonaRoles = require('database/layer/admin-personarole')
-const { checkPersonaExists, checkPersonaRolesValidity } = require('./utils')
+const { checkPersonaExists, checkPersonaRolesValidity, checkRoleExists } = require('./utils')
 
 const getPersonaRoles = async (req, res, next) => {
   try {
@@ -16,7 +16,7 @@ const getPersonaRoles = async (req, res, next) => {
 const createPersonaRoles = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
-    const roleKeys = Array.from((new Set(req.body)))
+    const roleKeys = [...new Set(req.body)]
     await Promise.all([
       checkPersonaExists(personaKey),
       checkPersonaRolesValidity(personaKey, roleKeys)
@@ -30,7 +30,22 @@ const createPersonaRoles = async (req, res, next) => {
   }
 }
 
+const deletePersonaRole = async (req, res, next) => {
+  try {
+    const { persona_key: personaKey, role_key: roleKey } = req.params
+    await Promise.all([
+      checkPersonaExists(personaKey),
+      checkRoleExists(roleKey),
+    ])
+    await dbAdminPersonaRoles.deletePersonaRoleByKeys(personaKey, roleKey)
+    res.status(204).send()
+} catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   getPersonaRoles,
   createPersonaRoles,
+  deletePersonaRole,
 }

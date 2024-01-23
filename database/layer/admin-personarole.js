@@ -126,10 +126,27 @@ const insertPersonaRoles = async (personaKey, roleKeys) => {
   }
 }
 
+/**
+ * Delete a personaroles record
+ *
+ * @param {number} personaKey - The persona key
+ * @param {number} roleKey - The role key
+ * @returns {Promise<number>} - A promise that resolves to the number of deleted records
+ */
+const deletePersonaRoleByKeys = async (personaKey, roleKey) => {
+  try {
+    return await usherDb('personaroles').where({ personakey: personaKey, rolekey: roleKey }).del()
+  } catch (err) {
+    console.log(err)
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertPersonaRole,
   deletePersonaRole,
   getPersonaRoles,
   selectPersonaRolesInTheSameTenant,
   insertPersonaRoles,
+  deletePersonaRoleByKeys,
 }
