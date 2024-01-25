@@ -73,9 +73,29 @@ const insertPersonaByTenantKey = async (tenantKey, subClaim, userContext = '') =
   }
 }
 
+/**
+ * Get persona by personaKey
+ *
+ * @param {number} personaKey - The persona key
+ * @returns {Promise<Object>} - A promise that resolves to the persona object with matching personaKey
+ */
 const getPersona = async (personaKey) => {
   try {
-    return await usherDb('personas').select('*').where({ key: personaKey }).first();
+    return await usherDb('personas').select('*').where({ key: personaKey }).first()
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+/**
+ * Delete a persona record by persona key
+ *
+ * @param {number} personaKey - The persona key to delete
+ * @returns {Promise<number>} - A promise that resolves to the number of deleted records
+ */
+const deletePersonaKey = async (personaKey) => {
+  try {
+    return await usherDb('personas').where({ key: personaKey }).del()
   } catch (err) {
     throw pgErrorHandler(err)
   }
@@ -87,4 +107,5 @@ module.exports = {
   updatePersona,
   insertPersonaByTenantKey,
   getPersona,
+  deletePersonaKey,
 }

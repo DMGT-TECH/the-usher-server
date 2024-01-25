@@ -1,5 +1,6 @@
 const createError = require('http-errors')
 const dbAdminPersona = require('database/layer/admin-persona')
+const { checkPersonaExists } = require('./utils')
 
 const createPersona = async (req, res, next) => {
   try {
@@ -11,6 +12,18 @@ const createPersona = async (req, res, next) => {
   }
 }
 
+const deletePersona = async (req, res, next) => {
+  try {
+    const { persona_key: personaKey } = req.params
+    await checkPersonaExists(personaKey)
+    await dbAdminPersona.deletePersonaKey(personaKey)
+    res.status(204).send()
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   createPersona,
+  deletePersona,
 }
