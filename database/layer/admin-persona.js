@@ -93,7 +93,7 @@ const getPersona = async (personaKey) => {
  * @param {number} personaKey - The persona key to delete
  * @returns {Promise<number>} - A promise that resolves to the number of deleted records
  */
-const deletePersonaKey = async (personaKey) => {
+const deletePersonaByKey = async (personaKey) => {
   try {
     return await usherDb('personas').where({ key: personaKey }).del()
   } catch (err) {
@@ -107,5 +107,5 @@ module.exports = {
   updatePersona,
   insertPersonaByTenantKey,
   getPersona,
-  deletePersonaKey,
+  deletePersonaByKey,
 }

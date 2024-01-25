@@ -16,7 +16,7 @@ const deletePersona = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
     await checkPersonaExists(personaKey)
-    await dbAdminPersona.deletePersonaKey(personaKey)
+    await dbAdminPersona.deletePersonaByKey(personaKey)
     res.status(204).send()
   } catch ({ httpStatusCode = 500, message }) {
     return next(createError(httpStatusCode, { message }))
