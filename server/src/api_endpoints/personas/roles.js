@@ -39,7 +39,7 @@ const deletePersonaRole = async (req, res, next) => {
     ])
     await dbAdminPersonaRoles.deletePersonaRoleByKeys(personaKey, roleKey)
     res.status(204).send()
-} catch ({ httpStatusCode = 500, message }) {
+  } catch ({ httpStatusCode = 500, message }) {
     return next(createError(httpStatusCode, { message }))
   }
 }

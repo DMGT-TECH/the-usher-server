@@ -151,6 +151,63 @@ describe('Admin Personas Roles', () => {
     })
   })
 
+  describe('DELETE:/personas/{persona_key}/roles/{role_key}', () => {
+    const deletePersonasRoles = async (roleKey, personaKey = testPersonaKey, header = requestHeaders) => {
+      return await fetch(`${url}/personas/${personaKey}/roles/${roleKey}`, {
+        method: 'DELETE',
+        headers: header,
+      })
+    }
+
+    it('should return 204, successful attempt to delete a persona role', async () => {
+      const response = await deletePersonasRoles(validRoleKey)
+      assert.equal(response.status, 204)
+    })
+
+    it('should return 204, delete a persona role successfully', async () => {
+      const [newPersonaRole] = await usherDb('personaroles')
+        .insert({ personakey: testPersonaKey, rolekey: validRoleKey }).returning('*')
+      assert.equal(newPersonaRole.personakey, testPersonaKey)
+      const response = await deletePersonasRoles(newPersonaRole.rolekey)
+      assert.equal(response.status, 204)
+      const personaRole = await usherDb('personaroles').select('*').where({ personakey: testPersonaKey, rolekey: validRoleKey })
+      assert.equal(personaRole.length, 0)
+    })
+
+    it('should return 400, two different invalid requests', async () => {
+      const [invalidRoleKeyResponse, invalidPersonaKeyResponse] = await Promise.all(
+        [
+          deletePersonasRoles('a'),
+          deletePersonasRoles(validRoleKey, 'a'),
+        ]
+      )
+      assert.equal([
+        invalidRoleKeyResponse.status,
+        invalidPersonaKeyResponse.status].every((status) => status === 400), true)
+    })
+
+    it('should return 401, unauthorized token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await deletePersonasRoles(
+        validRoleKey,
+        testPersonaKey,
+        {
+          ...requestHeaders,
+          Authorization: `Bearer ${userAccessToken}`
+        })
+      assert.equal(response.status, 401)
+    })
+
+    it('should return 404, fail to delete persona roles for an invalid persona', async () => {
+      const response = await deletePersonasRoles(validRoleKey, invalidPersona)
+      assert.equal(response.status, 404)
+    })
+
+    afterEach(async () => {
+      await usherDb('personaroles').where({ personakey: testPersonaKey }).del()
+    })
+  })
+
   after(async () => {
     await usherDb('personas').where({ key: testPersonaKey }).del()
   })
