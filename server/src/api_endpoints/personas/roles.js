@@ -30,6 +30,15 @@ const createPersonaRoles = async (req, res, next) => {
   }
 }
 
+/**
+ * HTTP request handler
+ * Delete a persona role by persona key and role key and send 204 on success
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @param {Function} next - The next middleware function
+ * @returns {Promise<void>} - A promise that resolves to void
+ */
 const deletePersonaRole = async (req, res, next) => {
   try {
     const { persona_key: personaKey, role_key: roleKey } = req.params

@@ -152,6 +152,14 @@ describe('Admin Personas Roles', () => {
   })
 
   describe('DELETE:/personas/{persona_key}/roles/{role_key}', () => {
+    /**
+     * Helper function to make an HTTPS request to delete a persona role.
+     *
+     * @param {string} roleKey - The role key
+     * @param {string} personaKey - The persona key
+     * @param {Object} header - The request headers
+     * @returns {Promise<Response>} - A promise that resolves to the HTTP response
+     */
     const deletePersonasRoles = async (roleKey, personaKey = testPersonaKey, header = requestHeaders) => {
       return await fetch(`${url}/personas/${personaKey}/roles/${roleKey}`, {
         method: 'DELETE',
