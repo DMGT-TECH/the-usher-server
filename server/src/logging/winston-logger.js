@@ -3,7 +3,6 @@ const expressWinston = require('express-winston')
 const fs = require('fs')
 const WinstonCloudWatch = require('winston-aws-cloudwatch') // Winston-CloudWatch package
 require('dotenv').config()
-const env = require('../../server-env')
 
 const logger = expressWinston.logger({
   transports: getLoggingTransports(),

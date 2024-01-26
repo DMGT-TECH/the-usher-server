@@ -1,4 +1,4 @@
-const { describe, it, before, after, afterEach } = require('mocha')
+const { describe, it, before, afterEach } = require('mocha')
 const assert = require('assert')
 const adminPersonas = require('../layer/admin-persona')
 const { usherDb } = require('../layer/knex')
@@ -62,6 +62,58 @@ describe('Admin persona view', () => {
     it('Should return undefined for invalid persona key', async () => {
       const persona = await adminPersonas.getPersona(invalidPersonaKey)
       assert.strictEqual(persona, undefined)
+    })
+  })
+
+  describe('Test Delete personas by key', () => {
+    let testPersonaKey
+    let validPermissionKey
+    let validRoleKey
+    let validTenantKey
+    const invalidPersonaKey = 999999
+
+    before(async () => {
+      const { key: permissionKey } = await usherDb('permissions').select('key').first()
+      validPermissionKey = permissionKey
+      const { key: roleKey } = await usherDb('roles').select('key').first()
+      validRoleKey = roleKey
+      const { key: tenantKey } = await usherDb('tenants').select('key').first()
+      validTenantKey = tenantKey
+    })
+
+    beforeEach(async () => {
+      const [persona] = await usherDb('personas').insert({ tenantkey: validTenantKey, sub_claim: 'persona@test' }).returning('key')
+      testPersonaKey = persona.key
+    })
+
+    it('Should return 0 when there is no persona record to delete', async () => {
+      const numberOfDeletedRecords = await adminPersonas.deletePersonaByKey(invalidPersonaKey)
+      assert.equal(numberOfDeletedRecords, 0)
+    })
+
+    it('Should return 1 when successfully deletes a persona record', async () => {
+      const numberOfDeletedRecords = await adminPersonas.deletePersonaByKey(testPersonaKey)
+      assert.equal(numberOfDeletedRecords, 1)
+    })
+
+    it('Should delete persona and cascade delete personapermission records', async () => {
+      await usherDb('personapermissions').insert({ personakey: testPersonaKey, permissionkey: validPermissionKey })
+      const numberOfDeletedRecords = await adminPersonas.deletePersonaByKey(testPersonaKey)
+      assert.equal(numberOfDeletedRecords, 1)
+      const personaPermission = await usherDb('personapermissions').select('*').where({ personakey: testPersonaKey })
+      assert.equal(personaPermission.length, 0)
+    })
+
+    it('Should delete persona and cascade delete personarole records', async () => {
+      await usherDb('personaroles').insert({ personakey: testPersonaKey, rolekey: validRoleKey })
+      const numberOfDeletedRecords = await adminPersonas.deletePersonaByKey(testPersonaKey)
+      assert.equal(numberOfDeletedRecords, 1)
+      const personaRole = await usherDb('personaroles').select('*').where({ personakey: testPersonaKey })
+      assert.equal(personaRole.length, 0)
+    })
+
+    afterEach(async () => {
+      await usherDb('personas').where({ key: testPersonaKey }).del()
     })
   })
 })

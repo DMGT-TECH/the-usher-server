@@ -1,5 +1,6 @@
 const createError = require('http-errors')
 const dbAdminPersona = require('database/layer/admin-persona')
+const { checkPersonaExists } = require('./utils')
 
 const createPersona = async (req, res, next) => {
   try {
@@ -11,6 +12,27 @@ const createPersona = async (req, res, next) => {
   }
 }
 
+/**
+ * HTTP Request handler
+ * Delete a persona by key and sends 204 statusCode on success
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @param {Function} next - The next middleware function
+ * @returns {Promise<void>} - A promise that resolves to void
+ */
+const deletePersona = async (req, res, next) => {
+  try {
+    const { persona_key: personaKey } = req.params
+    await checkPersonaExists(personaKey)
+    await dbAdminPersona.deletePersonaByKey(personaKey)
+    res.status(204).send()
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   createPersona,
+  deletePersona,
 }
