@@ -483,10 +483,10 @@ paths:
       responses:
         204:
           description: Empty response on success
-        401:
-          $ref: '#/components/responses/Unauthorized'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:

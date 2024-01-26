@@ -22,7 +22,7 @@ describe('Admin Clients Endpoint Test', () => {
     it('Should return error for missing fields', async () => {
       let body = { name: 'API Client Name' }
       const response = await fetch(`${url}/clients`, { method: 'POST', body: JSON.stringify(body), headers: requestHeaders })
-      const data = await response.json()
+      await response.json()
       assert.strictEqual(response.status, 400, 'Expected 400 error response code')
     })
     it('Should return error for invalid tenant name', async () => {
@@ -65,7 +65,7 @@ describe('Admin Clients Endpoint Test', () => {
 
     after(async () => {
       // clean up newly created Clients
-      const results = await dbAdminRole.deleteClientByClientId('api-client-1')
+      await dbAdminRole.deleteClientByClientId('api-client-1')
     })
   })
 

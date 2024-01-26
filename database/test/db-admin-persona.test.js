@@ -1,4 +1,4 @@
-const { describe, it, before, after, afterEach } = require('mocha')
+const { describe, it, before, afterEach } = require('mocha')
 const assert = require('assert')
 const adminPersonas = require('../layer/admin-persona')
 const { usherDb } = require('../layer/knex')
