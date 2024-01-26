@@ -16,7 +16,7 @@ const getPersonaPermissions = async (req, res, next) => {
 const createPersonaPermissions = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
-    const permissionKeys = Array.from((new Set(req.body)))
+    const permissionKeys = [...new Set(req.body)]
     await Promise.all([
       checkPersonaExists(personaKey),
       checkPersonaPermissionsValidity(personaKey, permissionKeys),

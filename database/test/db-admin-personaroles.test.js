@@ -116,4 +116,33 @@ describe('Admin persona roles view', () => {
       await usherDb('personas').where({ key: testPersonaKey }).del()
     })
   })
+
+  describe('Test Delete personas roles', () => {
+    let testPersonaKey
+    let validRoleKey
+    const invalidPersonaKey = 0
+
+    before(async () => {
+      const { key: roleKey } = await usherDb('roles').select('key').first()
+      validRoleKey = roleKey
+      const { key: tenantkey } = await usherDb('tenants').select('key').first()
+      const [persona] = await usherDb('personas').insert({ tenantkey, sub_claim: 'personarole@test' }).returning('key')
+      testPersonaKey = persona.key
+    })
+
+    it('Should return 0 when there is no personaroles record to delete', async () => {
+      const numberOfDeletedRecords = await adminPersonaRoles.deletePersonaRoleByKeys(invalidPersonaKey, validRoleKey)
+      assert.equal(numberOfDeletedRecords, 0)
+    })
+
+    it('Should return 1 when successfully deletes a personaroles record', async () => {
+      await usherDb('personaroles').insert({ personakey: testPersonaKey, rolekey: validRoleKey })
+      const numberOfDeletedRecords = await adminPersonaRoles.deletePersonaRoleByKeys(testPersonaKey, validRoleKey)
+      assert.equal(numberOfDeletedRecords, 1)
+    })
+
+    after(async () => {
+      await usherDb('personas').where({ key: testPersonaKey }).del()
+    })
+  })
 })

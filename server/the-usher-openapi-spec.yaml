@@ -570,10 +570,10 @@ paths:
       responses:
         204:
           description: Empty response on success
-        401:
-          $ref: '#/components/responses/Unauthorized'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -633,6 +633,30 @@ paths:
               description: The URL to get all the persona roles
               schema:
                 type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /personas/{persona_key}/roles/{role_key}:
+    delete:
+      'x-swagger-router-controller': 'personas/roles'
+      operationId: deletePersonaRole
+      summary: Removes a role for subject persona
+      parameters:
+      - $ref: '#/components/parameters/personaKeyPathParam'
+      - $ref: '#/components/parameters/roleKeyPathParam'
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        204:
+          description: Empty response on success
         400:
           $ref: '#/components/responses/BadRequest'
         401:
