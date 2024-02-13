@@ -70,10 +70,35 @@ const checkRoleExists = async (roleKey) => {
   }
 }
 
+/**
+ * Converts a filter query string into a filter object
+ *
+ * @param {string} filterQuery - The filter query string (E.g. 'tenantname:value1, sub_claim:value2')
+ * @returns {Object} - The generated filter object
+ * @throws {Object} - Error object with HTTP status code and message if the filter query is invalid
+ */
+const getFilterObjectFromFilterQueryString = (filterQuery) => {
+  try {
+    return filterQuery.split(',').reduce((acc, filter) => {
+      const [field, value] = filter.split(':').map((v) => {
+        return v.trim()
+      })
+      acc[field] = value
+      return acc
+    }, {})
+  } catch {
+    throw {
+      httpStatusCode: 400,
+      message: 'Invalid filter query!'
+    }
+  }
+}
+
 module.exports = {
   checkPersonaExists,
   checkPermissionExists,
   checkPersonaRolesValidity,
   checkPersonaPermissionsValidity,
   checkRoleExists,
+  getFilterObjectFromFilterQueryString,
 }

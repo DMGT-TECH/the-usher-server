@@ -101,6 +101,32 @@ const deletePersonaByKey = async (personaKey) => {
   }
 }
 
+/**
+ * Retrieve a list of personas based on filter criteria
+ *
+ * @param {Object} filterQuery - The filter query to apply (optional)
+ * @param {string} sort - The field to sort by (default: 'key')
+ * @param {string} order - The sort order ('asc' or 'desc', default: 'asc')
+ * @returns {Promise<Array>} - A promise that resolves to an array of personas with tenantname
+ * @throws {Error} - If there is an error during the retrieval process
+ */
+const getPersonas = async (filterQuery = {}, sort = 'key', order = 'asc') => {
+  try {
+    const tenantNameKey = 'tenantname'
+    if (tenantNameKey in filterQuery) {
+      filterQuery.name = filterQuery[tenantNameKey]
+      delete filterQuery[tenantNameKey]
+    }
+    return await usherDb('personas')
+      .select('personas.*', `tenants.name as ${tenantNameKey}`)
+      .join('tenants', 'personas.tenantkey', 'tenants.key')
+      .where(filterQuery)
+      .orderBy(sort, order)
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertPersona,
   deletePersona,
@@ -108,4 +134,5 @@ module.exports = {
   insertPersonaByTenantKey,
   getPersona,
   deletePersonaByKey,
+  getPersonas,
 }

@@ -429,6 +429,51 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   /personas:
+    get:
+      'x-swagger-router-controller': 'personas/persona'
+      operationId: getPersonas
+      summary: Retrieve a list of personas
+      parameters:
+        - name: filter
+          in: query
+          description: Filter by a field value
+          schema:
+            type: string
+            example: tenantname:value1,sub_claim:value2
+            pattern: ^((?:key|tenantkey|sub_claim|user_context|created_at|updated_at|tenantname)\s*:\s*([^,]+)(?:,(?!$))*)+$
+        - name: sort
+          in: query
+          description: Sort the results by a field
+          schema:
+            type: string
+            example: sub_claim
+            pattern: ^(key|tenantkey|sub_claim|user_context|created_at|updated_at|tenantname)$ 
+        - name: order
+          in: query
+          description: Specify the sort order (asc or desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        200:
+          description: Returns a list of personas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Persona"
+                  properties:
+                    tenantname:
+                      type: string
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalError'
     post:
       'x-swagger-router-controller': 'personas/persona'
       summary: Create a single persona
