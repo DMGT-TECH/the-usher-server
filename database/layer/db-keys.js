@@ -1,25 +1,29 @@
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
+const { usherDb } = require('./knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
-async function selectKeyWithKid (kid) {
+async function selectKeyWithKid(kid) {
   const sql = 'SELECT * FROM usher.keys WHERE kid = $1'
   const result = await pool.query(sql, [kid])
   return result.rows
 }
 
-async function selectAllKeys () {
-  const sql = 'SELECT * FROM usher.keys ORDER BY key DESC'
-  const result = await pool.query(sql)
-  return result.rows
+const selectAllKeys = async () => {
+  try {
+    return await usherDb('keys').select('*').orderBy('key', 'desc')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
 }
 
-async function selectLatestKey () {
+async function selectLatestKey() {
   const sql = 'SELECT * FROM usher.keys ORDER BY key DESC LIMIT 1'
   const result = await pool.query(sql)
   return result.rows[0]
 }
 
-async function insertKey (kid, publicKey, privateKey) {
+async function insertKey(kid, publicKey, privateKey) {
   // TODO: Security Review: Should keys be encrypted prior to storing in DB?
   const alreadyExistingKeys = await selectKeyWithKid(kid)
   if (alreadyExistingKeys.length > 0) {
@@ -34,7 +38,7 @@ async function insertKey (kid, publicKey, privateKey) {
   }
 }
 
-async function deleteKey (kid) {
+async function deleteKey(kid) {
   const alreadyExistingKeys = await selectKeyWithKid(kid)
   if (alreadyExistingKeys.length === 1) {
     const sql = 'DELETE FROM usher.keys WHERE kid = $1'
