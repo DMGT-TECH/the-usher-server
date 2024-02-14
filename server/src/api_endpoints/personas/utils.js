@@ -79,13 +79,13 @@ const checkRoleExists = async (roleKey) => {
  */
 const getFilterObjectFromFilterQueryString = (filterQuery) => {
   try {
-    return filterQuery.split(',').reduce((acc, filter) => {
+    return filterQuery ? filterQuery.split(',').reduce((acc, filter) => {
       const [field, value] = filter.split(':').map((v) => {
         return v.trim()
       })
       acc[field] = value
       return acc
-    }, {})
+    }, {}) : {}
   } catch {
     throw {
       httpStatusCode: 400,
