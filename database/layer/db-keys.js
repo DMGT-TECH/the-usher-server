@@ -1,46 +1,44 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
+const { usherDb } = require('./knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
-async function selectKeyWithKid (kid) {
-  const sql = 'SELECT * FROM usher.keys WHERE kid = $1'
-  const result = await pool.query(sql, [kid])
-  return result.rows
-}
-
-async function selectAllKeys () {
-  const sql = 'SELECT * FROM usher.keys ORDER BY key DESC'
-  const result = await pool.query(sql)
-  return result.rows
-}
-
-async function selectLatestKey () {
-  const sql = 'SELECT * FROM usher.keys ORDER BY key DESC LIMIT 1'
-  const result = await pool.query(sql)
-  return result.rows[0]
-}
-
-async function insertKey (kid, publicKey, privateKey) {
-  // TODO: Security Review: Should keys be encrypted prior to storing in DB?
-  const alreadyExistingKeys = await selectKeyWithKid(kid)
-  if (alreadyExistingKeys.length > 0) {
-    throw new Error('Insert failed. Key with kid ' + kid + ' already exists in the keystore.')
-  }
-  const sql = 'INSERT INTO usher.keys (kid, public_key, private_key) VALUES ($1, $2, $3)'
+const selectKeyWithKid = async (kid) => {
   try {
-    await pool.query(sql, [kid, publicKey, privateKey])
-    return 'Insert successful'
-  } catch (error) {
-    return `Insert failed: ${error.message}`
+    return await usherDb('keys').where('kid', kid)
+  } catch (err) {
+    throw pgErrorHandler(err)
   }
 }
 
-async function deleteKey (kid) {
-  const alreadyExistingKeys = await selectKeyWithKid(kid)
-  if (alreadyExistingKeys.length === 1) {
-    const sql = 'DELETE FROM usher.keys WHERE kid = $1'
-    await pool.query(sql, [kid])
-  } else {
-    throw new Error('Delete failed. Key with kid ' + kid + ' not found.')
+const selectAllKeys = async () => {
+  try {
+    return await usherDb('keys').select('*').orderBy('key', 'desc')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+const selectLatestKey = async () => {
+  try {
+    return await usherDb('keys').select('*').orderBy('key', 'desc').first()
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+const insertKey = async (kid, publicKey, privateKey) => {
+  try {
+    const [insertedKey] = await usherDb('keys').insert({ kid, public_key: publicKey, private_key: privateKey }).returning('*')
+    return insertedKey
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+const deleteKey = async (kid) => {
+  try {
+    return await usherDb('keys').where('kid', kid).del()
+  } catch (err) {
+    throw pgErrorHandler(err)
   }
 }
 
