@@ -212,4 +212,68 @@ describe('Admin Personas', () => {
       assert.equal(response.status, 401)
     })
   })
+
+  describe('GET:/personas/{persona_key}', () => {
+    let testPersonaKey
+    let validTenantKey
+    const invalidPersonaKey = 999999
+    /**
+     * GET /personas/{:key}
+     * HTTP request to GET a persona by its persona_key
+     *
+     * @param {string} personaKey - The key of the persona to be retrieved
+     * @param {Object} header - The request headers
+     * @returns {Promise<fetch.response>} - A Promise which resolves to fetch.response
+     */
+    const getPersona = async (personaKey = testPersonaKey, header = requestHeaders) => {
+      return await fetch(`${url}/personas/${personaKey}`, {
+        method: 'GET',
+        headers: header,
+      })
+    }
+
+    before(async () => {
+      const { key } = await usherDb('tenants').select('key').first()
+      validTenantKey = key
+    })
+
+    beforeEach(async () => {
+      const [persona] = await usherDb('personas').insert({ tenantkey: validTenantKey, sub_claim: 'persona@test' }).returning('key')
+      testPersonaKey = persona.key
+    })
+
+    it('should return 200, return a persona by persona_key', async () => {
+      const response = await getPersona(testPersonaKey)
+      assert.equal(response.status, 200)
+      const persona = await response.json()
+      assert.equal(persona.key, testPersonaKey)
+      assert.equal(persona.tenantkey, validTenantKey)
+      assert.ok('tenantname' in persona)
+    })
+
+    it('should return 400, invalid persona_key path parameter', async () => {
+      const response = await getPersona('a')
+      assert.equal(response.status, 400)
+    })
+
+    it('should return 401, unauthorized token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await getPersona(
+        testPersonaKey,
+        {
+          ...requestHeaders,
+          Authorization: `Bearer ${userAccessToken}`
+        })
+      assert.equal(response.status, 401)
+    })
+
+    it('should return 404, persona does not exist', async () => {
+      const response = await getPersona(invalidPersonaKey)
+      assert.equal(response.status, 404)
+    })
+
+    afterEach(async () => {
+      await usherDb('personas').where({ key: testPersonaKey }).del()
+    })
+  })
 })

@@ -548,6 +548,32 @@ paths:
           $ref: '#/components/responses/InternalError'
 
   /personas/{persona_key}:
+    get:
+      'x-swagger-router-controller': 'personas/persona'
+      operationId: getPersona
+      summary: Get a Persona by persona_key
+      parameters:
+      - $ref: '#/components/parameters/personaKeyPathParam'
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        200:
+          description: Returns a persona
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Persona"
+                properties:
+                  tenantname:
+                    type: string
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
     delete:
       'x-swagger-router-controller': 'personas/persona'
       operationId: deletePersona
