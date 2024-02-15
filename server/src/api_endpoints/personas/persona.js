@@ -1,6 +1,6 @@
 const createError = require('http-errors')
 const dbAdminPersona = require('database/layer/admin-persona')
-const { checkPersonaExists, getFilterObjectFromFilterQueryString } = require('./utils')
+const { checkPersonaExists } = require('./utils')
 
 /**
  * HTTP Request handler
@@ -52,8 +52,16 @@ const deletePersona = async (req, res, next) => {
  */
 const getPersonas = async (req, res, next) => {
   try {
-    const { filter, sort, order } = req.query
-    const personas = await dbAdminPersona.getPersonas(getFilterObjectFromFilterQueryString(filter), sort, order)
+    const { sort, order } = req.query
+    const allowedFilterParameters = ['key', 'tenantkey', 'tenantname', 'sub_claim', 'user_context']
+    const filters = allowedFilterParameters.reduce((acc, filter) => {
+      const filterValue = req.query[filter]
+      if (filterValue) {
+        acc[filter] = filterValue
+      }
+      return acc
+    }, {})
+    const personas = await dbAdminPersona.getPersonas(filters, sort, order)
     res.status(200).send(personas);
   } catch ({ httpStatusCode = 500, message }) {
     return next(createError(httpStatusCode, { message }))

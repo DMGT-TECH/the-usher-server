@@ -113,14 +113,18 @@ const deletePersonaByKey = async (personaKey) => {
 const getPersonas = async (filterQuery = {}, sort = 'key', order = 'asc') => {
   try {
     const tenantNameKey = 'tenantname'
-    if (tenantNameKey in filterQuery) {
-      filterQuery.name = filterQuery[tenantNameKey]
-      delete filterQuery[tenantNameKey]
-    }
+    const filters = Object.entries(filterQuery).reduce((acc, [key, val]) => {
+      if (key === tenantNameKey) {
+        acc.name = filterQuery[tenantNameKey]
+      } else {
+        acc[`personas.${key}`] = val
+      }
+      return acc
+    }, {})
     return await usherDb('personas')
       .select('personas.*', `tenants.name as ${tenantNameKey}`)
       .join('tenants', 'personas.tenantkey', 'tenants.key')
-      .where(filterQuery)
+      .where(filters)
       .orderBy(sort, order)
   } catch (err) {
     throw pgErrorHandler(err)

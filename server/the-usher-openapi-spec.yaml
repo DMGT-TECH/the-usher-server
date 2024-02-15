@@ -434,20 +434,51 @@ paths:
       operationId: getPersonas
       summary: Retrieve a list of personas
       parameters:
-        - name: filter
+        - name: key
           in: query
-          description: Filter by a field value
+          description: Filter by key (exact match)
+          schema:
+            type: number
+            example: 10
+        - name: tenantkey
+          in: query
+          description: Filter by tenantkey (exact match)
+          schema:
+            type: number
+            example: 10
+        - name: tenantname
+          in: query
+          description: Filter by tenantname (exact match)
           schema:
             type: string
-            example: tenantname:value1,sub_claim:value2
-            pattern: ^((?:key|tenantkey|sub_claim|user_context|created_at|updated_at|tenantname)\s*:\s*([^,]+)(?:,(?!$))*)+$
+            example: DMGT
+        - name: sub_claim
+          in: query
+          description: Filter by sub_claim (exact match)
+          schema:
+            type: string
+            example: auth0|test-persona
+        - name: user_context
+          in: query
+          description: Filter by user_context (exact match)
+          schema:
+            type: string
         - name: sort
           in: query
           description: Sort the results by a field
           schema:
             type: string
             example: sub_claim
-            pattern: ^(key|tenantkey|sub_claim|user_context|created_at|updated_at|tenantname)$ 
+            enum:
+              [
+                key,
+                tenantkey,
+                tenantname,
+                sub_claim,
+                user_context,
+                created_at,
+                updated_at,
+              ]
         - name: order
           in: query
           description: Specify the sort order (asc or desc)

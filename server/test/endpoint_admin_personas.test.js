@@ -132,7 +132,7 @@ describe('Admin Personas', () => {
      * GET /personas
      * HTTP request to retrieve a list of personas
      *
-     * @param {string} query - The query params to be added to the URL (E.g. ?filter=tenantname:value1,sub_claim:value2&sort=sub_claim&order=desc)
+     * @param {string} query - The query params to be added to the URL (E.g. ?tenantname=value1&sub_claim=value2&sort=sub_claim&order=desc)
      * @param {Object} header - The request headers
      * @returns {Promise<fetch.response>} - A Promise which resolves to fetch.response
      */
@@ -154,15 +154,26 @@ describe('Admin Personas', () => {
     it('should return 200, return all the personas for a tenant', async () => {
       const { name: validTenantName, key: tenantkey } = await usherDb('tenants').select('*').first()
       const { count: totalCount } = await usherDb('personas').where({ tenantkey }).count('*').first()
-      const response = await getPersonas(`?filter=tenantname:${validTenantName}`)
+      const response = await getPersonas(`?tenantname=${validTenantName}`)
       assert.equal(response.status, 200)
       const personas = await response.json()
       assert.equal(personas.length, Number(totalCount))
       assert.equal(personas[0]['tenantname'], validTenantName)
     })
 
+    it('should return 200, return a persona with two filter parameters', async () => {
+      const validPersona = await usherDb('personas').select('*').first()
+      const { tenantkey, sub_claim } = validPersona
+      const response = await getPersonas(`?tennatkey=${tenantkey}&sub_claim=${sub_claim}`)
+      assert.equal(response.status, 200)
+      const personas = await response.json()
+      assert.equal(personas.length, 1)
+      assert.equal(personas[0]['tenantkey'], tenantkey)
+      assert.equal(personas[0]['sub_claim'], sub_claim)
+    })
+
     it('should return 200, return empty array for invalid tennatname', async () => {
-      const response = await getPersonas('?filter=tenantname:invalid')
+      const response = await getPersonas('?tenantname=invalid')
       assert.equal(response.status, 200)
       const personas = await response.json()
       assert.equal(personas.length, 0)
@@ -181,11 +192,7 @@ describe('Admin Personas', () => {
     it('should return 400, due to invalid query params', async () => {
       const responses = await Promise.all(
         [
-          getPersonas('?filter='),
-          getPersonas('?filter=tenant'),
-          getPersonas('?filter=tenantname:'),
-          getPersonas('?filter=tenantname:test,'),
-          getPersonas('?filter=tenantname:test&sort=invalidField'),
+          getPersonas('?key=NaN'),
           getPersonas('?sort=key,'),
           getPersonas('?sort=key&order'),
           getPersonas('?sort=key&order=not_asc_desc'),
