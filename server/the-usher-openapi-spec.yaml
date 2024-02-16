@@ -429,6 +429,84 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   /personas:
+    get:
+      'x-swagger-router-controller': 'personas/persona'
+      operationId: getPersonas
+      summary: Retrieve a list of personas
+      parameters:
+        - name: key
+          in: query
+          description: Filter by key (exact match)
+          schema:
+            type: number
+            example: 10
+        - name: tenantkey
+          in: query
+          description: Filter by tenantkey (exact match)
+          schema:
+            type: number
+            example: 10
+        - name: tenantname
+          in: query
+          description: Filter by tenantname (exact match)
+          schema:
+            type: string
+            example: DMGT
+        - name: sub_claim
+          in: query
+          description: Filter by sub_claim (exact match)
+          schema:
+            type: string
+            example: auth0|test-persona
+        - name: user_context
+          in: query
+          description: Filter by user_context (exact match)
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sort the results by a field
+          schema:
+            type: string
+            example: sub_claim
+            enum:
+              [
+                key,
+                tenantkey,
+                tenantname,
+                sub_claim,
+                user_context,
+                created_at,
+                updated_at,
+              ]
+        - name: order
+          in: query
+          description: Specify the sort order (asc or desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        200:
+          description: Returns a list of personas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Persona"
+                  properties:
+                    tenantname:
+                      type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalError'
     post:
       'x-swagger-router-controller': 'personas/persona'
       summary: Create a single persona

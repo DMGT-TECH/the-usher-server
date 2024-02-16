@@ -2,6 +2,15 @@ const createError = require('http-errors')
 const dbAdminPersona = require('database/layer/admin-persona')
 const { checkPersonaExists } = require('./utils')
 
+/**
+ * HTTP Request handler
+ * Create a persona
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object to send 201 statusCode and the cerated persona on success
+ * @param {Function} next - The next middleware function
+ * @returns {Promise<void>} - A Promise that resolves to void when the persona is created
+ */
 const createPersona = async (req, res, next) => {
   try {
     const { tenant_key, sub_claim, user_context } = req.body
@@ -14,12 +23,12 @@ const createPersona = async (req, res, next) => {
 
 /**
  * HTTP Request handler
- * Delete a persona by key and sends 204 statusCode on success
+ * Delete a persona by key
  *
  * @param {Object} req - The request object
- * @param {Object} res - The response object
+ * @param {Object} res - The response object to send 204 statusCode on success
  * @param {Function} next - The next middleware function
- * @returns {Promise<void>} - A promise that resolves to void
+ * @returns {Promise<void>} - A promise that resolves to void when persona is deleted
  */
 const deletePersona = async (req, res, next) => {
   try {
@@ -32,7 +41,35 @@ const deletePersona = async (req, res, next) => {
   }
 }
 
+/**
+ * HTTP Request handler
+ * Get personas with optional filtering, sorting, and ordering
+ * 
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object to send 200 statusCode and a list of personas
+ * @param {Function} next - The callback function for the next middleware
+ * @returns {Promise<void>} - A promise that resolves to void when personas are retrieved
+ */
+const getPersonas = async (req, res, next) => {
+  try {
+    const { sort, order } = req.query
+    const allowedFilterParameters = ['key', 'tenantkey', 'tenantname', 'sub_claim', 'user_context']
+    const filters = allowedFilterParameters.reduce((acc, filter) => {
+      const filterValue = req.query[filter]
+      if (filterValue) {
+        acc[filter] = filterValue
+      }
+      return acc
+    }, {})
+    const personas = await dbAdminPersona.getPersonas(filters, sort, order)
+    res.status(200).send(personas);
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   createPersona,
   deletePersona,
+  getPersonas,
 }

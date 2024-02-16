@@ -53,7 +53,7 @@ describe('Admin persona view', () => {
     })
   })
 
-  describe('Test GET personas', () => {
+  describe('Test GET persona', () => {
     const invalidPersonaKey = 0
     it('Should return a valid persona', async () => {
       const persona = await adminPersonas.getPersona(1)
@@ -114,6 +114,36 @@ describe('Admin persona view', () => {
 
     afterEach(async () => {
       await usherDb('personas').where({ key: testPersonaKey }).del()
+    })
+  })
+
+  describe('Test GET personas', () => {
+    it('Should return all the personas', async () => {
+      const { count: totalCount } = await usherDb('personas').count('*').first()
+      const personas = await adminPersonas.getPersonas()
+
+      assert.equal(personas.length, Number(totalCount))
+      assert.ok('tenantname' in personas[0])
+    })
+
+    it('Should return filtered personas when filterQuery is provided', async () => {
+      const { name: validTenantName } = await usherDb('tenants').select('name').first()
+      const filterQuery = { tenantname: validTenantName }
+      const personas = await adminPersonas.getPersonas(filterQuery)
+
+      personas.forEach((persona) => {
+        assert.equal(persona.tenantname, validTenantName)
+      })
+    })
+
+    it('Should return personas sorted by the specified field and order', async () => {
+      const sort = 'created_at'
+      const order = 'desc'
+      const personas = await adminPersonas.getPersonas({}, sort, order)
+
+      for (let i = 1; i < personas.length; i++) {
+        assert.ok(personas[i - 1][sort] >= personas[i][sort])
+      }
     })
   })
 })
