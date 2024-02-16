@@ -68,8 +68,34 @@ const getPersonas = async (req, res, next) => {
   }
 }
 
+/**
+ * HTTP Request handler
+ * Get a persona by key
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object to send 200 statusCode and a persona
+ * @param {Function} next - The next middleware function
+ * @returns {Promise<void>} - A promise that resolves to void when persona is retrieved
+ */
+const getPersona = async (req, res, next) => {
+  try {
+    const { persona_key: key } = req.params
+    const [persona] = await dbAdminPersona.getPersonas({ key })
+    if (!persona) {
+      throw {
+        httpStatusCode: 404,
+        message: 'Persona does not exist!'
+      }
+    }
+    res.status(200).send(persona)
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   createPersona,
   deletePersona,
   getPersonas,
+  getPersona,
 }
