@@ -6,9 +6,11 @@ function getTenantPersonaClientsView () {
             FROM usher.tenants t
             JOIN usher.tenantclients tc ON t.key = tc.tenantkey
             JOIN usher.clients c ON c.key = tc.clientkey
-            JOIN usher.roles r ON r.clientkey = c.key
-            JOIN usher.personaroles ur ON ur.rolekey = r.key
-            JOIN usher.personas p ON ur.personakey = p.key AND p.tenantkey = t.key`
+            LEFT JOIN usher.roles r ON r.clientkey = c.key
+            LEFT JOIN usher.permissions pe ON pe.clientkey = c.key
+            LEFT JOIN usher.personaroles pr ON pr.rolekey = r.key
+            LEFT JOIN usher.personapermissions pp ON pp.permissionkey = pe.key
+            JOIN usher.personas p ON (pr.personakey = p.key OR pp.personakey = p.key) AND p.tenantkey = t.key`
 }
 
 async function selectTenantPersonaClients (subClaim = '*', userContext = '*', clientId = '*') {
