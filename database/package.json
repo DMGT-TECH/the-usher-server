@@ -22,7 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "16.4.4",
+    "dotenv": "16.4.5",
     "knex": "3.1.0",
     "pg": "8.11.3",
     "uuid": "9.0.1"
