@@ -1,5 +1,6 @@
 const createError = require('http-errors')
 const dbAdminRole = require('database/layer/admin-client')
+const { checkClientExists } = require('./utils')
 
 /**
  * Client Admin function to create a Client
@@ -8,7 +9,7 @@ const dbAdminRole = require('database/layer/admin-client')
  * @param {*} res
  * @param {*} next
  */
- const createClient = async (req, res, next) => {
+const createClient = async (req, res, next) => {
   const {
     tenant_name: tenantName,
     client_id: clientId,
@@ -65,8 +66,29 @@ const getClient = async (req, res, next) => {
   }
 }
 
+/**
+ * HTTP Request handler
+ * Update a client by client_id
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object to send 200 statusCode and updated client on success
+ * @param {Function} next - The next middleware function
+ * @returns {Promise<void>} - A promise that resolves to void when client is updated
+ */
+const updateClient = async (req, res, next) => {
+  try {
+    const { client_id: clientId } = req.params
+    await checkClientExists(clientId)
+    const updatedClient = await dbAdminRole.updateClientByClientId(clientId, req.body)
+    res.status(200).send(updatedClient)
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   createClient,
   deleteClient,
-  getClient
+  getClient,
+  updateClient,
 }

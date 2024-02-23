@@ -51,8 +51,8 @@ describe('Insert Update and Delete tests', function () {
       })
       it('Should update a single specified client', async function () {
         try {
-          await postClients.updateClientByClientId('dummy_client', 'updated_clientname', 'updated_clientdescription', 'updated_secret')
-          await postClients.updateClientByClientId('dummy_client', 'Dummy Client', 'Dummy client for testing', 'secretsecretdonttell')
+          await postClients.updateClientByClientId('dummy_client', { client_id: 'dummy_client', name: 'updated_clientname', description: 'updated_clientdescription', secret: 'updated_secret' })
+          await postClients.updateClientByClientId('dummy_client', { client_id: 'dummy_client', name: 'Dummy Client', description: 'Dummy client for testing', secret: 'secretsecretdonttell' })
           assert(true, 'Dummy client updated and reverted')
         } catch (error) {
           assert(false, error.message)

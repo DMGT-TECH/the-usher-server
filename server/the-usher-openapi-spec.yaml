@@ -850,6 +850,36 @@ paths:
           description: Successfully deleted the Client and data
         404:
           $ref: '#/components/responses/NotFound'
+    put:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: updateClient
+      summary: Update a client
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+        - bearerClientAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+      responses:
+        200:
+          description: Return the details of updated client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
 
   /clients/{client_id}/roles:
     parameters:
