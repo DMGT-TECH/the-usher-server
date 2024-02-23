@@ -1,12 +1,7 @@
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
-
-module.exports = {
-  insertClient,
-  getClient,
-  updateClientByClientId,
-  deleteClientByClientId
-}
+const { usherDb } = require('./knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
 /**
  *
@@ -19,7 +14,7 @@ module.exports = {
  * @param {string} secret
  * @returns Record with the newly created object
  */
-async function insertClient (tenantName, clientId, name, description, secret) {
+const insertClient = async (tenantName, clientId, name, description, secret) => {
   try {
     // validate tenant name and get tenant key
     let sql = 'SELECT t.key from usher.tenants t WHERE t.name = $1'
@@ -56,11 +51,11 @@ async function insertClient (tenantName, clientId, name, description, secret) {
  * @param {string} clientId The Client ID
  * @returns client object
  */
- async function getClient (clientId) {
+const getClient = async (clientId) => {
   const sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id = $1'
   try {
     const results = await pool.query(sql, [clientId])
-    if(results.rowCount === 0) {
+    if (results.rowCount === 0) {
       throw new Error(`No results for client_id ${clientId}`)
     }
     return results.rows[0]
@@ -69,21 +64,36 @@ async function insertClient (tenantName, clientId, name, description, secret) {
   }
 }
 
-async function updateClientByClientId (clientId, name, description, secret) {
-  const sql = 'UPDATE usher.clients SET name = $1, description = $2, secret = $3 WHERE client_id = $4'
+/**
+ * Updates a client by client ID with the provided information.
+ *
+ * @param {string} clientId - The ID of the client to update.
+ * @param {Object} clientInfo - Object containing the updated client information.
+ * @param {string} clientInfo.client_id - The new client ID of the client.
+ * @param {string} clientInfo.name - The new name of the client.
+ * @param {string} clientInfo.description - The new description of the client.
+ * @param {string} clientInfo.secret - The new secret key of the client.
+ * @returns {Promise<Object>} The updated client object.
+ * @throws {Error} If an error occurs while updating the client.
+ */
+const updateClientByClientId = async (clientId, { client_id, name, description, secret }) => {
   try {
-    const results = await pool.query(sql, [name, description, secret, clientId])
-    if (results.rowCount === 1) {
-      return 'Update successful'
-    } else {
-      return `Update failed: Client does not exist matching client_id ${clientId}`
-    }
-  } catch (error) {
-    return `Update failed: ${error.message}`
+    const [updatedClient] = await usherDb('clients')
+      .where({ client_id: clientId })
+      .update({
+        client_id,
+        name,
+        description,
+        secret,
+        updated_at: new Date(),
+      }).returning(['client_id', 'name', 'description', 'secret'])
+    return updatedClient
+  } catch (err) {
+    throw pgErrorHandler(err)
   }
 }
 
-async function deleteClientByClientId (clientId) {
+const deleteClientByClientId = async (clientId) => {
   const sql = 'DELETE FROM usher.clients WHERE client_id = $1'
   try {
     const results = await pool.query(sql, [clientId])
@@ -95,4 +105,11 @@ async function deleteClientByClientId (clientId) {
   } catch (error) {
     return `Delete failed: ${error.message}`
   }
+}
+
+module.exports = {
+  insertClient,
+  getClient,
+  updateClientByClientId,
+  deleteClientByClientId,
 }
