@@ -85,6 +85,7 @@ const updateClientByClientId = async (clientId, { client_id, name, description, 
         name,
         description,
         secret,
+        updated_at: new Date(),
       }).returning(['client_id', 'name', 'description', 'secret'])
     return updatedClient
   } catch (err) {
