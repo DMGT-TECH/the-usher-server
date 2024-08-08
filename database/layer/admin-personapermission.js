@@ -55,7 +55,7 @@ const deletePersonaPermissionByClientId = async (clientId, subClaim, permissionN
 
 /**
  * Get persona permissions for a given persona key.
- * 
+ *
  * @param {number} personaKey - The persona key.
  * @returns {Promise<Array>} - A promise that resolves to an array of persona permissions.
  */
@@ -73,6 +73,8 @@ const getPersonaPermissions = async (personaKey) => {
 
 /**
  * Insert multiple records for persona permissions and ignore conflicts
+ * This means if several permissions are inserted and some of them already exist,
+ * the existing records will **not** be returned in the Promise results
  *
  * @param {number} personaKey - The persona key
  * @param {number[]} permissionKeys - An array of permission keys

@@ -1,5 +1,5 @@
 const { describe, it } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 const crypto = require('node:crypto')
 const fetch = require('node-fetch')
 const postSessions = require('database/layer/admin-session')

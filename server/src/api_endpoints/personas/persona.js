@@ -5,7 +5,7 @@ const { checkPersonaExists } = require('./utils')
 /**
  * HTTP Request handler
  * Create a persona
- * 
+ *
  * @param {Object} req - The request object
  * @param {Object} res - The response object to send 201 statusCode and the cerated persona on success
  * @param {Function} next - The next middleware function
@@ -44,7 +44,7 @@ const deletePersona = async (req, res, next) => {
 /**
  * HTTP Request handler
  * Get personas with optional filtering, sorting, and ordering
- * 
+ *
  * @param {Object} req - The request object
  * @param {Object} res - The response object to send 200 statusCode and a list of personas
  * @param {Function} next - The callback function for the next middleware
@@ -82,10 +82,7 @@ const getPersona = async (req, res, next) => {
     const { persona_key: key } = req.params
     const [persona] = await dbAdminPersona.getPersonas({ key })
     if (!persona) {
-      throw {
-        httpStatusCode: 404,
-        message: 'Persona does not exist!'
-      }
+      return next(createError(404, { message: 'Persona does not exist!' }))
     }
     res.status(200).send(persona)
   } catch ({ httpStatusCode = 500, message }) {
