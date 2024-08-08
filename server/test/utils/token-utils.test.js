@@ -1,5 +1,5 @@
 const { describe, it } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 const env = require('../../server-env')
 const tokenUtils = require('../../src/utils/token-utils')
 

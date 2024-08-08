@@ -1,5 +1,5 @@
 const { describe, it, before, after, afterEach } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 const adminPersonaPermissions = require('../layer/admin-personapermission')
 const { usherDb } = require('../layer/knex')
 
@@ -43,6 +43,13 @@ describe('Admin persona permissions view', () => {
     it('Should ignore the duplicate permission keys', async () => {
       const personaPermissions = await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [validPermissionKey, validPermissionKey])
       assert.equal(personaPermissions.length, 1)
+    })
+
+    it('Should handle multiple permission key inserts', async () => {
+      const personaPermissions1 = await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [validPermissionKey])
+      const personaPermissions2 = await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [validPermissionKey])
+      assert.equal(personaPermissions1.length, 1)
+      assert.equal(personaPermissions2.length, 0)
     })
 
     it('Should fail due to invalid persona key', async () => {
