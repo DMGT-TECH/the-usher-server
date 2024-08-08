@@ -1,6 +1,6 @@
 const { describe, it } = require('mocha')
 const fetch = require('node-fetch')
-const assert = require('assert')
+const assert = require('node:assert')
 
 const { getServerUrl } = require('./lib/urls')
 

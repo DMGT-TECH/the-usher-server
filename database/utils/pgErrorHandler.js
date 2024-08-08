@@ -3,7 +3,7 @@ const { PgErrorCodes } = require('../constant/PgErrorCodes')
 /**
    * Handles database errors into a generic message and appropriate http status code
    * @param pgDbError The error thrown by the database.
-   * @returns {message: text, httpStatusCode: number} 
+   * @returns {message: text, httpStatusCode: number}
 */
 const pgErrorHandler = (pgDbError) => {
   const error = {}
@@ -69,7 +69,7 @@ const pgErrorHandler = (pgDbError) => {
       break
 
     default:
-      error.message = `Unexpected Error: ${error?.message}!`
+      error.message = `Unexpected DB Error ${pgDbError.code}, message is: ${pgDbError?.message}!`
       error.httpStatusCode = 500
       break
   }

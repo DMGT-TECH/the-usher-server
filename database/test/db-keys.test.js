@@ -1,5 +1,5 @@
 const { describe, it } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 const dbKeys = require('../layer/db-keys.js')
 
 describe('Test DB keystore table', function () {

@@ -1,5 +1,5 @@
 const { describe, it, before, after } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 const crypto = require('node:crypto')
 const fetch = require('node-fetch')
 const jwtDecoder = require('jsonwebtoken')

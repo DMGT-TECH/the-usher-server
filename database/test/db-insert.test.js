@@ -1,5 +1,5 @@
 const { describe, it } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 // Require entities
 const postTenants = require('../layer/admin-tenant')
 const postClients = require('../layer/admin-client')

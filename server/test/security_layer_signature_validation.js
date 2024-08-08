@@ -1,6 +1,6 @@
 const { describe, it } = require('mocha')
 const { getTestUser1IdPToken, getAdmin1IdPToken } = require('./lib/tokens')
-const assert = require('assert')
+const assert = require('node:assert')
 const jwtDecoder = require('jsonwebtoken')
 
 describe('Verify Token Middleware', () => {

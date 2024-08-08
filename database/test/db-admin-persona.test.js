@@ -1,5 +1,5 @@
 const { describe, it, before, afterEach } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 const adminPersonas = require('../layer/admin-persona')
 const { usherDb } = require('../layer/knex')
 

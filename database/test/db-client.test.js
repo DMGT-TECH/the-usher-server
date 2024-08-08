@@ -1,5 +1,5 @@
 const { describe, it } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
 const viewSelectEntities = require('../layer/view-select-entities')
 const viewSelectRelationships = require('../layer/view-select-relationships')
 
