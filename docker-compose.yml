@@ -3,7 +3,7 @@ include:
 
 services:
   usher-server:
-    image: node:18-alpine
+    image: node:20-alpine
     expose: [3001, 9229]
     entrypoint: ["sh", "/app/scripts/run_for_development.sh"]
     depends_on: [db]

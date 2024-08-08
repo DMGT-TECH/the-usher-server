@@ -1,5 +1,6 @@
 const { describe, it, before } = require('mocha')
-const assert = require('assert')
+const assert = require('node:assert')
+const crypto = require('node:crypto')
 // Require entities
 const postTenants = require('../layer/admin-tenant')
 const postClients = require('../layer/admin-client')
@@ -12,7 +13,6 @@ const postSessions = require('../layer/admin-session')
 const postPersonaRoles = require('../layer/admin-personarole')
 const postGroupRoles = require('../layer/admin-grouprole')
 const postRolePermissions = require('../layer/admin-rolepermission')
-const { v4: uuidv4 } = require('uuid')
 
 // INSERT ENTITIES, THEN RELATIONSHIPS, THEN DELETE ENTITIES
 describe('Cascade deletes', function () {
@@ -33,7 +33,7 @@ describe('Cascade deletes', function () {
         'dummy_subclaim',
         '',
         'https://dummytenant',
-        uuidv4(),
+        crypto.randomUUID(),
         new Date(),
         idpExpirationDateTime,
         'dummy_permission:dummyA',

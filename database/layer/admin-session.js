@@ -1,6 +1,6 @@
+const crypto = require('node:crypto')
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
-const { v4: uuidv4 } = require('uuid')
 
 function getAdminSessionView () {
   return `SELECT p.key AS personakey, s.event_id, s.authorization_time, s.scope, s.idp_token
@@ -95,7 +95,7 @@ async function createOrUpdateSession ({ subClaim, userContext, issClaim, scope, 
     await updateSessionBySubIss(subClaim, userContext, issClaim, authorizationTime, idpExpirationTime, scope, encodedIdpToken)
     return session.event_id
   } else {
-    const eventId = uuidv4()
+    const eventId = crypto.randomUUID()
     await insertSessionBySubIss(subClaim, userContext, issClaim, eventId, authorizationTime, idpExpirationTime, scope, encodedIdpToken)
     return eventId
   }
