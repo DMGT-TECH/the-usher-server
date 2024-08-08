@@ -1,5 +1,6 @@
 const { describe, it } = require('mocha')
 const assert = require('node:assert')
+const crypto = require('node:crypto')
 // Require entities
 const postTenants = require('../layer/admin-tenant')
 const postClients = require('../layer/admin-client')
@@ -14,7 +15,6 @@ const postPersonaRoles = require('../layer/admin-personarole')
 const postGroupRoles = require('../layer/admin-grouprole')
 const postRolePermissions = require('../layer/admin-rolepermission')
 const postPersonaPermissions = require('../layer/admin-personapermission')
-const { v4: uuidv4 } = require('uuid')
 
 // DUMMY ENTITIES ARE ALSO REQUIRED TO TEST RELATIONSHIP ADMIN AND WILL BE DELETED AT THE END AS DELETE TESTS
 describe('Insert Update and Delete tests', function () {
@@ -130,7 +130,7 @@ describe('Insert Update and Delete tests', function () {
 
       it('Should insert a single specified session', async function () {
         try {
-          const eventId = uuidv4()
+          const eventId = crypto.randomUUID()
           const excessAuthorizationDateTime = new Date()
           excessAuthorizationDateTime.setMinutes(excessAuthorizationDateTime.getMinutes() + 45)
           const result = await postSessions.insertSessionBySubIss(
