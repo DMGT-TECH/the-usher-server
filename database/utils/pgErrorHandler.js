@@ -69,7 +69,7 @@ const pgErrorHandler = (pgDbError) => {
       break
 
     default:
-      error.message = `Unexpected DB Error ${pgDbError.code}, message is: ${pgDbError?.message}!`
+      error.message = `Unexpected DB Error ${pgDbError?.code}, message is: ${pgDbError?.message}!. ${JSON.stringify(pgDbError)}`
       error.httpStatusCode = 500
       break
   }
