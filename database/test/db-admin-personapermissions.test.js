@@ -45,6 +45,13 @@ describe('Admin persona permissions view', () => {
       assert.equal(personaPermissions.length, 1)
     })
 
+    it('Should handle multiple permission key inserts', async () => {
+      const personaPermissions1 = await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [validPermissionKey])
+      const personaPermissions2 = await adminPersonaPermissions.insertPersonaPermissions(testPersonaKey, [validPermissionKey])
+      assert.equal(personaPermissions1.length, 1)
+      assert.equal(personaPermissions2.length, 0)
+    })
+
     it('Should fail due to invalid persona key', async () => {
       try {
         await adminPersonaPermissions.insertPersonaPermissions(invalidPersonaKey, [validPermissionKey])

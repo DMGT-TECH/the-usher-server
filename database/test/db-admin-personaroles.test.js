@@ -47,6 +47,13 @@ describe('Admin persona roles view', () => {
       assert.equal(personaRoles.length, 1)
     })
 
+    it('Should handle multiple role key inserts', async () => {
+      const personaRoles1 = await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [validRoleKey])
+      const personaRoles2 = await adminPersonaRoles.insertPersonaRoles(testPersonaKey, [validRoleKey])
+      assert.equal(personaRoles1.length, 1)
+      assert.equal(personaRoles2.length, 0)
+    })
+
     it('Should fail due to invalid persona key', async () => {
       try {
         await adminPersonaRoles.insertPersonaRoles(invalidPersonaKey, [validRoleKey])

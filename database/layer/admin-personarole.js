@@ -58,7 +58,7 @@ const deletePersonaRole = async (tenantName, issClaim, subClaim, userContext, cl
 
 /**
  * Get persona roles for a given persona key.
- * 
+ *
  * @param {number} personaKey - The persona key.
  * @returns {Promise<Array>} - A promise that resolves to an array of roles.
  */
@@ -103,6 +103,8 @@ const selectPersonaRolesInTheSameTenant = async (personaKey, roleKeys) => {
 
 /**
  * Insert multiple records for persona roles and ignore conflicts
+ * This means if several roles are inserted and some of them already exist,
+ * the existing records will **not** be returned in the Promise results
  *
  * @param {number} personaKey - The persona key
  * @param {number[]} roleKeys - An array of role keys
