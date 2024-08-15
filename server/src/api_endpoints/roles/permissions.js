@@ -1,5 +1,5 @@
 const createError = require('http-errors')
-const dbAdminRolePermissions = require('database/layer/admin-rolepermission')
+const dbAdminRolePermissions = require('database/layer/admin-rolepermissions')
 const { checkRoleExists } = require('./utils')
 
 const getRolesPermissions = async (req, res, next) => {

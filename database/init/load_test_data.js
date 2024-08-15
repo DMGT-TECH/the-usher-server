@@ -7,7 +7,7 @@ const postPersonas = require('../layer/admin-persona')
 // Require relationships
 const postTenantClients = require('../layer/admin-tenantclient')
 const postPersonaRoles = require('../layer/admin-personarole')
-const postRolePermissions = require('../layer/admin-rolepermission')
+const postRolePermissions = require('../layer/admin-rolepermissions')
 const postPersonaPermissions = require('../layer/admin-personapermission')
 const testClearUp = require('./delete_data')
 

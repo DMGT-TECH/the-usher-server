@@ -6,7 +6,7 @@ const postPermissions = require('../layer/admin-permission')
 const postPersonas = require('../layer/admin-persona')
 // Require relationships
 const postPersonaRoles = require('../layer/admin-personarole')
-const postRolePermissions = require('../layer/admin-rolepermission')
+const postRolePermissions = require('../layer/admin-rolepermissions')
 const postPersonaPermissions = require('../layer/admin-personapermission')
 
 module.exports = { loadSampleData }
