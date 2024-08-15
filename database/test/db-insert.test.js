@@ -13,7 +13,7 @@ const postSessions = require('../layer/admin-session')
 const postTenantClients = require('../layer/admin-tenantclient')
 const postPersonaRoles = require('../layer/admin-personarole')
 const postGroupRoles = require('../layer/admin-grouprole')
-const postRolePermissions = require('../layer/admin-rolepermission')
+const postRolePermissions = require('../layer/admin-rolepermissions')
 const postPersonaPermissions = require('../layer/admin-personapermission')
 
 // DUMMY ENTITIES ARE ALSO REQUIRED TO TEST RELATIONSHIP ADMIN AND WILL BE DELETED AT THE END AS DELETE TESTS

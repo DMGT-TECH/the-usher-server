@@ -12,7 +12,7 @@ const postSessions = require('../layer/admin-session')
 // Require relationships
 const postPersonaRoles = require('../layer/admin-personarole')
 const postGroupRoles = require('../layer/admin-grouprole')
-const postRolePermissions = require('../layer/admin-rolepermission')
+const postRolePermissions = require('../layer/admin-rolepermissions')
 
 // INSERT ENTITIES, THEN RELATIONSHIPS, THEN DELETE ENTITIES
 describe('Cascade deletes', function () {
