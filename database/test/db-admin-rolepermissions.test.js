@@ -1,7 +1,7 @@
-const { describe, it } = require('mocha')
 const assert = require('node:assert')
-const adminRolePermissions = require('../layer/admin-rolepermissions')
+const { describe, it } = require('mocha')
 const { usherDb } = require('../layer/knex')
+const adminRolePermissions = require('../layer/admin-rolepermissions')
 
 describe('Admin role permissions view', () => {
   describe('Test getRolePermissions', () => {
