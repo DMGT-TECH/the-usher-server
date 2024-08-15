@@ -1,17 +1,15 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
 const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
-const insertRolePermissionByClientId = async  (clientId, rolename, permissionname) => {
-  const sql = `INSERT INTO usher.rolepermissions (rolekey, permissionkey)
-  SELECT r.KEY, p.KEY
-  FROM usher.roles r, usher.permissions p, usher.clients c
-  WHERE r.clientkey = c.key AND c.client_id = $1 AND r.name = $2
-  AND p.name = $3`
+const insertRolePermissionByClientId = async (clientId, rolename, permissionname) => {
+  const sql = `
+    INSERT INTO usher.rolepermissions (rolekey, permissionkey)
+    SELECT r.KEY, p.KEY
+    FROM usher.roles r, usher.permissions p, usher.clients c
+    WHERE r.clientkey = c.key AND c.client_id = ? AND r.name = ? AND p.name = ?`
   const sqlParams = [clientId, rolename, permissionname]
   try {
-    const results = await pool.query(sql, sqlParams)
+    const results = await usherDb.raw(sql, sqlParams)
     if (results.rowCount === 1) {
       return 'Insert successful'
     } else {
@@ -19,7 +17,7 @@ const insertRolePermissionByClientId = async  (clientId, rolename, permissionnam
       return `Insert failed: ${errClientRolePermissionDoesNotExist}`
     }
   } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "rolepermissions_rolekey_permissionkey_uq"') {
+    if (error.message.includes('duplicate key value violates unique constraint')) {
       const errClientRolePermissionAlreadyExists = `A client role client_id = ${clientId} & rolename ${rolename} is already assigned to permissionname ${permissionname}`
       return `Insert failed: ${errClientRolePermissionAlreadyExists}`
     }
@@ -28,12 +26,22 @@ const insertRolePermissionByClientId = async  (clientId, rolename, permissionnam
 }
 
 const deleteRolePermissionByClientId = async (clientId, rolename, permissionname) => {
-  const sql = `DELETE FROM usher.rolepermissions rp
-  WHERE EXISTS (SELECT c.key FROM usher.clients c JOIN usher.roles r ON r.clientkey = c.key WHERE c.client_id = $1 AND r.name = $2 AND r.key = rp.rolekey)
-  AND EXISTS (SELECT key FROM usher.permissions p WHERE p.name = $3 AND p.key = rp.permissionkey)`
+  const sql = `
+    DELETE FROM usher.rolepermissions rp
+    WHERE EXISTS (
+      SELECT c.key 
+      FROM usher.clients c 
+      JOIN usher.roles r ON r.clientkey = c.key 
+      WHERE c.client_id = ? AND r.name = ? AND r.key = rp.rolekey
+    )
+    AND EXISTS (
+      SELECT key 
+      FROM usher.permissions p 
+      WHERE p.name = ? AND p.key = rp.permissionkey
+    )`
   const sqlParams = [clientId, rolename, permissionname]
   try {
-    const results = await pool.query(sql, sqlParams)
+    const results = await usherDb.raw(sql, sqlParams)
     if (results.rowCount === 1) {
       return 'Delete successful'
     } else {
