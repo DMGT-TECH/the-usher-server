@@ -1,5 +1,3 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
 const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
@@ -11,12 +9,12 @@ const insertPersonaPermissionByClientId = async (clientId, subClaim, permissionN
     INNER JOIN usher.tenantclients tc on (c.key = tc.clientkey)
     INNER JOIN usher.tenants t on (t.key = tc.tenantkey)
     INNER JOIN usher.personas prs on (prs.tenantkey = t.key)
-  WHERE c.client_id = $1
-    AND prs.sub_claim = $2
-    AND pm.name = $3`
+  WHERE c.client_id = ?
+    AND prs.sub_claim = ?
+    AND pm.name = ?`
   const sqlParams = [clientId, subClaim, permissionName]
   try {
-    const results = await pool.query(sql, sqlParams)
+    const results = await usherDb.raw(sql, sqlParams)
     if (results.rowCount === 1) {
       return 'Insert successful'
     } else {
@@ -24,7 +22,7 @@ const insertPersonaPermissionByClientId = async (clientId, subClaim, permissionN
       return `Insert failed: ${errClientPersonaPermissionDoesNotExist}`
     }
   } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "personapermissions_personakey_permissionkey_uq"') {
+    if (error.message.includes('duplicate key value violates unique constraint "personapermissions_personakey_permissionkey_uq"')) {
       const errClientPersonaPermissionAlreadyExists = `A persona permission client_id = ${clientId}; persona ${subClaim}; is already assigned to permission ${permissionName}.`
       return `Insert failed: ${errClientPersonaPermissionAlreadyExists}`
     }
@@ -37,12 +35,12 @@ const deletePersonaPermissionByClientId = async (clientId, subClaim, permissionN
   WHERE
     EXISTS (SELECT c.key
       FROM usher.clients c
-      JOIN usher.permissions pm ON pm.clientkey = c.key WHERE  c.client_id = $1 AND pm.name = $3)
+      JOIN usher.permissions pm ON pm.clientkey = c.key WHERE c.client_id = ? AND pm.name = ?)
     AND
-    EXISTS (SELECT prs.key FROM usher.personas prs WHERE prs.KEY = pp.personakey AND prs.sub_claim = $2)`
-  const sqlParams = [clientId, subClaim, permissionName]
+    EXISTS (SELECT prs.key FROM usher.personas prs WHERE prs.KEY = pp.personakey AND prs.sub_claim = ?)`
+  const sqlParams = [clientId, permissionName, subClaim]
   try {
-    const results = await pool.query(sql, sqlParams)
+    const results = await usherDb.raw(sql, sqlParams)
     if (results.rowCount === 1) {
       return 'Delete successful'
     } else {

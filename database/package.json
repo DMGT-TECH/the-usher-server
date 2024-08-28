@@ -1,6 +1,6 @@
 {
   "name": "@dmgt-tech/the-usher-server-database",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Database layer for TheUsher",
   "scripts": {
     "test": "mocha --exit",
