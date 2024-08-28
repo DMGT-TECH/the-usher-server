@@ -6,6 +6,10 @@ module.exports = {
   searchPath: [env.PGSCHEMA, 'public'],
   migrations: {
     tableName: 'knex_migrations',
-    schemaName: env.PGSCHEMA
-  }
+    schemaName: env.PGSCHEMA,
+  },
+  pool: {
+    min: 1,
+    max: 100,
+  },
 }

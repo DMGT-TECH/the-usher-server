@@ -1,16 +1,14 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
 const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
 const insertPersona = async (tenantName, issClaim, subClaim, userContext) => {
   const sql = `INSERT INTO usher.personas (tenantkey, sub_claim, user_context)
-  SELECT key, $3, $4
+  SELECT key, ?, ?
   FROM usher.tenants
-  WHERE name = $1 AND iss_claim = $2`
-  const sqlParams = [tenantName, issClaim, subClaim, userContext]
+  WHERE name = ? AND iss_claim = ?`
+  const sqlParams = [subClaim, userContext, tenantName, issClaim]
   try {
-    const results = await pool.query(sql, sqlParams)
+    const results = await usherDb.raw(sql, sqlParams)
     if (results.rowCount === 1) {
       return 'Insert successful'
     } else {
@@ -18,7 +16,7 @@ const insertPersona = async (tenantName, issClaim, subClaim, userContext) => {
       return `Insert failed: ${errTenantDoesNotExist}`
     }
   } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "personas_subclaim_userscope_tenantkey_uq"') {
+    if (error.message.includes('duplicate key value violates unique constraint "personas_subclaim_userscope_tenantkey_uq"')) {
       const errPersonaAlreadyExists = `A persona (sub_claim = ${subClaim}; user_context = ${userContext}) already exists on tenantname ${tenantName} iss_claim ${issClaim}`
       return `Insert failed: ${errPersonaAlreadyExists}`
     }
@@ -28,11 +26,11 @@ const insertPersona = async (tenantName, issClaim, subClaim, userContext) => {
 
 const deletePersona = async (tenantName, issClaim, subClaim, userContext) => {
   const sql = `DELETE FROM usher.personas p
-    WHERE EXISTS (SELECT 1 FROM usher.tenants t WHERE t.KEY = p.tenantkey AND t.name = $1 and t.iss_claim = $2)
-    AND p.sub_claim = $3 AND p.user_context = $4`
+    WHERE EXISTS (SELECT 1 FROM usher.tenants t WHERE t.KEY = p.tenantkey AND t.name = ? and t.iss_claim = ?)
+    AND p.sub_claim = ? AND p.user_context = ?`
   const sqlParams = [tenantName, issClaim, subClaim, userContext]
   try {
-    const deleteResult = await pool.query(sql, sqlParams)
+    const deleteResult = await usherDb.raw(sql, sqlParams)
     if (deleteResult.rowCount === 1) {
       return 'Delete successful'
     } else {
@@ -45,12 +43,12 @@ const deletePersona = async (tenantName, issClaim, subClaim, userContext) => {
 }
 
 const updatePersona = async (tenantName, issClaim, oldSubClaim, newSubClaim, oldUserContext, newUserContext) => {
-  const sql = `UPDATE usher.personas p SET sub_claim = $4, user_context = $6
-    WHERE EXISTS (SELECT 1 FROM usher.tenants t WHERE t.KEY = p.tenantkey AND t.name = $1 and t.iss_claim = $2)
-    AND p.sub_claim = $3 AND p.user_context = $5`
-  const sqlParams = [tenantName, issClaim, oldSubClaim, newSubClaim, oldUserContext, newUserContext]
+  const sql = `UPDATE usher.personas p SET sub_claim = ?, user_context = ?
+    WHERE EXISTS (SELECT 1 FROM usher.tenants t WHERE t.KEY = p.tenantkey AND t.name = ? and t.iss_claim = ?)
+    AND p.sub_claim = ? AND p.user_context = ?`
+  const sqlParams = [newSubClaim, newUserContext, tenantName, issClaim, oldSubClaim, oldUserContext]
   try {
-    const updateResult = await pool.query(sql, sqlParams)
+    const updateResult = await usherDb.raw(sql, sqlParams)
     if (updateResult.rowCount === 1) {
       return 'Update successful'
     } else {

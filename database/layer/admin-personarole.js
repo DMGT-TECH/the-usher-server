@@ -1,5 +1,3 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
 const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
@@ -7,11 +5,11 @@ const insertPersonaRole = async (tenantName, issClaim, subClaim, userContext, cl
   const sql = `INSERT INTO usher.personaroles (personakey, rolekey)
   SELECT p.KEY, r.KEY
   FROM usher.roles r JOIN usher.clients c ON (c.key = r.clientkey) inner join usher.tenantclients tc ON (c.key = tc.clientkey) inner JOIN usher.tenants t ON (t.key = tc.tenantkey) inner join usher.personas p on (p.tenantkey = t.key)
-  WHERE t.name = $1 AND t.iss_claim = $2 AND p.sub_claim = $3 AND p.user_context = $4
-  AND c.client_id = $5 AND r.name = $6`
+  WHERE t.name = ? AND t.iss_claim = ? AND p.sub_claim = ? AND p.user_context = ?
+  AND c.client_id = ? AND r.name = ?`
   const sqlParams = [tenantName, issClaim, subClaim, userContext, clientId, rolename]
   try {
-    const results = await pool.query(sql, sqlParams)
+    const results = await usherDb.raw(sql, sqlParams)
     if (results.rowCount === 1) {
       return 'Insert successful'
     } else {
@@ -19,7 +17,7 @@ const insertPersonaRole = async (tenantName, issClaim, subClaim, userContext, cl
       return `Insert failed: ${errPersonaRoleDoesNotExist}`
     }
   } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "personaroles_personakey_rolekey_uq"') {
+    if (error.message.includes('duplicate key value violates unique constraint "personaroles_personakey_rolekey_uq"')) {
       const errPersonaRoleAlreadyExists = `A client role client_id = ${clientId} & rolename ${rolename} is already assigned to tenantname = ${tenantName} & iss_claim = ${issClaim} & sub_claim = ${subClaim} & user_context = ${userContext}`
       return `Insert failed: ${errPersonaRoleAlreadyExists}`
     }
@@ -36,16 +34,16 @@ const deletePersonaRole = async (tenantName, issClaim, subClaim, userContext, cl
         JOIN usher.tenantclients tc ON (c.key = tc.clientkey)
         JOIN usher.tenants t ON (t.key = tc.tenantkey)
         JOIN usher.personas p ON (p.tenantkey = t.key)
-      WHERE t.name = $1
-        AND t.iss_claim = $2
-        AND p.sub_claim = $3
-        AND p.user_context = $4
-        AND c.client_id = $5
-        AND r.name = $6
+      WHERE t.name = ?
+        AND t.iss_claim = ?
+        AND p.sub_claim = ?
+        AND p.user_context = ?
+        AND c.client_id = ?
+        AND r.name = ?
     );`
   const sqlParams = [tenantName, issClaim, subClaim, userContext, clientId, rolename]
   try {
-    const results = await pool.query(sql, sqlParams)
+    const results = await usherDb.raw(sql, sqlParams)
     if (results.rowCount === 1) {
       return 'Delete successful'
     } else {
