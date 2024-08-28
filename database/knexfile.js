@@ -9,7 +9,7 @@ module.exports = {
     schemaName: env.PGSCHEMA,
   },
   pool: {
-    min: 1,
-    max: 100,
+    min: process.env.KNEX_POOL_MIN || 1,
+    max: process.env.KNEX_POOL_MAX || 100,
   },
 }
