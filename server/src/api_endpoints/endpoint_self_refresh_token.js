@@ -10,6 +10,7 @@ async function issueSelfRefreshToken (req, res, next) {
   const clientId = req.query.client_id
 
   // Check if the session exists and has not expired based on server configuration for session lifetime.
+  // TODO investigate logic as this function does the look up by event_id, not refresh token
   const session = await dbSessions.getSessionByEventId(refreshToken)
   if (!session) {
     return next(createError(404, 'Not found: No session was found for refresh token.'))

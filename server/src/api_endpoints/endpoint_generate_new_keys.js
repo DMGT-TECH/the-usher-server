@@ -1,4 +1,4 @@
-const { generateKeyPairSync } = require('crypto')
+const { generateKeyPairSync } = require('node:crypto')
 var keystore = require('database/layer/db-keys')
 
 function generateAndInsertNewKeys () {

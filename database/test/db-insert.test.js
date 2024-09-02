@@ -125,12 +125,12 @@ describe('Insert Update and Delete tests', function () {
 
     describe('Test session insert', function () {
       const authorizationDateTime = new Date()
+      const eventId = crypto.randomUUID()
       const idpExpirationDateTime = new Date()
       idpExpirationDateTime.setMinutes(idpExpirationDateTime.getMinutes() + 30)
 
       it('Should insert a single specified session', async function () {
         try {
-          const eventId = crypto.randomUUID()
           const excessAuthorizationDateTime = new Date()
           excessAuthorizationDateTime.setMinutes(excessAuthorizationDateTime.getMinutes() + 45)
           const result = await postSessions.insertSessionBySubIss(
@@ -144,9 +144,18 @@ describe('Insert Update and Delete tests', function () {
             'eydsagdsadahdhwwgywqrwqrqrwqwqy'
           )
           assert(result, 'Inserted successfully')
+
+          // get session
+          const session = await postSessions.getSessionByEventId(eventId)
+          assert.strictEqual(eventId, session.event_id)
         } catch (error) {
           assert(false, error.message)
         }
+      })
+      it('Should return null for invalid session event_id', async function () {
+          const invalidEventId = 'invalid_event_id'
+          const session = await postSessions.getSessionByEventId(invalidEventId)
+          assert.strictEqual(null, session)
       })
       it('Should update a single specified session', async function () {
         const scope = 'dummy_permission:dummyA'
@@ -161,6 +170,10 @@ describe('Insert Update and Delete tests', function () {
         } catch (error) {
           assert(false, error.message)
         }
+      })
+      it('Should get a session by sub claim, user_context, and iss', async function () {
+        const session = await postSessions.getSessionBySubIss('dummy_subclaim', '', 'https://dummytenant')
+        assert.strictEqual(eventId, session.event_id)
       })
     })
   })

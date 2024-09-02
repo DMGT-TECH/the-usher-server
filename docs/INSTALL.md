@@ -57,6 +57,8 @@ The following variables are required to be configured.
 |--------------------------|----------------------------------------------------------|
 | PGURI                    | Database connection string                               |
 | PGSCHEMA                 | Database schema name                                     |
+| KNEX_POOL_MIN | (Optional) Min number of db pool connections, default to 1 |
+| KNEX_POOL_MAX | (Optional) Max number of db pool connections, default to 100 |
 | TOKEN_LIFETIME_SECONDS   | Number of seconds Access Token is valid                  |
 | SESSION_LIFETIME_SECONDS | Number of seconds Refresh Token is valid                 |
 | ISSUER_WHITELIST         | Comma separated list of authorized Issuer Servers        |
