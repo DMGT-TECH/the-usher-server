@@ -39,7 +39,6 @@ async function getSessionBySubIss (subClaim, userContext, issClaim) {
   const results = await usherDb('sessions').select().where('personakey', personaKey)
     .orderBy('authorization_time', 'desc')
     .first()
-  console.log(JSON.stringify(results))
   return results || null // force null return if no results instead of undefined
 }
 
@@ -133,8 +132,8 @@ async function deleteSessionBySubIss (subClaim, userContext, issClaim) {
   return deleteReturn
 }
 
-async function deleteSessionByPersonaKey (personakey) {
-  const deleteResults = await usherDb('sessions').where('personakey', personakey).del()
+async function deleteSessionByPersonaKey (personaKey) {
+  const deleteResults = await usherDb('sessions').where('personakey', personaKey).del()
   if (deleteResults === 1) {
     return 'Delete successful'
   } else {
