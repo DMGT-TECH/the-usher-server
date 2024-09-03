@@ -105,9 +105,26 @@ const deleteClientByClientId = async (clientId) => {
   }
 }
 
+/**
+ * Retrieve a list of all clients
+ *
+ * @returns {Promise<Array>} - A promise that resolves to an array of clients
+ * @throws {Error} - If there is an error during the retrieval process
+ */
+const getClients = async () => {
+  try {
+    return await usherDb('clients')
+      .select('*')
+      .returning('*')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertClient,
   getClient,
   updateClientByClientId,
   deleteClientByClientId,
+  getClients,
 }
