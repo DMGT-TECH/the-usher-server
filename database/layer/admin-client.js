@@ -1,5 +1,3 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
 const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
@@ -17,24 +15,24 @@ const { pgErrorHandler } = require('../utils/pgErrorHandler')
 const insertClient = async (tenantName, clientId, name, description, secret) => {
   try {
     // validate tenant name and get tenant key
-    let sql = 'SELECT t.key from usher.tenants t WHERE t.name = $1'
-    const tenants = await pool.query(sql, [tenantName])
+    let sql = 'SELECT t.key from usher.tenants t WHERE t.name = ?'
+    const tenants = await usherDb.raw(sql, [tenantName])
     if (tenants.rows.length === 0) {
       throw new Error('Invalid tenant name')
     }
     const tenantKey = tenants.rows[0].key
 
     // insert client record
-    sql = 'INSERT INTO usher.clients (client_id, name, description, secret) VALUES ($1, $2, $3, $4) returning key'
-    const results = await pool.query(sql, [clientId, name, description, secret])
+    sql = 'INSERT INTO usher.clients (client_id, name, description, secret) VALUES (?, ?, ?, ?) returning key'
+    const results = await usherDb.raw(sql, [clientId, name, description, secret])
     const clientKey = results.rows[0].key
     // relate client to tenant
-    sql = 'INSERT INTO usher.tenantclients (tenantkey, clientkey) VALUES ($1, $2)'
-    await pool.query(sql, [tenantKey, clientKey])
+    sql = 'INSERT INTO usher.tenantclients (tenantkey, clientkey) VALUES (?, ?)'
+    await usherDb.raw(sql, [tenantKey, clientKey])
 
     // return client
-    sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id=$1'
-    const role = await pool.query(sql, [clientId])
+    sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id=?'
+    const role = await usherDb.raw(sql, [clientId])
     return role.rows[0]
   } catch (error) {
     if (error.message === 'duplicate key value violates unique constraint "clients_client_id_uq"') {
@@ -52,9 +50,9 @@ const insertClient = async (tenantName, clientId, name, description, secret) => 
  * @returns client object
  */
 const getClient = async (clientId) => {
-  const sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id = $1'
+  const sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id = ?'
   try {
-    const results = await pool.query(sql, [clientId])
+    const results = await usherDb.raw(sql, [clientId])
     if (results.rowCount === 0) {
       throw new Error(`No results for client_id ${clientId}`)
     }
@@ -94,9 +92,9 @@ const updateClientByClientId = async (clientId, { client_id, name, description, 
 }
 
 const deleteClientByClientId = async (clientId) => {
-  const sql = 'DELETE FROM usher.clients WHERE client_id = $1'
+  const sql = 'DELETE FROM usher.clients WHERE client_id = ?'
   try {
-    const results = await pool.query(sql, [clientId])
+    const results = await usherDb.raw(sql, [clientId])
     if (results.rowCount === 1) {
       return 'Delete successful'
     } else {
