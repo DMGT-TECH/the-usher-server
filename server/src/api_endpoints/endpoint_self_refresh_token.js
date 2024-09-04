@@ -18,7 +18,7 @@ async function issueSelfRefreshToken (req, res, next) {
   // If session is expired, delete it from the sessions table and deny the user a JWT.
   const sessionLifetimeExpiry = tokenUtils.calculateSessionLifetimeExpiry(session.idp_expirationtime)
   if (sessionLifetimeExpiry <= 0) {
-    await dbSessions.deleteSessionByPersonaKey(session.personaKey)
+    await dbSessions.deleteSessionByPersonaKey(session.personakey)
     return next(createError(403, 'Forbidden: Refresh token has expired. Unable to issue new JWT access token.'))
   }
 

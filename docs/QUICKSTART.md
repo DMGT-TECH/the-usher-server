@@ -22,7 +22,7 @@ The Usher ships with a mock identity provider that simulates Auth0's API endpoin
 
 The mock identity provider is fairly simple, and returns tokens with the `iss` (issuer) claim set based on the hostname you use when accessing it.  For the purposes of this quickstart, given the identities in the test database, you should ensure the mock identity provider is accessible via the hostname `idp.dmgt.com.mock.localhost`.  Depending on your operating system, `docker compose` may create an alias (check this by running `ping idp.dmgt.com.mock.localhost`).  However, if it does not, then manually add to `/etc/hosts` an entry like:
 
-```
+```text
 127.0.0.1 idp.dmgt.com.mock.localhost
 ```
 

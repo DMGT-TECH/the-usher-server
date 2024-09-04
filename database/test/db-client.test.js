@@ -17,6 +17,11 @@ describe('Clients', function () {
       const CLIENT_ACTUAL1 = await viewSelectEntities.selectClients('test-client1')
       assert.strictEqual(JSON.stringify(CLIENT_ACTUAL1), JSON.stringify(CLIENT_EXPECTED1))
     })
+
+    it('Should return multiple clients', async function () {
+      const results = await viewSelectEntities.selectClients()
+      assert(results.length >= 1, 'Expected more than one client')
+    })
   })
 
   describe('Test Client Roles requests', function () {

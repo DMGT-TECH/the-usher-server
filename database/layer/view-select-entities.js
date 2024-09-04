@@ -1,41 +1,37 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
+const { usherDb } = require('./knex')
 
-function getTenantsView () {
-  return `SELECT t.name AS tenantname, t.iss_claim, t.jwks_uri
-            FROM usher.tenants t`
-}
-async function selectIssuerJWKS (issClaim = '*') {
+/**
+ *
+ * @param {string} issClaim ISS Claim to look up tenant by
+ * @returns
+ */
+async function selectIssuerJWKS (issClaim) {
   try {
-    let sql = getTenantsView() + ' where 1=1'
-    const params = []
-    let paramCount = 0
-    if (issClaim !== '*') {
-      params.push(issClaim)
-      paramCount++
-      sql += ' and iss_claim = $' + paramCount
-    }
-    sql += ' LIMIT 1'
-    const results = await pool.query(sql, params)
-    return results.rows
+    const results = await usherDb('tenants')
+      .select('name as tenantname', 'iss_claim', 'jwks_uri')
+      .where('iss_claim', issClaim)
+      .limit(1)
+    return results
   } catch (error) {
     throw error.message
   }
 }
 
+/**
+ * Get a list of clients, if clientId is not provided, return all clients
+ * @param {*} clientId
+ * @returns
+ */
 async function selectClients (clientId = '*') {
   try {
-    let sql = `SELECT c.client_id, c.name as clientname, c.description, c.secret
-      FROM usher.clients c where 1=1 `
-    const params = []
-    let paramCount = 0
-    if (clientId !== '*') {
-      params.push(clientId)
-      paramCount++
-      sql += ' and client_id = $' + paramCount
-    }
-    const results = await pool.query(sql, params)
-    return results.rows
+    const results = await usherDb('clients')
+      .select('client_id', 'name as clientname', 'description', 'secret')
+      .modify((queryBuilder) => {
+        if (clientId !== '*') {
+          queryBuilder.where('client_id', clientId)
+        }
+      })
+    return results
   } catch (error) {
     throw error.message
   }
