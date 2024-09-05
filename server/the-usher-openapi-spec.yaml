@@ -800,6 +800,28 @@ paths:
           $ref: '#/components/responses/InternalError'
 
   /clients:
+    get:
+      'x-swagger-router-controller': 'clients/index'
+      operationId: getClients
+      summary: Get a list of Clients
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        200:
+          description: Returns a list of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalError'
+
     post:
       'x-swagger-router-controller': 'clients/index'
       operationId: createClient
@@ -940,6 +962,7 @@ paths:
       tags:
         - Client Admin APIs
       security:
+        - bearerAdminAuth: []
         - bearerClientAdminAuth: []
       requestBody:
         required: true
@@ -1217,15 +1240,23 @@ components:
     Client:
       type: object
       properties:
+        key:
+          type: integer
+          minimum: 1
+          format: int32
         client_id:
           $ref: '#/components/schemas/EntityNameDef'
         name:
           $ref: '#/components/schemas/EntityNameDef'
         description:
-          $ref: '#/components/schemas/EntityDescriptionDef'
+          type: string
         secret:
           type: string
           maxLength: 50
+        created_at:
+          type: string
+        updated_at:
+          type: string
       required:
         - client_id
         - name

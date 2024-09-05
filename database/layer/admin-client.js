@@ -31,7 +31,7 @@ const insertClient = async (tenantName, clientId, name, description, secret) => 
     await usherDb.raw(sql, [tenantKey, clientKey])
 
     // return client
-    sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id=?'
+    sql = 'SElECT * FROM usher.clients c WHERE c.client_id=?'
     const role = await usherDb.raw(sql, [clientId])
     return role.rows[0]
   } catch (error) {
@@ -50,7 +50,7 @@ const insertClient = async (tenantName, clientId, name, description, secret) => 
  * @returns client object
  */
 const getClient = async (clientId) => {
-  const sql = 'SElECT c.client_id, c.name, c.description, c.secret FROM usher.clients c WHERE c.client_id = ?'
+  const sql = 'SElECT * FROM usher.clients c WHERE c.client_id = ?'
   try {
     const results = await usherDb.raw(sql, [clientId])
     if (results.rowCount === 0) {
@@ -84,7 +84,7 @@ const updateClientByClientId = async (clientId, { client_id, name, description, 
         description,
         secret,
         updated_at: new Date(),
-      }).returning(['client_id', 'name', 'description', 'secret'])
+      }).returning('*')
     return updatedClient
   } catch (err) {
     throw pgErrorHandler(err)

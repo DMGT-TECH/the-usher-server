@@ -86,9 +86,28 @@ const updateClient = async (req, res, next) => {
   }
 }
 
+/**
+ * HTTP Request handler
+ * Returns a list of clients
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object to send 200 statusCode and a list of clients
+ * @param {Function} next - The next middleware function
+ * @returns {Promise<void>} - A promise that resolves to void when client is updated
+ */
+const getClients = async (req, res, next) => {
+  try {
+    const clients = await dbAdminRole.getClients()
+    res.status(200).send(clients)
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   createClient,
   deleteClient,
   getClient,
   updateClient,
+  getClients,
 }
