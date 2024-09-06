@@ -182,4 +182,37 @@ describe('Admin Clients Endpoint Test', () => {
       await usherDb('clients').where({ client_id: testClient.client_id }).del()
     })
   })
+
+  describe('Get Clients', () => {
+    /**
+     * GET /clients
+     * HTTP request to get list of clients
+     *
+     * @param {Object} header - The request headers
+     * @returns {Promise<fetch.response>} - A Promise which resolves to fetch.response
+     */
+    const getClients = async (header = requestHeaders) => {
+      return await fetch(`${url}/clients`, {
+        method: 'GET',
+        headers: header,
+      })
+    }
+
+    it('should return 200, and list of all clients', async () => {
+      const response = await getClients()
+      assert.equal(response.status, 200)
+      const clients = await response.json();
+      assert.ok(!!clients.length)
+    })
+
+    it('should return 401, unauthorized token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await getClients(
+        {
+          ...requestHeaders,
+          Authorization: `Bearer ${userAccessToken}`
+        })
+      assert.equal(response.status, 401)
+    })
+  })
 })

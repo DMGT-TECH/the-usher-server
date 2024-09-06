@@ -17,10 +17,8 @@ const createPersonaPermissions = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
     const permissionKeys = [...new Set(req.body)]
-    await Promise.all([
-      checkPersonaExists(personaKey),
-      checkPersonaPermissionsValidity(personaKey, permissionKeys),
-    ])
+    await checkPersonaExists(personaKey)
+    await checkPersonaPermissionsValidity(personaKey, permissionKeys)
     await dbAdminPersonaPermissions.insertPersonaPermissions(personaKey, permissionKeys)
     const locationUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`
     res.set('Location', locationUrl)
@@ -33,10 +31,8 @@ const createPersonaPermissions = async (req, res, next) => {
 const deletePersonaPermission = async (req, res, next) => {
   try {
     const { persona_key: personaKey, permission_key: permissionKey } = req.params
-    await Promise.all([
-      checkPersonaExists(personaKey),
-      checkPermissionExists(permissionKey),
-    ])
+    await checkPersonaExists(personaKey)
+    await checkPermissionExists(permissionKey)
     await dbAdminPersonaPermissions.deletePersonaPermission(personaKey, permissionKey)
     res.status(204).send()
   } catch ({ httpStatusCode = 500, message }) {
