@@ -113,9 +113,7 @@ const deleteClientByClientId = async (clientId) => {
  */
 const getClients = async () => {
   try {
-    return await usherDb('clients')
-      .select('*')
-      .returning('*')
+    return await usherDb('clients').select('*')
   } catch (err) {
     throw pgErrorHandler(err)
   }

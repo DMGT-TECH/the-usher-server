@@ -1255,16 +1255,21 @@ components:
           maxLength: 50
         created_at:
           type: string
+          format: date-time
         updated_at:
           type: string
+          format: date-time
       required:
         - client_id
         - name
       example:
+        key: 1
         client_id: newsletter-app
         name: The Newsletter App
         description: Application for reading the newsletter on a mobile device
         secret: secretphraseused
+        created_at: '2024-08-13T20:59:37.072Z'
+        updated_at: '2024-08-13T20:59:37.072Z'
 
     ArrayOfSelfClients:
       type: array
@@ -1301,8 +1306,10 @@ components:
           type: string
         created_at:
           type: string
+          format: date-time
         updated_at:
           type: string
+          format: date-time
       required:
         - key
         - tenantkey
