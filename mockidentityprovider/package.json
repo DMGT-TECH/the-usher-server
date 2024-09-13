@@ -19,7 +19,7 @@
     "@oas-tools/core": "3.1.0",
     "cors": "2.8.5",
     "dotenv": "16.3.1",
-    "express": "4.19.2",
+    "express": "4.21.0",
     "helmet": "7.1.0",
     "helmet-csp": "3.4.0",
     "http-errors": "2.0.0",
