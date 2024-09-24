@@ -53,18 +53,23 @@ Create a `.env` file that will contain the settings to configure the Usher. You 
 
 The following variables are required to be configured.
 
-| Parameter                | Description                                              |
-|--------------------------|----------------------------------------------------------|
-| PGURI                    | Database connection string                               |
-| PGSCHEMA                 | Database schema name                                     |
-| KNEX_POOL_MIN | (Optional) Min number of db pool connections, default to 1 |
-| KNEX_POOL_MAX | (Optional) Max number of db pool connections, default to 100 |
-| TOKEN_LIFETIME_SECONDS   | Number of seconds Access Token is valid                  |
-| SESSION_LIFETIME_SECONDS | Number of seconds Refresh Token is valid                 |
-| ISSUER_WHITELIST         | Comma separated list of authorized Issuer Servers        |
-| THEUSHER_AUD_CLAIMS      | (Optional) Comma separated list of authorized audience (aud) claims |
-| PRESET_SERVER_URL        | (Optional) URI to use as `iss` claim for issued tokens   |
-| ISSUER_ALIASES           | (Optional && Experimental) [Hostname aliases](USAGE.md#migrating-idenitity-provider-domain-names-issuer-aliases-experimental) for IdP tokens issuer |
+| Parameter                               | Description                                              |
+|-----------------------------------------|----------------------------------------------------------|
+| PGURI                                   | Database connection string                               |
+| PGSCHEMA                                | Database schema name                                     |
+| KNEX_POOL_MIN                           | (Optional) Min number of db pool connections, default 0  |
+| KNEX_POOL_MAX                           | (Optional) Max number of db pool connections, default 100  |
+| KNEX_POOL_PROPAGATE_CREATE_ERROR        | (Optional) Propagate create error, default false         |
+| KNEX_POOL_CREATE_RETRY_INTERVAL_MILLIS  | (Optional) Interval in milliseconds to retry creating connection, default 500  |
+| KNEX_POOL_CREATE_TIMEOUT_MILLIS         | (Optional) Timeout in milliseconds for creating connection, default 5000       |
+| KNEX_POOL_ACQUIRE_TIMEOUT_MILLIS        | (Optional) Timeout in milliseconds for acquiring connection, default 5000      |
+| KNEX_POOL_REAP_INTERVAL_MILLIS          | (Optional) Interval in milliseconds to reap connection pool, default 1000      |
+| TOKEN_LIFETIME_SECONDS                  | Number of seconds Access Token is valid                  |
+| SESSION_LIFETIME_SECONDS                | Number of seconds Refresh Token is valid                 |
+| ISSUER_WHITELIST                        | Comma separated list of authorized Issuer Servers        |
+| THEUSHER_AUD_CLAIMS                     | (Optional) Comma separated list of authorized audience (aud) claims |
+| PRESET_SERVER_URL                       | (Optional) URI to use as `iss` claim for issued tokens   |
+| ISSUER_ALIASES                          | (Optional && Experimental) [Hostname aliases](USAGE.md#migrating-idenitity-provider-domain-names-issuer-aliases-experimental) for IdP tokens issuer |
 
 ## Generic Installation Steps
 

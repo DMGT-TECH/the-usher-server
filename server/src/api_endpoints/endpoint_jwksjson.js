@@ -2,7 +2,7 @@ const keystore = require('database/layer/db-keys')
 const { pem2jwk } = require('pem-jwk')
 const createError = require('http-errors')
 
-const getJwks = async (req, res) => {
+const getJwks = async (req, res, next) => {
   try {
     const keyPairs = await keystore.selectAllKeys()
     const publicKeys = keyPairs?.map(keyPair => {
