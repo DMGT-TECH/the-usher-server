@@ -4,8 +4,8 @@ This document outlines the steps necessary to deploy the Usher to a production e
 
 ## Requirements
 
-* **NodeJS** The Usher application requires NodeJS >= 14.x.
-* **PostgreSQL** The Usher application requires access to a running PostgreSQL database. Please ensure you are running at least [version 12](https://www.postgresql.org/support/versioning/), as the Usher is not tested with older versions.
+* **NodeJS** - Check The Usher's [server package.json](../server/package.json) `engines` attribute for the minimum required version.
+* **PostgreSQL** - The Usher application requires access to a running PostgreSQL database. Please ensure you are running at least [version 13](https://www.postgresql.org/support/versioning/), as the Usher is not tested with older versions.
 
 ## Set Up the PostgreSQL Database
 
