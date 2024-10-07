@@ -327,6 +327,13 @@ paths:
         - bearerAdminAuth: []
       parameters:
         - $ref: '#/components/parameters/clientIdQueryParam'
+        - name: includePermissions
+          in: query
+          description: Includes permissions for each role
+          required: false
+          schema:
+            type: boolean
+            example: true
       responses:
         200:
           description: The List of Roles
@@ -381,6 +388,14 @@ paths:
         - Admin APIs
       security:
         - bearerAdminAuth: []
+      parameters:
+        - name: includePermissions
+          in: query
+          description: Includes permissions for each role
+          required: false
+          schema:
+            type: boolean
+            example: true
       responses:
         200:
           description: Return a Role for the given key
@@ -456,6 +471,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas:
     get:
@@ -536,6 +553,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     post:
       'x-swagger-router-controller': 'personas/persona'
       summary: Create a single persona
@@ -575,6 +594,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}:
     get:
@@ -603,6 +624,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     delete:
       'x-swagger-router-controller': 'personas/persona'
       operationId: deletePersona
@@ -624,6 +647,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/permissions:
     get:
@@ -651,6 +676,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     put:
       'x-swagger-router-controller': 'personas/permissions'
       operationId: createPersonaPermissions
@@ -687,6 +714,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/permissions/{permission_key}:
     delete:
@@ -711,6 +740,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/roles:
     get:
@@ -718,7 +749,14 @@ paths:
       operationId: getPersonaRoles
       summary: Get a list of roles assigned to the given Persona
       parameters:
-      - $ref: '#/components/parameters/personaKeyPathParam'
+        - $ref: '#/components/parameters/personaKeyPathParam'
+        - name: includePermissions
+          in: query
+          description: Includes permissions for each role
+          required: false
+          schema:
+            type: boolean
+            example: true
       tags:
         - Admin APIs
       security:
@@ -738,6 +776,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     put:
       'x-swagger-router-controller': 'personas/roles'
       operationId: createPersonaRoles
@@ -774,6 +814,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/roles/{role_key}:
     delete:
@@ -798,6 +840,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /clients:
     get:
@@ -821,6 +865,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
     post:
       'x-swagger-router-controller': 'clients/index'
@@ -933,6 +979,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /clients/{client_id}/roles:
     parameters:
@@ -1583,6 +1631,16 @@ components:
           example:
             code: 500
             message: Internal Error!
+
+    ServiceUnavailableError:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 503
+            message: Service Unavailable!
 
     Default:
       description: Unexpected error

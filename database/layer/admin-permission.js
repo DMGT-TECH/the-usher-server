@@ -62,9 +62,27 @@ const getPermission = async (permissionKey) => {
   }
 }
 
+/**
+ * Retrieve a list of permissions by role key
+ *
+ * @param {number} roleKey - The role key
+ * @returns {Promise<Array<Object>>} - A promise that resolves to the list of permission objects associated with the role
+ */
+const getPermissionsByRoleKey = async (roleKey) => {
+  try {
+    return await usherDb('permissions')
+      .join('rolepermissions', 'permissions.key', '=', 'rolepermissions.permissionkey')
+      .where({ 'rolepermissions.rolekey': roleKey })
+      .select('permissions.*');
+  } catch (err) {
+    throw pgErrorHandler(err);
+  }
+}
+
 module.exports = {
   insertPermissionByClientId,
   updatePermissionByPermissionname,
   deletePermissionByPermissionname,
   getPermission,
+  getPermissionsByRoleKey,
 }
