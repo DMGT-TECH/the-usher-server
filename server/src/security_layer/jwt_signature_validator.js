@@ -6,7 +6,7 @@ const jwksClients = {}
 const createError = require('http-errors')
 const env = require('../../server-env')
 
-async function verifyAndDecodeToken (token) {
+const verifyAndDecodeToken = async (token) => {
   if (!token) {
     throw createError(403, 'Forbidden: No IdP JWT provided.')
   }
@@ -28,7 +28,12 @@ async function verifyAndDecodeToken (token) {
   }
 
   const possiblyAliased = env?.ISSUER_ALIASES?.[issuerClaim] ?? issuerClaim
-  const tenant = await viewSelectEntities.selectIssuerJWKS(possiblyAliased)
+  let tenant
+  try {
+    tenant = await viewSelectEntities.selectIssuerJWKS(possiblyAliased)
+  } catch (err) {
+    return next(createError(500, `Internal Server Error: ${err}`))
+  }
 
   if (tenant.length === 0) {
     throw createError(500, 'Internal Server Error: Could not determine IdP JWKS for IdP token issuer ' + issuerClaim + '. Tenant not registered?')
@@ -89,18 +94,21 @@ async function verifyAndDecodeToken (token) {
  * @param {string} requiredRoleName Either a full role name or suffix to match, ie: client-admin
  * @returns {boolean} True if the user has access to at least one of the roles
  */
-async function verifyRoleGroupAccess (subClaim, userContext, clientId, requiredRoleName) {
-  const userRoles = await viewSelectRelationships.selectTenantPersonaClientRoles(subClaim, userContext, clientId)
-  const roleAccess = userRoles.map(x => x.rolename)
-    .some(x => {
-      const roleParts = x.split(':')
-      const roleSuffix = roleParts.length > 0 ? roleParts.pop() : ''
-      return x === requiredRoleName || requiredRoleName === roleSuffix
-    })
-  // TODO Logic: Query DB to check if any groups in IdP token grant admin access. If yes, grant access.
-  const idpGroupsAccess = false
-
-  return roleAccess || idpGroupsAccess
+const verifyRoleGroupAccess = async (subClaim, userContext, clientId, requiredRoleName) => {
+  try {
+    const userRoles = await viewSelectRelationships.selectTenantPersonaClientRoles(subClaim, userContext, clientId)
+    const roleAccess = userRoles.map(x => x.rolename)
+      .some(x => {
+        const roleParts = x.split(':')
+        const roleSuffix = roleParts.length > 0 ? roleParts.pop() : ''
+        return x === requiredRoleName || requiredRoleName === roleSuffix
+      })
+    // TODO Logic: Query DB to check if any groups in IdP token grant admin access. If yes, grant access.
+    const idpGroupsAccess = false
+    return roleAccess || idpGroupsAccess
+  } catch (err) {
+    return next(createError(500, `Internal Server Error: ${err}`))
+  }
 }
 
 /**
@@ -108,7 +116,7 @@ async function verifyRoleGroupAccess (subClaim, userContext, clientId, requiredR
  * In particular, it checks that the persona (sub) or claimed groups are
  * managed on this server for the tenant.
  */
-async function verifyTokenForSelf (req, secDef, token, next) {
+const verifyTokenForSelf = async (req, secDef, token, next) => {
   try {
     const payload = await verifyAndDecodeToken(token) // If the token isn't verified an exception will be thrown
     let personaIsManagedOnThisServerForTenant = false
@@ -135,7 +143,7 @@ async function verifyTokenForSelf (req, secDef, token, next) {
   }
 }
 
-async function verifyTokenForAdmin (req, secDef, token, next) {
+const verifyTokenForAdmin = async (req, secDef, token, next) => {
   try {
     const payload = await verifyAndDecodeToken(token)
     const roleName = 'the-usher:usher-admin'
@@ -149,7 +157,7 @@ async function verifyTokenForAdmin (req, secDef, token, next) {
       next()
     } else {
       return next(createError(401, 'Unauthorized: Persona does not have Admin on this client or the-usher ' +
-                'and did not obtain Admin via group membership.'
+        'and did not obtain Admin via group membership.'
       ))
     }
   } catch (err) {
@@ -157,7 +165,7 @@ async function verifyTokenForAdmin (req, secDef, token, next) {
   }
 }
 
-async function verifyTokenForClientAdmin (req, secDef, token, next) {
+const verifyTokenForClientAdmin = async (req, secDef, token, next) => {
   try {
     const payload = await verifyAndDecodeToken(token)
     const clientId = req.header('client_id') ? req.header('client_id') : '*'
@@ -171,7 +179,7 @@ async function verifyTokenForClientAdmin (req, secDef, token, next) {
       next()
     } else {
       return next(createError(401, 'Unauthorized: Persona does not have Client Admin on this client ' +
-                'and did not obtain Admin via group membership.'
+        'and did not obtain Admin via group membership.'
       ))
     }
   } catch (err) {
