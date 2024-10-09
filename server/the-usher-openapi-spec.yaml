@@ -1001,8 +1001,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CollectionOfRoles'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     post:
       'x-swagger-router-controller': 'clients/roles'
       operationId: createClientRole
