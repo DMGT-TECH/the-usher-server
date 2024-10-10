@@ -28,9 +28,14 @@ function normalizePort(val) {
 }
 
 async function seedKeysIfDbIsEmpty() {
-  if ((await keystore.selectAllKeys()).length === 0) {
-    console.log('Note: There were no keys in the database generating and inserting a new key.')
-    keygen.generateAndInsertNewKeys()
+  try {
+    console.log('checking database for keys..')
+    if ((await keystore.selectAllKeys()).length === 0) {
+      console.log('Note: There were no keys in the database generating and inserting a new key.')
+      keygen.generateAndInsertNewKeys()
+    }
+  } catch (err) {
+    console.log(`Failed to seedKeysIfDbIsEmpty: ${JSON.stringify(err)}`)
   }
 }
 
@@ -115,12 +120,9 @@ expressApp.use(function (req, res, next) {
   res.status(405).send(notFoundResponse)
 })
 
-try {
-  if (process.env.SKIP_KEYS_CHECK !== 'true') {
-    seedKeysIfDbIsEmpty()
-  }
-} catch (err) {
-  console.log(`Failed to seedKeysIfDbIsEmpty: ${JSON.stringify(err)}`)
+console.log(`SKIP_KEYS_CHECK value: ${process.env.SKIP_KEYS_CHECK}`)
+if (!process.env.SKIP_KEYS_CHECK) {
+  seedKeysIfDbIsEmpty()
 }
 
 module.exports = { 'the-usher': expressApp } // For deploying to GCP
