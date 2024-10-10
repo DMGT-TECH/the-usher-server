@@ -21,5 +21,16 @@ describe('Admin permissions view', () => {
       const permission = await adminPermissions.getPermission(0)
       assert.equal(permission, undefined)
     })
+
+    it('Should get the permissions for a role key', async () => {
+      const { rolekey, permission_count } = await usherDb('rolepermissions')
+        .select('rolekey')
+        .count('permissionkey as permission_count')
+        .groupBy('rolekey')
+        .orderBy('permission_count', 'desc')
+        .first();
+      const permissions = await adminPermissions.getPermissionsByRoleKey(rolekey)
+      assert.equal(permission_count, permissions.length)
+    })
   })
 })

@@ -2,12 +2,6 @@ const createError = require('http-errors')
 const dbAdminRole = require('database/layer/admin-role')
 const dbAdminPermissions = require('database/layer/admin-permission')
 
-module.exports = {
-  getRole,
-  patchRole,
-  deleteRole
-}
-
 /**
  * Usher admin function to get a single Role object
  *
@@ -16,7 +10,7 @@ module.exports = {
  * @param {*} next
  * @returns Role object
  */
-async function getRole(req, res, next) {
+const getRole = async (req, res, next) => {
   const roleKey = req.params.role_key
   const { includePermissions } = req.query
   try {
@@ -40,7 +34,7 @@ async function getRole(req, res, next) {
  * @param {*} res
  * @param {*} next
  */
-async function patchRole(req, res, next) {
+const patchRole = async (req, res, next) => {
   // const roleKey = req.params.role_key
   // try {
   //   const role = await getRole(req, res, next)
@@ -60,7 +54,7 @@ async function patchRole(req, res, next) {
  * @param {*} res
  * @param {*} next
  */
-async function deleteRole(req, res, next) {
+const deleteRole = async (req, res, next) => {
   // const roleKey = req.params.role_key
   // try {
   //   const role = await getRole(req, res, next)
@@ -71,4 +65,10 @@ async function deleteRole(req, res, next) {
   //   }
   //   return next(createError(500, err))
   // }
+}
+
+module.exports = {
+  getRole,
+  patchRole,
+  deleteRole
 }
