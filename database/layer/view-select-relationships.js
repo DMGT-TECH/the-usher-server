@@ -1,7 +1,6 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
+const { usherDb } = require('./knex')
 
-function getTenantPersonaClientsView () {
+const getTenantPersonaClientsView = () => {
   return `SELECT DISTINCT c.client_id, c.name AS clientname
             FROM usher.tenants t
             JOIN usher.tenantclients tc ON t.key = tc.tenantkey
@@ -18,35 +17,31 @@ function getTenantPersonaClientsView () {
             JOIN usher.personas p ON rp.personakey = p.key AND p.tenantkey = t.key`
 }
 
-async function selectTenantPersonaClients (subClaim = '*', userContext = '*', clientId = '*') {
+const selectTenantPersonaClients = async (subClaim = '*', userContext = '*', clientId = '*') => {
   try {
     let sql = `${getTenantPersonaClientsView()} WHERE 1=1`
     const params = []
-    let paramCount = 0
     if (subClaim !== '*') {
       params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
+      sql += ' AND p.sub_claim = ?'
     }
     if (userContext !== '*') {
       params.push(userContext)
-      paramCount++
-      sql += ' AND p.user_context = $' + paramCount
+      sql += ' AND p.user_context = ?'
     }
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
     sql += ' ORDER BY client_id, clientname'
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
   }
 }
 
-function getTenantPersonaClientRolesView () {
+const getTenantPersonaClientRolesView = () => {
   return `SELECT t.iss_claim, t.name AS tenantname, p.sub_claim, p.user_context,
                 c.client_id, c.name AS clientname,
                 r.name AS rolename, r.description AS roledescription
@@ -58,64 +53,56 @@ function getTenantPersonaClientRolesView () {
             JOIN usher.personas p ON ur.personakey = p.key AND p.tenantkey = t.key`
 }
 
-async function selectTenantPersonaClientRoles (subClaim = '*', userContext = '*', clientId = '*') {
+const selectTenantPersonaClientRoles = async (subClaim = '*', userContext = '*', clientId = '*') => {
   try {
     let sql = getTenantPersonaClientRolesView() + ' WHERE 1=1'
     const params = []
-    let paramCount = 0
     if (subClaim !== '*') {
       params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
+      sql += ' AND p.sub_claim = ?'
     }
     if (userContext !== '*') {
       params.push(userContext)
-      paramCount++
-      sql += ' AND p.user_context = $' + paramCount
+      sql += ' AND p.user_context = ?'
     }
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
     sql += ' ORDER BY tenantname, sub_claim, client_id, user_context, rolename'
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
   }
 }
 
-async function selectClientsByTenantPersonaRole (subClaim = '*', userContext = '*', rolename = '*') {
+const selectClientsByTenantPersonaRole = async (subClaim = '*', userContext = '*', rolename = '*') => {
   try {
     let sql = getTenantPersonaClientRolesView() + ' WHERE 1=1'
     const params = []
-    let paramCount = 0
     if (subClaim !== '*') {
       params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
+      sql += ' AND p.sub_claim = ?'
     }
     if (userContext !== '*') {
       params.push(userContext)
-      paramCount++
-      sql += ' AND p.user_context = $' + paramCount
+      sql += ' AND p.user_context = ?'
     }
     // This is specifically set as LIKE to allow the generation of %:client-admin roles
     if (rolename !== '*') {
       params.push(rolename)
-      paramCount++
-      sql += ' AND r.name LIKE $' + paramCount
+      sql += ' AND r.name LIKE ?'
     }
     sql += ' ORDER BY tenantname, sub_claim, user_context, client_id, rolename'
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
   }
 }
 
-function getTenantPersonaClientRolePermissionsView () {
+const getTenantPersonaClientRolePermissionsView = () => {
   return `SELECT
     t.iss_claim,
     t.name AS tenantname,
@@ -154,35 +141,31 @@ function getTenantPersonaClientRolePermissionsView () {
      AND (pm.clientkey IS NULL OR pm.clientkey = c.key)`
 }
 
-async function selectTenantPersonaClientRolePermissions (subClaim = '*', userContext = '*', clientId = '*') {
+const selectTenantPersonaClientRolePermissions = async (subClaim = '*', userContext = '*', clientId = '*') => {
   try {
     let sql = getTenantPersonaClientRolePermissionsView() + ' WHERE 1=1'
     const params = []
-    let paramCount = 0
     if (subClaim !== '*') {
       params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
+      sql += ' AND p.sub_claim = ?'
     }
     if (userContext !== '*') {
       params.push(userContext)
-      paramCount++
-      sql += ' AND p.user_context = $' + paramCount
+      sql += ' AND p.user_context = ?'
     }
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
     sql += ' ORDER BY tenantname, sub_claim, user_context, client_id, rolename, permissionname'
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
   }
 }
 
-function getTenantPersonaPermissionsView () {
+const getTenantPersonaPermissionsView = () => {
   return `SELECT c.client_id, p.sub_claim, pm.name AS permissionname
             FROM usher.tenants t
             JOIN usher.tenantclients tc ON t.key = tc.tenantkey
@@ -192,52 +175,46 @@ function getTenantPersonaPermissionsView () {
             JOIN usher.permissions pm ON (pp.permissionkey = pm.KEY AND pm.clientkey = c.key)`
 }
 
-async function selectTenantPersonaPermissions (clientId = '*', subClaim = '*') {
+const selectTenantPersonaPermissions = async (clientId = '*', subClaim = '*') => {
   try {
     let sql = getTenantPersonaPermissionsView() + ' WHERE 1=1'
     const params = []
-    let paramCount = 0
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
     if (subClaim !== '*') {
       params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
+      sql += ' AND p.sub_claim = ?'
     }
     sql += ' ORDER BY client_id, sub_claim, permissionname'
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
   }
 }
 
-function getClientRolesView () {
+const getClientRolesView = () => {
   return `SELECT c.client_id, c.name AS clientname, r.name AS rolename, r.description AS roledescription
             FROM usher.clients c
             JOIN usher.roles r ON r.clientkey = c.key`
 }
 
-async function selectClientRoles (clientId = '*', rolename = '*') {
+const selectClientRoles = async (clientId = '*', rolename = '*') => {
   try {
     let sql = getClientRolesView() + ' WHERE 1=1'
     const params = []
-    let paramCount = 0
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
     if (rolename !== '*') {
       params.push(rolename)
-      paramCount++
-      sql += ' AND r.name = $' + paramCount
+      sql += ' AND r.name = ?'
     }
     sql += ' ORDER BY client_id, rolename'
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
@@ -252,9 +229,8 @@ async function selectClientRoles (clientId = '*', rolename = '*') {
  * @param {*} clientId
  * @returns
  */
-async function selectSelfRoles (subClaim, userContext = '*', clientId = '*') {
+const selectSelfRoles = async (subClaim, userContext = '*', clientId = '*') => {
   const params = [subClaim]
-  let paramCount = 1
   let sql = `SELECT DISTINCT r.key, r.clientkey, r.name, r.description
   FROM usher.tenants t
   JOIN usher.tenantclients tc ON t.key = tc.tenantkey
@@ -262,28 +238,26 @@ async function selectSelfRoles (subClaim, userContext = '*', clientId = '*') {
   JOIN usher.roles r ON r.clientkey = c.key
   JOIN usher.personaroles ur ON ur.rolekey = r.key
   JOIN usher.personas p ON ur.personakey = p.key AND p.tenantkey = t.key
-  WHERE p.sub_claim = $1 `
+  WHERE p.sub_claim = ? `
 
   try {
     if (userContext !== '*') {
       params.push(userContext)
-      paramCount++
-      sql += ' AND p.user_context = $' + paramCount
+      sql += ' AND p.user_context = ?'
     }
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
 
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
   }
 }
 
-async function selectSelfPermissions (subClaim = '*', userContext = '*', clientId = '*') {
+const selectSelfPermissions = async (subClaim = '*', userContext = '*', clientId = '*') => {
   let sql = `SELECT DISTINCT pm.name AS permission
   FROM usher.tenants t
   JOIN usher.tenantclients tc ON t.key = tc.tenantkey
@@ -296,32 +270,28 @@ async function selectSelfPermissions (subClaim = '*', userContext = '*', clientI
   JOIN usher.permissions pm ON ((rp.permissionkey = pm.KEY OR pp.permissionkey = pm.KEY) AND pm.clientkey = c.key)
   WHERE 1=1`
   const params = []
-  let paramCount = 0
   try {
     if (subClaim !== '*') {
       params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
+      sql += ' AND p.sub_claim = ?'
     }
     if (userContext !== '*') {
       params.push(userContext)
-      paramCount++
-      sql += ' AND p.user_context = $' + paramCount
+      sql += ' AND p.user_context = ?'
     }
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
 
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
   }
 }
 
-async function selectSelfScope (subClaim = '*', userContext = '*', clientId = '*') {
+const selectSelfScope = async (subClaim = '*', userContext = '*', clientId = '*') => {
   let sql = `SELECT DISTINCT r.name as role, pm.name AS permission
   FROM usher.tenants t
   JOIN usher.tenantclients tc ON t.key = tc.tenantkey
@@ -334,25 +304,21 @@ async function selectSelfScope (subClaim = '*', userContext = '*', clientId = '*
   JOIN usher.permissions pm ON ((rp.permissionkey = pm.KEY OR pp.permissionkey = pm.KEY) AND pm.clientkey = c.key)
   WHERE 1=1`
   const params = []
-  let paramCount = 0
   try {
     if (subClaim !== '*') {
       params.push(subClaim)
-      paramCount++
-      sql += ' AND p.sub_claim = $' + paramCount
+      sql += ' AND p.sub_claim = ?'
     }
     if (userContext !== '*') {
       params.push(userContext)
-      paramCount++
-      sql += ' AND p.user_context = $' + paramCount
+      sql += ' AND p.user_context = ?'
     }
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
 
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message
@@ -363,7 +329,7 @@ async function selectSelfScope (subClaim = '*', userContext = '*', clientId = '*
  * @deprecated
  * @returns
  */
-function getClientRolePermissionsView () {
+const getClientRolePermissionsView = () => {
   return `SELECT DISTINCT c.client_id, c.name AS clientname, r.name AS rolename, r.description AS roledescription,
                 pm.name AS permissionname, pm.description AS permissiondescription
             FROM usher.clients c
@@ -381,23 +347,20 @@ function getClientRolePermissionsView () {
  * @param {*} rolename
  * @returns
  */
-async function selectClientRolePermissions (clientId = '*', rolename = '*') {
+const selectClientRolePermissions = async (clientId = '*', rolename = '*') => {
   try {
     let sql = getClientRolePermissionsView() + ' WHERE 1=1'
     const params = []
-    let paramCount = 0
     if (clientId !== '*') {
       params.push(clientId)
-      paramCount++
-      sql += ' AND c.client_id = $' + paramCount
+      sql += ' AND c.client_id = ?'
     }
     if (rolename !== '*') {
       params.push(rolename)
-      paramCount++
-      sql += ' AND r.name = $' + paramCount
+      sql += ' AND r.name = ?'
     }
     sql += ' ORDER BY client_id, rolename, permissionname'
-    const results = await pool.query(sql, params)
+    const results = await usherDb.raw(sql, params)
     return results.rows
   } catch (error) {
     throw error.message

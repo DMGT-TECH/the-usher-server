@@ -16,15 +16,12 @@ try {
   usherDb = knex(knexDbConfig)
   if (usherDb?.client?.pool) {
     const pool = usherDb.client.pool
-    // Set idle timeout to 0 to release connections immediately. This can't be configured through Knex.
+    /* 
+      Set idleTimeoutMillis to 0 to ensure connections are released during the next pool.check() interval.
+      The check interval can be configured using reapIntervalMillis.
+      Default idleTimeoutMillis is 30000 ms.
+    */
     pool.idleTimeoutMillis = 0
-
-    // Check the pool for idle connections on 'release' event
-    pool.on('release', () => {
-      process.nextTick(() => {
-        pool.check() // Ensures the pool checks for idle connections immediately
-      })
-    })
   }
 } catch (err) {
   console.error('Failed to create knex instance: ', JSON.stringify(err))

@@ -1,12 +1,19 @@
 const createError = require('http-errors')
 const dbAdminPersonaRoles = require('database/layer/admin-personarole')
+const dbAdminPermissions = require('database/layer/admin-permission')
 const { checkPersonaExists, checkPersonaRolesValidity, checkRoleExists } = require('./utils')
 
 const getPersonaRoles = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
+    const { includePermissions } = req.query
     await checkPersonaExists(personaKey)
     const roles = await dbAdminPersonaRoles.getPersonaRoles(personaKey)
+    if (includePermissions === 'true') {
+      for (const role of roles) {
+        role.permissions = await dbAdminPermissions.getPermissionsByRoleKey(role.key)
+      }
+    }
     res.status(200).send(roles)
   } catch ({ httpStatusCode = 500, message }) {
     return next(createError(httpStatusCode, { message }))

@@ -16,7 +16,7 @@ const { verifyTokenForAdmin, verifyTokenForSelf, verifyTokenForClientAdmin } = r
 const winstonLogger = require('./src/logging/winston-logger')
 
 // Normalizes a port into a number, string, or false
-function normalizePort (val) {
+function normalizePort(val) {
   var port = parseInt(val, 10)
   if (isNaN(port)) {
     return val // named pipe
@@ -27,10 +27,15 @@ function normalizePort (val) {
   return false
 }
 
-async function seedKeysIfDbIsEmpty () {
-  if ((await keystore.selectAllKeys()).length === 0) {
-    console.log('Note: There were no keys in the database generating and inserting a new key.')
-    keygen.generateAndInsertNewKeys()
+async function seedKeysIfDbIsEmpty() {
+  try {
+    console.log('checking database for keys..')
+    if ((await keystore.selectAllKeys()).length === 0) {
+      console.log('Note: There were no keys in the database generating and inserting a new key.')
+      keygen.generateAndInsertNewKeys()
+    }
+  } catch (err) {
+    console.log(`Failed to seedKeysIfDbIsEmpty: ${JSON.stringify(err)}`)
   }
 }
 
@@ -54,7 +59,7 @@ const optionsObject = {
   customErrorHandling: true
 }
 
-function preInitCheck () {
+function preInitCheck() {
   let missingKeyEnvVars = false
   if (!env.ISSUER_WHITELIST) {
     missingKeyEnvVars = true
@@ -115,7 +120,10 @@ expressApp.use(function (req, res, next) {
   res.status(405).send(notFoundResponse)
 })
 
-seedKeysIfDbIsEmpty()
+console.log(`SKIP_KEYS_CHECK value: ${process.env.SKIP_KEYS_CHECK}`)
+if (!process.env.SKIP_KEYS_CHECK) {
+  seedKeysIfDbIsEmpty()
+}
 
 module.exports = { 'the-usher': expressApp } // For deploying to GCP
 // For deploying to AWS Lambda
