@@ -9,7 +9,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: 2.3.0-rc.1
+  version: 2.3.0
 externalDocs:
   description: GitHub Repository
   url: https://github.com/DMGT-TECH/the-usher-server
@@ -327,20 +327,14 @@ paths:
         - bearerAdminAuth: []
       parameters:
         - $ref: '#/components/parameters/clientIdQueryParam'
-        - name: includePermissions
-          in: query
-          description: Includes permissions for each role
-          required: false
-          schema:
-            type: boolean
-            example: true
+        - $ref: '#/components/parameters/includePermissionsQueryParam'
       responses:
         200:
           description: The List of Roles
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollectionOfRoles'
+                $ref: '#/components/schemas/CollectionOfRolesWithPermissions'
         400:
           $ref: '#/components/responses/BadRequest'
     post:
@@ -389,20 +383,14 @@ paths:
       security:
         - bearerAdminAuth: []
       parameters:
-        - name: includePermissions
-          in: query
-          description: Includes permissions for each role
-          required: false
-          schema:
-            type: boolean
-            example: true
+        - $ref: '#/components/parameters/includePermissionsQueryParam'
       responses:
         200:
           description: Return a Role for the given key
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Role'
+                $ref: '#/components/schemas/RoleWithPermissions'
         404:
           $ref: '#/components/responses/NotFound'
     patch:
@@ -460,9 +448,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PermissionObject"
+                $ref: "#/components/schemas/ArrayOfPermissionObject"
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -667,9 +653,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PermissionObject"
+                $ref: "#/components/schemas/ArrayOfPermissionObject"
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
@@ -750,13 +734,7 @@ paths:
       summary: Get a list of roles assigned to the given Persona
       parameters:
         - $ref: '#/components/parameters/personaKeyPathParam'
-        - name: includePermissions
-          in: query
-          description: Includes permissions for each role
-          required: false
-          schema:
-            type: boolean
-            example: true
+        - $ref: '#/components/parameters/includePermissionsQueryParam'
       tags:
         - Admin APIs
       security:
@@ -769,7 +747,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Role"
+                  $ref: "#/components/schemas/RoleWithPermissions"
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
@@ -985,6 +963,7 @@ paths:
   /clients/{client_id}/roles:
     parameters:
       - $ref: '#/components/parameters/clientIdPathParam'
+      - $ref: '#/components/parameters/includePermissionsQueryParam'
     get:
       'x-swagger-router-controller': 'clients/roles'
       operationId: listClientRoles
@@ -1000,7 +979,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollectionOfRoles'
+                $ref: '#/components/schemas/CollectionOfRolesWithPermissions'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -1120,7 +1099,6 @@ components:
           value: the-usher
         Example 3 (all client applications where persona has a role):
           value: "*"
-    # client_id as query param
     clientIdQueryParam:
       name: client_id
       description: Unique identifier for the client.
@@ -1128,6 +1106,14 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/EntityNameDef'
+    includePermissionsQueryParam:
+      name: include_permissions
+      in: query
+      description: Includes permissions for each role
+      required: false
+      schema:
+        type: boolean
+        example: true
     roleKeyPathParam:
       name: role_key
       description: The unique role identifier
@@ -1223,7 +1209,7 @@ components:
           $ref: '#/components/schemas/EntityNameDef'
         description:
           type: string
-          nullable: true # Can't use shared schema with nullable in 3.0.x
+          nullable: true
           maxLength: 100
       required:
         - key
@@ -1233,6 +1219,14 @@ components:
         key: 10
         name: usher:admin
         clientkey: fake-client
+      
+    RoleWithPermissions:
+      allOf:
+      - $ref: '#/components/schemas/Role'
+      - type: object
+        properties:
+          permissions: 
+            $ref: '#/components/schemas/PermissionObject'
 
     CollectionOfRoles:
       type: object
@@ -1241,6 +1235,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Role'
+
+    CollectionOfRolesWithPermissions:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleWithPermissions'
 
     Permission:
       type: object
@@ -1283,6 +1285,11 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Permission'
+
+    ArrayOfPermissionObject:
+      type: array
+      items:
+        $ref: '#/components/schemas/PermissionObject'
 
     DictionaryOfPermissions:
       type: object

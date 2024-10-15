@@ -6,10 +6,10 @@ const { checkPersonaExists, checkPersonaRolesValidity, checkRoleExists } = requi
 const getPersonaRoles = async (req, res, next) => {
   try {
     const { persona_key: personaKey } = req.params
-    const { includePermissions } = req.query
+    const { include_permissions } = req.query
     await checkPersonaExists(personaKey)
     const roles = await dbAdminPersonaRoles.getPersonaRoles(personaKey)
-    if (includePermissions === 'true') {
+    if (include_permissions === 'true') {
       for (const role of roles) {
         role.permissions = await dbAdminPermissions.getPermissionsByRoleKey(role.key)
       }

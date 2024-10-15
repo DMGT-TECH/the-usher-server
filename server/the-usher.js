@@ -16,8 +16,8 @@ const { verifyTokenForAdmin, verifyTokenForSelf, verifyTokenForClientAdmin } = r
 const winstonLogger = require('./src/logging/winston-logger')
 
 // Normalizes a port into a number, string, or false
-function normalizePort(val) {
-  var port = parseInt(val, 10)
+const normalizePort = (val) => {
+  const port = parseInt(val, 10)
   if (isNaN(port)) {
     return val // named pipe
   }
@@ -27,7 +27,7 @@ function normalizePort(val) {
   return false
 }
 
-async function seedKeysIfDbIsEmpty() {
+const seedKeysIfDbIsEmpty = async () => {
   try {
     console.log('checking database for keys..')
     if ((await keystore.selectAllKeys()).length === 0) {
@@ -59,7 +59,7 @@ const optionsObject = {
   customErrorHandling: true
 }
 
-function preInitCheck() {
+const preInitCheck = () => {
   let missingKeyEnvVars = false
   if (!env.ISSUER_WHITELIST) {
     missingKeyEnvVars = true
@@ -76,7 +76,7 @@ expressApp.use(usherCors())
 expressApp.use(winstonLogger)
 oasTools.configure(optionsObject)
 
-oasTools.initialize(oasDoc, expressApp, function () {
+oasTools.initialize(oasDoc, expressApp, () => {
   const exitBeforeInitialization = preInitCheck()
   if (exitBeforeInitialization) {
     console.log('TheUsher is not initializing because critical env vars are not configured.')
@@ -84,7 +84,7 @@ oasTools.initialize(oasDoc, expressApp, function () {
     process.exit(1)
   }
   const port = normalizePort(process.env.PORT || '3001')
-  http.createServer(expressApp).listen(port, function () {
+  http.createServer(expressApp).listen(port, () => {
     console.log('App up and running!')
   })
 })
@@ -98,7 +98,7 @@ expressApp.use((err, req, res, next) => {
   next(err)
 })
 
-expressApp.use(function (err, req, res, next) {
+expressApp.use((err, req, res, next) => {
   // handle case if headers have already been sent to client
   if (res.headersSent) {
     return next(err)
@@ -112,7 +112,7 @@ expressApp.use(function (err, req, res, next) {
 })
 
 // Default route to handle not found endpoints but return 405 for security
-expressApp.use(function (req, res, next) {
+expressApp.use((req, res, next) => {
   const notFoundResponse = {
     code: 405,
     message: 'Method Not Allowed'

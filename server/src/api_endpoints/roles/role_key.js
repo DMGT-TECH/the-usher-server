@@ -12,13 +12,13 @@ const dbAdminPermissions = require('database/layer/admin-permission')
  */
 const getRole = async (req, res, next) => {
   const roleKey = req.params.role_key
-  const { includePermissions } = req.query
+  const { include_permissions } = req.query
   try {
     const role = await dbAdminRole.getRole(roleKey)
     if (!role) {
       return next(createError(404, 'Role key not found or no access'))
     }
-    if (includePermissions === 'true') {
+    if (include_permissions === 'true') {
       role.permissions = await dbAdminPermissions.getPermissionsByRoleKey(role.key)
     }
     res.status(200).send(role)

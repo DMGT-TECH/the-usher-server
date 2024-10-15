@@ -4,9 +4,9 @@ const dbAdminPermissions = require('database/layer/admin-permission')
 
 const getRoles = async (req, res, next) => {
   try {
-    const { clientId, includePermissions } = req.query
+    const { clientId, include_permissions } = req.query
     const roles = await dbAdminRole.listRoles(clientId)
-    if (includePermissions === 'true') {
+    if (include_permissions === 'true') {
       for (const role of roles) {
         role.permissions = await dbAdminPermissions.getPermissionsByRoleKey(role.key)
       }
