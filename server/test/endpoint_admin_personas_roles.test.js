@@ -38,22 +38,38 @@ describe('Admin Personas Roles', () => {
   })
 
   describe('GET:/personas/{persona_key}/roles', () => {
-    const getPersonasRoles = async (personaKey = testPersonaKey, header = requestHeaders) => {
-      return await fetch(`${url}/personas/${personaKey}/roles`, {
+    let validPersonaKey
+    const getPersonasRoles = async (personaKey = testPersonaKey, header = requestHeaders, queryParam = '') => {
+      return await fetch(`${url}/personas/${personaKey}/roles${queryParam}`, {
         method: 'GET',
         headers: header,
       })
     }
 
-    it('should return 200 and a list of roles for the persona', async function () {
+    before(async () => {
       const { personakey } = await usherDb('personaroles').select('*').first() || {}
-      if (!personakey) {
+      validPersonaKey = personakey
+    })
+
+    it('should return 200 and a list of roles for the persona', async function () {
+      if (!validPersonaKey) {
         this.skip()
       }
-      const response = await getPersonasRoles(personakey)
+      const response = await getPersonasRoles(validPersonaKey)
       assert.equal(response.status, 200)
       const personaRoles = await response.json()
       assert.equal(!!personaRoles?.length, true)
+    })
+
+    it('should return 200 and a list of roles for the persona which includes permissions', async function () {
+      if (!validPersonaKey) {
+        this.skip()
+      }
+      const response = await getPersonasRoles(validPersonaKey, requestHeaders, '?include_permissions=true')
+      assert.equal(response.status, 200)
+      const personaRoles = await response.json()
+      assert.ok(Array.isArray(personaRoles))
+      assert.ok(personaRoles.every(role => Array.isArray(role.permissions)))
     })
 
     it('should return 200 and an empty array', async () => {

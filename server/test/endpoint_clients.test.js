@@ -215,4 +215,53 @@ describe('Admin Clients Endpoint Test', () => {
       assert.equal(response.status, 401)
     })
   })
+
+  describe('Get Client roles', () => {
+    let validClientId
+    const getClientRoles = async (clientId, queryParam = '', header = requestHeaders) => {
+      return await fetch(`${url}/clients/${clientId}/roles${queryParam}`, {
+        method: 'GET',
+        headers: header,
+      })
+    }
+
+    before(async () => {
+      const client = await usherDb('clients').select('*').first()
+      validClientId = client.client_id
+    })
+
+    it('should return 200 and list of all roles', async () => {
+      const response = await getClientRoles(validClientId)
+      assert.equal(response.status, 200)
+      const { data: roles } = await response.json()
+      assert.ok(roles?.length)
+    })
+
+    it('should return 200 and list of all roles which includes permissions', async () => {
+      const response = await getClientRoles(validClientId, '?include_permissions=true')
+      assert.equal(response.status, 200)
+      const { data: roles } = await response.json()
+      assert.ok(roles?.length)
+      assert.ok(roles.every(role => Array.isArray(role.permissions)))
+    })
+
+    it('should return 400 for invalid client id', async () => {
+      const response = await getClientRoles(validClientId, '?include_permissions=invalid')
+      assert.equal(response.status, 400)
+    })
+
+    it('should return 401 due to lack of proper token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await getClientRoles(validClientId, '', {
+        ...requestHeaders,
+        Authorization: `Bearer ${userAccessToken}`
+      })
+      assert.equal(response.status, 401)
+    })
+
+    it('should return 404 for invalid include_permissions value', async () => {
+      const response = await getClientRoles('invalid_client_id')
+      assert.equal(response.status, 404)
+    })
+  })
 })

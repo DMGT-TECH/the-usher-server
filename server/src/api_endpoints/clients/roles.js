@@ -1,6 +1,7 @@
 const createError = require('http-errors')
 const dbAdminRoles = require('database/layer/admin-role')
 const dbAdminPermissions = require('database/layer/admin-permission')
+const { checkClientExists } = require('./utils')
 
 /**
  * Client Admin function to get a list of Roles for given Client
@@ -13,6 +14,7 @@ const listClientRoles = async (req, res, next) => {
   try {
     const { client_id: clientId } = req.params
     const { include_permissions } = req.query
+    await checkClientExists(clientId)
     const roles = await dbAdminRoles.listRoles(clientId)
     if (include_permissions === 'true') {
       for (const role of roles) {
@@ -38,6 +40,7 @@ const createClientRole = async (req, res, next) => {
   const description = req.body.description
 
   try {
+    await checkClientExists(clientId)
     const role = await dbAdminRoles.insertRoleByClientId(clientId, name, description)
     res.status(201).send(role)
   } catch (err) {
