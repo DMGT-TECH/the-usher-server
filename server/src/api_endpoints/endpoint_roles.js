@@ -1,17 +1,23 @@
 const createError = require('http-errors')
 const dbAdminRole = require('database/layer/admin-role')
+const dbAdminPermissions = require('database/layer/admin-permission')
 
-module.exports = { getRoles, createRole }
-
-async function getRoles (req, res, next) {
-  const clientId = req.query.client_id
-
-  // TODO refactor as part of issue #235.
-  const roles = await dbAdminRole.listRoles(clientId)
-  res.status(200).send({ data: roles })
+const getRoles = async (req, res, next) => {
+  try {
+    const { client_id: clientId, include_permissions: includePermissions } = req.query
+    const roles = await dbAdminRole.listRoles(clientId)
+    if (includePermissions === 'true') {
+      for (const role of roles) {
+        role.permissions = await dbAdminPermissions.getPermissionsByRoleKey(role.key)
+      }
+    }
+    res.status(200).send({ data: roles })
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
 }
 
-async function createRole (req, res, next) {
+const createRole = async (req, res, next) => {
   // perm access checked by middleware
   let role
   try {
@@ -26,3 +32,5 @@ async function createRole (req, res, next) {
   }
   res.status(201).send(role)
 }
+
+module.exports = { getRoles, createRole }

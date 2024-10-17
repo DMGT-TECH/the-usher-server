@@ -9,7 +9,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: 2.2.0
+  version: 2.3.0
 externalDocs:
   description: GitHub Repository
   url: https://github.com/DMGT-TECH/the-usher-server
@@ -327,13 +327,14 @@ paths:
         - bearerAdminAuth: []
       parameters:
         - $ref: '#/components/parameters/clientIdQueryParam'
+        - $ref: '#/components/parameters/includePermissionsQueryParam'
       responses:
         200:
           description: The List of Roles
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollectionOfRoles'
+                $ref: '#/components/schemas/CollectionOfRolesWithPermissions'
         400:
           $ref: '#/components/responses/BadRequest'
     post:
@@ -381,13 +382,15 @@ paths:
         - Admin APIs
       security:
         - bearerAdminAuth: []
+      parameters:
+        - $ref: '#/components/parameters/includePermissionsQueryParam'
       responses:
         200:
           description: Return a Role for the given key
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Role'
+                $ref: '#/components/schemas/RoleWithPermissions'
         404:
           $ref: '#/components/responses/NotFound'
     patch:
@@ -445,9 +448,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PermissionObject"
+                $ref: "#/components/schemas/ArrayOfPermissionObject"
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -456,6 +457,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas:
     get:
@@ -536,6 +539,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     post:
       'x-swagger-router-controller': 'personas/persona'
       summary: Create a single persona
@@ -575,6 +580,8 @@ paths:
           $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}:
     get:
@@ -603,6 +610,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     delete:
       'x-swagger-router-controller': 'personas/persona'
       operationId: deletePersona
@@ -624,6 +633,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/permissions:
     get:
@@ -642,15 +653,15 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PermissionObject"
+                $ref: "#/components/schemas/ArrayOfPermissionObject"
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     put:
       'x-swagger-router-controller': 'personas/permissions'
       operationId: createPersonaPermissions
@@ -687,6 +698,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/permissions/{permission_key}:
     delete:
@@ -711,6 +724,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/roles:
     get:
@@ -718,7 +733,8 @@ paths:
       operationId: getPersonaRoles
       summary: Get a list of roles assigned to the given Persona
       parameters:
-      - $ref: '#/components/parameters/personaKeyPathParam'
+        - $ref: '#/components/parameters/personaKeyPathParam'
+        - $ref: '#/components/parameters/includePermissionsQueryParam'
       tags:
         - Admin APIs
       security:
@@ -731,13 +747,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Role"
+                  $ref: "#/components/schemas/RoleWithPermissions"
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     put:
       'x-swagger-router-controller': 'personas/roles'
       operationId: createPersonaRoles
@@ -774,6 +792,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /personas/{persona_key}/roles/{role_key}:
     delete:
@@ -798,6 +818,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /clients:
     get:
@@ -821,6 +843,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
     post:
       'x-swagger-router-controller': 'clients/index'
@@ -933,10 +957,13 @@ paths:
           $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
 
   /clients/{client_id}/roles:
     parameters:
       - $ref: '#/components/parameters/clientIdPathParam'
+      - $ref: '#/components/parameters/includePermissionsQueryParam'
     get:
       'x-swagger-router-controller': 'clients/roles'
       operationId: listClientRoles
@@ -952,9 +979,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollectionOfRoles'
+                $ref: '#/components/schemas/CollectionOfRolesWithPermissions'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     post:
       'x-swagger-router-controller': 'clients/roles'
       operationId: createClientRole
@@ -1064,7 +1099,6 @@ components:
           value: the-usher
         Example 3 (all client applications where persona has a role):
           value: "*"
-    # client_id as query param
     clientIdQueryParam:
       name: client_id
       description: Unique identifier for the client.
@@ -1072,6 +1106,14 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/EntityNameDef'
+    includePermissionsQueryParam:
+      name: include_permissions
+      in: query
+      description: Includes permissions for each role
+      required: false
+      schema:
+        type: boolean
+        example: true
     roleKeyPathParam:
       name: role_key
       description: The unique role identifier
@@ -1167,7 +1209,7 @@ components:
           $ref: '#/components/schemas/EntityNameDef'
         description:
           type: string
-          nullable: true # Can't use shared schema with nullable in 3.0.x
+          nullable: true
           maxLength: 100
       required:
         - key
@@ -1177,6 +1219,14 @@ components:
         key: 10
         name: usher:admin
         clientkey: fake-client
+      
+    RoleWithPermissions:
+      allOf:
+      - $ref: '#/components/schemas/Role'
+      - type: object
+        properties:
+          permissions: 
+            $ref: '#/components/schemas/ArrayOfPermissionObject'
 
     CollectionOfRoles:
       type: object
@@ -1185,6 +1235,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Role'
+
+    CollectionOfRolesWithPermissions:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleWithPermissions'
 
     Permission:
       type: object
@@ -1211,6 +1269,12 @@ components:
           $ref: '#/components/schemas/EntityNameDef'
         description:
           $ref: '#/components/schemas/EntityDescriptionDef'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
       required:
         - key
         - name
@@ -1227,6 +1291,11 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Permission'
+
+    ArrayOfPermissionObject:
+      type: array
+      items:
+        $ref: '#/components/schemas/PermissionObject'
 
     DictionaryOfPermissions:
       type: object
@@ -1583,6 +1652,16 @@ components:
           example:
             code: 500
             message: Internal Error!
+
+    ServiceUnavailableError:
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 503
+            message: Service Unavailable!
 
     Default:
       description: Unexpected error

@@ -33,6 +33,11 @@ const pgErrorHandler = (pgDbError) => {
       error.httpStatusCode = 400
       break
 
+    case PgErrorCodes.UndefinedColumn:
+      error.message = 'Internal DB Error: Bad query - Specified column is invalid!'
+      error.httpStatusCode = 500
+      break
+
     case PgErrorCodes.SerializationFailure:
       error.message = 'Internal DB Error: A transaction serialization error occurred!'
       error.httpStatusCode = 500
