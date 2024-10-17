@@ -1,10 +1,10 @@
-const jwtDecoder = require('jsonwebtoken')
 const jwksRsa = require('jwks-rsa')
+const jwtDecoder = require('jsonwebtoken')
+const createError = require('http-errors')
 const viewSelectEntities = require('database/layer/view-select-entities')
 const viewSelectRelationships = require('database/layer/view-select-relationships')
-const jwksClients = {}
-const createError = require('http-errors')
 const env = require('../../server-env')
+const jwksClients = {}
 
 const verifyAndDecodeToken = async (token) => {
   if (!token) {

@@ -245,7 +245,7 @@ describe('Admin Clients Endpoint Test', () => {
       assert.ok(roles.every(role => Array.isArray(role.permissions)))
     })
 
-    it('should return 400 for invalid client id', async () => {
+    it('should return 400 for invalid value for the include_permissions query parameter', async () => {
       const response = await getClientRoles(validClientId, '?include_permissions=invalid')
       assert.equal(response.status, 400)
     })
@@ -259,7 +259,7 @@ describe('Admin Clients Endpoint Test', () => {
       assert.equal(response.status, 401)
     })
 
-    it('should return 404 for invalid include_permissions value', async () => {
+    it('should return 404 for non-existent client id', async () => {
       const response = await getClientRoles('invalid_client_id')
       assert.equal(response.status, 404)
     })

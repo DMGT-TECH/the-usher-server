@@ -13,10 +13,10 @@ const { checkClientExists } = require('./utils')
 const listClientRoles = async (req, res, next) => {
   try {
     const { client_id: clientId } = req.params
-    const { include_permissions } = req.query
+    const { include_permissions: includePermissions } = req.query
     await checkClientExists(clientId)
     const roles = await dbAdminRoles.listRoles(clientId)
-    if (include_permissions === 'true') {
+    if (includePermissions === 'true') {
       for (const role of roles) {
         role.permissions = await dbAdminPermissions.getPermissionsByRoleKey(role.key)
       }

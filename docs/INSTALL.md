@@ -70,6 +70,8 @@ The following variables are required to be configured.
 | THEUSHER_AUD_CLAIMS                     | (Optional) Comma separated list of authorized audience (aud) claims |
 | PRESET_SERVER_URL                       | (Optional) URI to use as `iss` claim for issued tokens   |
 | ISSUER_ALIASES                          | (Optional && Experimental) [Hostname aliases](USAGE.md#migrating-idenitity-provider-domain-names-issuer-aliases-experimental) for IdP tokens issuer |
+| SKIP_KEYS_CHECK                         | (Optional) Skips `seedKeysIfDbIsEmpty` on application bootstrap if the environment variable value is set to `true`.   |
+
 
 ## Generic Installation Steps
 
