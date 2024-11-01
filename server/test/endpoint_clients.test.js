@@ -264,4 +264,73 @@ describe('Admin Clients Endpoint Test', () => {
       assert.equal(response.status, 404)
     })
   })
+
+  describe('Create Client permissions', () => {
+    let validClientId
+    let validClientKey
+
+    /**
+     * POST /clients/{:client_id}/permissions
+     * HTTP request to create a permission for the give client
+     *
+     * @param {string} clientId - The subject client id which needs to be updated
+     * @param {string} payload - The request body payload to create a permission
+     * @param {Object} header - The request headers
+     * @returns {Promise<fetch.response>} - A Promise which resolves to fetch.response
+     */
+    const createClientPermissions = async (clientId, payload, header = requestHeaders) => {
+      return await fetch(`${url}/clients/${clientId}/permissions`, {
+        method: 'POST',
+        headers: header,
+        body: JSON.stringify(payload)
+      })
+    }
+
+    before(async () => {
+      const client = await usherDb('clients').select('*').first()
+      validClientId = client.client_id
+      validClientKey = client.key
+    })
+
+    it('should return 201 and create a permission', async () => {
+      const permissionToCreate = {
+        name: 'data:access:test',
+        description: 'This is a test permission!'
+      }
+      const response = await createClientPermissions(validClientId, permissionToCreate)
+      assert.equal(response.status, 201)
+      const permission = await response.json()
+      assert.equal(permission.name, permissionToCreate.name)
+      assert.equal(permission.description, permissionToCreate.description)
+      await usherDb('permissions').where({ key: permission.key }).del()
+    })
+
+    it('should return 400 for bad payload', async () => {
+      const permissionToCreate = {
+        description: 'This is a test permission!'
+      }
+      const response = await createClientPermissions(validClientId, permissionToCreate)
+      assert.equal(response.status, 400)
+    })
+
+    it('should return 401 due to lack of proper token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await createClientPermissions(validClientId, {}, {
+        ...requestHeaders,
+        Authorization: `Bearer ${userAccessToken}`
+      })
+      assert.equal(response.status, 401)
+    })
+
+    it('should return 404 for non-existent client id', async () => {
+      const response = await createClientPermissions('invalid_client_id', { name: 'test permission' })
+      assert.equal(response.status, 404)
+    })
+
+    it('should return 409 if permission name is already taken', async () => {
+      const { name: takenPermissionName } = await usherDb('permissions').where({ clientkey: validClientKey }).select('name').first()
+      const response = await createClientPermissions(validClientId, { name: takenPermissionName })
+      assert.equal(response.status, 409)
+    })
+  })
 })
