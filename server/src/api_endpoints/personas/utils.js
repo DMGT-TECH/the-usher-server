@@ -7,20 +7,18 @@ const dbAdminPersonaPermissions = require('database/layer/admin-personapermissio
 const checkPersonaExists = async (personaKey) => {
   const persona = await dbAdminPersona.getPersona(personaKey)
   if (!persona) {
-    throw {
-      httpStatusCode: 404,
-      message: 'Persona does not exist!'
-    }
+    const error = new Error('Persona does not exist!')
+    error.httpStatusCode = 404
+    throw error
   }
 }
 
 const checkPermissionExists = async (permissionKey) => {
   const permission = await dbAdminPermission.getPermission(permissionKey)
   if (!permission) {
-    throw {
-      httpStatusCode: 404,
-      message: 'Permission does not exist!'
-    }
+    const error = new Error('Permission does not exist!')
+    error.httpStatusCode = 404
+    throw error
   }
 }
 
@@ -35,10 +33,9 @@ const checkPermissionExists = async (permissionKey) => {
 const checkPersonaRolesValidity = async (personaKey, roleKeys) => {
   const validRoles = await dbAdminPersonaRoles.selectPersonaRolesInTheSameTenant(personaKey, roleKeys)
   if (validRoles.length !== roleKeys.length) {
-    throw {
-      httpStatusCode: 400,
-      message: 'Make sure to provide valid role keys which are associated with clients in the same tenant!',
-    }
+    const error = new Error('Make sure to provide valid role keys which are associated with clients in the same tenant!')
+    error.httpStatusCode = 400
+    throw error
   }
 }
 
@@ -53,20 +50,18 @@ const checkPersonaRolesValidity = async (personaKey, roleKeys) => {
 const checkPersonaPermissionsValidity = async (personaKey, permissionKeys) => {
   const validPermissions = await dbAdminPersonaPermissions.selectPersonaPermissionsInTheSameTenant(personaKey, permissionKeys)
   if (validPermissions.length !== permissionKeys.length) {
-    throw {
-      httpStatusCode: 400,
-      message: 'Make sure to provide valid permission keys which are associated with clients in the same tenant!',
-    }
+    const error = new Error('Make sure to provide valid permission keys which are associated with clients in the same tenant!')
+    error.httpStatusCode = 400
+    throw error
   }
 }
 
 const checkRoleExists = async (roleKey) => {
   const role = await dbAdminRole.getRole(roleKey)
   if (!role) {
-    throw {
-      httpStatusCode: 404,
-      message: 'Role does not exist!'
-    }
+    const error = new Error('Role does not exist!')
+    error.httpStatusCode = 404
+    throw error
   }
 }
 

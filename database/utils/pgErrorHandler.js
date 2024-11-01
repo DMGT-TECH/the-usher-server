@@ -6,79 +6,81 @@ const { PgErrorCodes } = require('../constant/PgErrorCodes')
    * @returns {message: text, httpStatusCode: number}
 */
 const pgErrorHandler = (pgDbError) => {
-  const error = {}
+  let errorMessage;
+  let httpStatusCode;
   switch (pgDbError.code) {
     case PgErrorCodes.UniqueViolation:
-      error.message = 'The operation would result in duplicate resources!'
-      error.httpStatusCode = 409
+      errorMessage = 'The operation would result in duplicate resources!'
+      httpStatusCode = 409
       break
 
     case PgErrorCodes.CheckViolation:
-      error.message = 'The operation would violate a check constraint!'
-      error.httpStatusCode = 400
+      errorMessage = 'The operation would violate a check constraint!'
+      httpStatusCode = 400
       break
 
     case PgErrorCodes.NotNullViolation:
-      error.message = 'A required value is missing!'
-      error.httpStatusCode = 400
+      errorMessage = 'A required value is missing!'
+      httpStatusCode = 400
       break
 
     case PgErrorCodes.ForeignKeyViolation:
-      error.message = 'Referenced resource is invalid!'
-      error.httpStatusCode = 400
+      errorMessage = 'Referenced resource is invalid!'
+      httpStatusCode = 400
       break
 
     case PgErrorCodes.InvalidTextRepresentation:
-      error.message = 'The provided data format is invalid!'
-      error.httpStatusCode = 400
+      errorMessage = 'The provided data format is invalid!'
+      httpStatusCode = 400
       break
 
     case PgErrorCodes.UndefinedColumn:
-      error.message = 'Internal DB Error: Bad query - Specified column is invalid!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: Bad query - Specified column is invalid!'
+      httpStatusCode = 500
       break
 
     case PgErrorCodes.SerializationFailure:
-      error.message = 'Internal DB Error: A transaction serialization error occurred!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: A transaction serialization error occurred!'
+      httpStatusCode = 500
       break
 
     case PgErrorCodes.DeadlockDetected:
-      error.message = 'Internal DB Error: The operation was halted due to a potential deadlock!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: The operation was halted due to a potential deadlock!'
+      httpStatusCode = 500
       break
 
     case PgErrorCodes.SyntaxError:
-      error.message = 'Internal DB Error: There is a syntax error in the provided SQL or data!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: There is a syntax error in the provided SQL or data!'
+      httpStatusCode = 500
       break
 
     case PgErrorCodes.UndefinedTable:
-      error.message = 'Internal DB Error: The table or view you are trying to access does not exist!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: The table or view you are trying to access does not exist!'
+      httpStatusCode = 500
       break
 
     case PgErrorCodes.DiskFull:
-      error.message = 'Internal DB Error: The operation failed due to insufficient disk space!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: The operation failed due to insufficient disk space!'
+      httpStatusCode = 500
       break
 
     case PgErrorCodes.OutOfMemory:
-      error.message = 'Internal DB Error: The system ran out of memory!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: The system ran out of memory!'
+      httpStatusCode = 500
       break
 
     case PgErrorCodes.TooManyConnections:
-      error.message = 'Internal DB Error: There are too many connections to the database!'
-      error.httpStatusCode = 500
+      errorMessage = 'Internal DB Error: There are too many connections to the database!'
+      httpStatusCode = 500
       break
 
     default:
-      error.message = `Unexpected DB Error - Code: ${pgDbError?.code}, Message: ${pgDbError?.message}, Error: ${JSON.stringify(pgDbError)}`
-      error.httpStatusCode = 503
+      errorMessage = `Unexpected DB Error - Code: ${pgDbError?.code}, Message: ${pgDbError?.message}, Error: ${JSON.stringify(pgDbError)}`
+      httpStatusCode = 503
       break
   }
-
+  const error = new Error(errorMessage)
+  error.httpStatusCode = httpStatusCode
   return error
 }
 

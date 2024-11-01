@@ -73,9 +73,44 @@ const getPermissionsByRoleKey = async (roleKey) => {
     return await usherDb('permissions')
       .join('rolepermissions', 'permissions.key', '=', 'rolepermissions.permissionkey')
       .where({ 'rolepermissions.rolekey': roleKey })
-      .select('permissions.*');
+      .select('permissions.*')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
+/**
+ * Insert a new permission
+ *
+ * @param {Object} permissionObject - The data for the new permission
+ * @param {string} permissionObject.name - The name of permission
+ * @param {number} permissionObject.clientkey - A valid client key
+ * @param {string} permissionObject.description - A description of the permission
+ * @returns {Promise<Object>} - A promise that resolves to the inserted permission object
+ */
+const insertPermission = async (permissionObject) => {
+  try {
+    const [permission] = await usherDb('permissions').insert(permissionObject).returning('*')
+    return permission
   } catch (err) {
     throw pgErrorHandler(err);
+  }
+}
+
+/**
+ * Get permissions by name and clientKey
+ *
+ * @param {string} name - The name of the permission
+ * @param {number} clientKey - The client key
+ * @returns {Promise<Array<Object>>} - A promise that resolves to an array of permissions
+ */
+const getPermissionsByNameClientKey = async (name, clientKey) => {
+  try {
+    const permissions = await usherDb('permissions')
+      .where({ name, clientkey: clientKey })
+    return permissions
+  } catch (err) {
+    throw pgErrorHandler(err)
   }
 }
 
@@ -85,4 +120,6 @@ module.exports = {
   deletePermissionByPermissionname,
   getPermission,
   getPermissionsByRoleKey,
+  insertPermission,
+  getPermissionsByNameClientKey,
 }

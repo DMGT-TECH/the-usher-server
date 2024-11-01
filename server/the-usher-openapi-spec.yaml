@@ -1022,6 +1022,52 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+  /clients/{client_id}/permissions:
+    parameters:
+    - $ref: '#/components/parameters/clientIdPathParam'
+    post:
+      'x-swagger-router-controller': 'clients/permissions'
+      summary: Create a new permission for the given client
+      operationId: createPermission
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+        - bearerClientAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/EntityNameDef'
+                description:
+                  $ref: '#/components/schemas/EntityDescriptionDef'
+              required:
+                - name
+              additionalProperties: false
+      responses:
+        201:
+          description: Returns the created permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionObject"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
+
   /sessions:
     delete:
       operationId: invalidateSession
@@ -1269,6 +1315,7 @@ components:
           $ref: '#/components/schemas/EntityNameDef'
         description:
           $ref: '#/components/schemas/EntityDescriptionDef'
+          nullable: true
         created_at:
           type: string
           format: date-time
