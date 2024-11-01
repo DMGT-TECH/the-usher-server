@@ -12,7 +12,7 @@ const env = require('../../server-env')
  * @param {number} secondsUntilExpiry The duration (in seconds) the token should be valid for
  * @returns {number} expiry time as epoch milliseconds
  */
-function calculateAccessTokenExpiryDate (secondsUntilExpiry) {
+function calculateAccessTokenExpiryDate(secondsUntilExpiry) {
   const utcNow = moment.utc()
   const expiryTime = utcNow.add(secondsUntilExpiry, 'seconds')
   const exp = moment(expiryTime).unix()
@@ -56,10 +56,9 @@ async function obtainScopedRolesAndPermissions(subClaim, userContext, clientId, 
     let roles = Array.from(new Set(rolesAndPermissionsRows.filter(row => (permissions ?? []).includes(row.permissionname)).map(row => row.rolename)))
     return { roles, permissions, xAcceptedOAuthScopes }
   } catch (err) {
-    throw {
-      message: 'Failed to obtainScopedRolesAndPermissions',
-      stack: err,
-    }
+    const error = new Error('Failed to obtainScopedRolesAndPermissions')
+    error.stack = err
+    throw error
   }
 }
 
@@ -73,7 +72,7 @@ async function obtainScopedRolesAndPermissions(subClaim, userContext, clientId, 
  * @param {string} scope Space separated list of Scopes
  * @param {number} secondsUntilExpiry The duration (in seconds) the token should be valid for
  */
-async function createSignedAccessToken (sub, azp, roles, scope, secondsUntilExpiry) {
+async function createSignedAccessToken(sub, azp, roles, scope, secondsUntilExpiry) {
   const latestKeyPair = await keystore.selectLatestKey()
 
   const signedAccessToken = jwt.sign(
@@ -103,7 +102,7 @@ async function createSignedAccessToken (sub, azp, roles, scope, secondsUntilExpi
  * @returns {number} Number of seconds remaining in session for use in new access token
  *  **NOTE** This number can be negative if the idp token expiration timestamp has elapsed
  */
- function calculateSessionLifetimeExpiry (idpExpirationTimestamp) {
+function calculateSessionLifetimeExpiry(idpExpirationTimestamp) {
   const utcNow = moment.utc()
 
   const idpExpirationDateTime = moment.utc(idpExpirationTimestamp)

@@ -5,10 +5,9 @@ const checkClientExists = async (clientId) => {
   try {
     return await dbAdminRole.getClient(clientId);
   } catch {
-    throw {
-      httpStatusCode: 404,
-      message: 'Client does not exist!',
-    }
+    const error = new Error('Client does not exist!')
+    error.httpStatusCode = 404
+    throw error
   }
 }
 
@@ -30,10 +29,9 @@ const checkClientExists = async (clientId) => {
 const checkPermissionNameUniqueness = async ({ name, clientkey: clientKey }) => {
   const permissions = await dbAdminPermission.getPermissionsByNameClientKey(name, clientKey);
   if (permissions?.length) {
-    throw {
-      httpStatusCode: 409,
-      message: 'The permission name is taken!'
-    };
+    const error = new Error('The permission name is taken!')
+    error.httpStatusCode = 409
+    throw error
   }
 };
 
