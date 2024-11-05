@@ -8,11 +8,9 @@ The next sections present key information you'll need to be familiar with to con
 
 Please familiarize yourself with The Usher's [data model](./DATAMODEL.md).
 
-![Entity Relationship Diagram](../diagrams/the_usher_entity_relationship_diagram.png)
-
 ### OpenAPI Spec (API-first development)
 
-The Usher's APIs are described in the [OpenAPI Spec](./the-usher/the-usher-openapi-spec.yaml).  The spec file describes the mappings from API endpoints to the implementing controllers and methods:
+The Usher's APIs are described in the [OpenAPI Spec](../server/the-usher-openapi-spec.yaml).  The spec file describes the mappings from API endpoints to the implementing controllers and methods. [Click here](https://swagger.io/resources/open-api/) to read more about writing Open API Spec files.
 
 - `x-swagger-router-controller` refers to the controller file located in `./server/src/api_endpoints/`
 - `operationId` refers to the function within the controller file implementing the endpoint
@@ -106,5 +104,5 @@ The following is the process for publishing a new version of The Usher. The proc
 1. Update the package version by incrementing the value of the `version` key in the `package.json` file within both the database and server folders.
 1. Run an `npm install` to ensure each associated `package-lock.json` file is updated with the updated value.
 1. Commit and push the above changes that contain the new version numbers to `main` branch.
-1. Create a [new release](https://github.com/DMGT-TECH/the-usher-server/releases/new), for the Tag Version and Release title use a format of vX.Y.Z, ie. v1.2.0 . In the Description field, describe what was changed in the release with headers for "Features & Updates" and "Library & Security Updates".
+1. Create a [new release](https://github.com/DMGT-TECH/the-usher-server/releases/new), for the Tag Version and Release title use a format of vX.Y.Z, ie. `v1.2.0` . In the Description field, describe what was changed in the release with headers for "Features & Updates" and "Library & Security Updates".
 1. After the new GitHub release has been created, this will trigger a [GitHub Action](https://github.com/DMGT-TECH/the-usher-server/actions?query=workflow%3A%22Publish+npm+package%22) to automatically publish the two new packages to GitHub.
