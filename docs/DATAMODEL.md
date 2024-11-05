@@ -2,9 +2,61 @@
 
 ## Data Model
 
-The following entity relationship diagram provides a high level view of The Usher's data model.
+The following entity relationship diagram provides a high level view of The Usher's data model. **NOTE**: The tables are not full schemas, just a few select attributes are included in this diagram.
 
-![Entity Relationship Diagram](../diagrams/the_usher_entity_relationship_diagram.png)
+```mermaid
+erDiagram
+  Clients ||..o{ Roles : contains
+  Clients ||--o{ Permissions : contains
+  Tenants }o--o{ Tenantclients : maps
+  Tenantclients }o--o{ Clients : maps
+  Tenants ||--o{ Personas : contains
+  Personas }o--o{ Personaroles : maps
+  Personaroles }o--o{ Roles : maps
+  Personas }o--o{ Personapermissions : maps
+  Personapermissions }o--o{ Permissions : maps
+  Personas ||--o{ Sessions : starts
+  Roles ||--o{ Rolepermissions : maps
+  Rolepermissions }o--o{ Permissions : maps
+  Tenants {
+    int key PK
+    string name UK
+    string iss_claim
+    string jwks_uri
+  }
+  Clients {
+      int key PK
+      string client_id UK
+      string name
+  }
+  Roles {
+      int key PK
+      int clientkey FK
+      string name
+  }
+  Permissions {
+    int key PK
+    string name
+    int clientkey FK
+  }
+  Personas {
+    int key PK
+    int tenantkey FK
+    string sub_claim
+    string user_context
+  }
+  Sessions {
+    int personakey PK
+    string event_id
+    timestamp authorization_time
+  }
+  Keys {
+    int key PK
+    string kid
+    string private_key
+    string public_key
+  }
+```
 
 ## Bootstrap Database with Seed Information
 

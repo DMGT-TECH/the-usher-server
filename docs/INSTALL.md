@@ -72,7 +72,6 @@ The following variables are required to be configured.
 | ISSUER_ALIASES                          | (Optional && Experimental) [Hostname aliases](USAGE.md#migrating-idenitity-provider-domain-names-issuer-aliases-experimental) for IdP tokens issuer |
 | SKIP_KEYS_CHECK                         | (Optional) Skips `seedKeysIfDbIsEmpty` on application bootstrap if the environment variable value is set to `true`.   |
 
-
 ## Generic Installation Steps
 
 The following two methods consist of the general steps to get the Usher project installed via either GitHub Packages or source.

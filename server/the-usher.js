@@ -121,7 +121,7 @@ expressApp.use((req, res, next) => {
 })
 
 console.log(`SKIP_KEYS_CHECK value: ${process.env.SKIP_KEYS_CHECK}`)
-if (!process.env.SKIP_KEYS_CHECK) {
+if (process.env.SKIP_KEYS_CHECK !== 'true') {
   seedKeysIfDbIsEmpty()
 }
 
