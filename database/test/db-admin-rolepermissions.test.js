@@ -32,13 +32,14 @@ describe('Admin role permissions view', () => {
       validRoleKey = roleKey
       const { key: permissionKey } = await usherDb('permissions').select('key').where({ clientkey: clientKey }).first()
       validPermissionKey = permissionKey
+      await usherDb('rolepermissions').where({ rolekey: validRoleKey }).del()
     })
 
     it('Should return an array of inserted rolepermissions records', async () => {
-      const [rolePermission] = await adminRolePermissions.insertRolePermissions(validRoleKey, [validPermissionKey])
-      assert.ok(!!rolePermission)
-      assert.equal(rolePermission.rolekey, validRoleKey)
-      assert.equal(rolePermission.permissionkey, validPermissionKey)
+      const rolePermissions = await adminRolePermissions.insertRolePermissions(validRoleKey, [validPermissionKey])
+      assert.equal(rolePermissions.length, 1)
+      assert.equal(rolePermissions[0].rolekey, validRoleKey)
+      assert.equal(rolePermissions[0].permissionkey, validPermissionKey)
     })
 
     it('Should ignore the duplicate permission keys', async () => {
@@ -72,7 +73,7 @@ describe('Admin role permissions view', () => {
     })
 
     afterEach(async () => {
-      await usherDb('rolepermissions').where({ rolekey: validRoleKey, permissionkey: validPermissionKey }).del()
+      await usherDb('rolepermissions').where({ rolekey: validRoleKey }).del()
     })
   })
 
