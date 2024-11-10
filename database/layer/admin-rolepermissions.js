@@ -70,8 +70,61 @@ const getRolePermissions = async (roleKey) => {
   }
 }
 
+/**
+ * Retrieves permissions for the role within the same client
+ *
+ * @param {number} roleKey - The key of the role
+ * @param {Array<number>} permissionKeys - An array of permission keys
+ * @returns {Promise<Array>} - A promise that resolves with the retrieved permissions
+ * @throws {Error} - If there's an error during the database operation.
+ */
+const getPermissionsForRoleWithinSameClient = async (roleKey, permissionKeys) => {
+  try {
+    const permissions = await usherDb('permissions as p')
+      .select('p.*')
+      .whereIn('p.key', permissionKeys)
+      .andWhere('p.clientkey', '=', usherDb('roles as r')
+        .select('r.clientkey')
+        .where('r.key', roleKey)
+        .first()
+      )
+    return permissions
+  } catch (error) {
+    throw pgErrorHandler(error)
+  }
+}
+
+/**
+ * Insert multiple records for role permissions and ignore conflicts
+ * This means if several permissions are inserted and some of them already exist,
+ * the existing records will **not** be returned in the Promise results
+ *
+ * @param {number} roleKey - The role key
+ * @param {number[]} permissionKeys - An array of permission keys
+ * @returns {Promise<Object[]>} - A promise that resolves to an array of inserted rolepermissions records
+ */
+const insertRolePermissions = async (roleKey, permissionKeys) => {
+  try {
+    const rolePermissions = permissionKeys.map((permissionKey) => {
+      return {
+        rolekey: roleKey,
+        permissionkey: permissionKey,
+      }
+    })
+    return await usherDb('rolepermissions')
+      .insert(rolePermissions)
+      .onConflict(['rolekey', 'permissionkey'])
+      .ignore()
+      .returning('*')
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertRolePermissionByClientId,
   deleteRolePermissionByClientId,
-  getRolePermissions
+  getRolePermissions,
+  getPermissionsForRoleWithinSameClient,
+  insertRolePermissions,
 }

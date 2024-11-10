@@ -432,12 +432,12 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   /roles/{role_key}/permissions:
+    parameters:
+      - $ref: '#/components/parameters/roleKeyPathParam'
     get:
       'x-swagger-router-controller': 'roles/permissions'
       operationId: getRolesPermissions
       summary: "Roles: Get list of Permissions"
-      parameters:
-        - $ref: '#/components/parameters/roleKeyPathParam'
       tags:
         - Admin APIs
       security:
@@ -449,6 +449,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ArrayOfPermissionObject"
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
+    put:
+      'x-swagger-router-controller': 'roles/permissions'
+      operationId: createRolePermissions
+      summary: Assigns permissions to the subject role
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              items:
+                type: integer
+                minimum: 1
+      responses:
+        204:
+          description: Successfully created permissions for the subject role
+          headers:
+            Location:
+              description: The URL to get all the role permissions
+              schema:
+                type: string
         400:
           $ref: '#/components/responses/BadRequest'
         401:
