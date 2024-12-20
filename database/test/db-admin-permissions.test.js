@@ -91,4 +91,46 @@ describe('Admin permissions view', () => {
       assert.deepEqual(permissions, [])
     })
   })
+
+  describe('Test GetPermissions by optional filter', () => {
+    it('Should return all permissions when no filters are applied', async () => {
+      const permissions = await adminPermissions.getPermissions()
+      assert.ok(permissions.length > 0)
+      assert.ok(permissionTableColumns.every((col) => col in permissions[0]))
+    })
+
+    it('Should return permissions for a specific clientId', async () => {
+      const { client_id: clientId } = await usherDb('clients').select('client_id').first()
+      const permissions = await adminPermissions.getPermissions({ clientId })
+      assert.ok(permissions.length > 0)
+      assert.ok(permissions.every(permission => permission.client_id === clientId))
+    })
+
+    it('Should return permissions for a specific name', async () => {
+      const { name } = await usherDb('permissions').select('name').first()
+      const permissions = await adminPermissions.getPermissions({ name })
+      assert.ok(permissions.length > 0)
+      assert.ok(permissions.every(permission => permission.name === name))
+    })
+
+    it('Should return permissions for a specific clientKey', async () => {
+      const { clientkey } = await usherDb('permissions').select('clientkey').first()
+      const permissions = await adminPermissions.getPermissions({ clientKey: clientkey })
+      assert.ok(permissions.length > 0)
+      assert.ok(permissions.every(permission => permission.clientkey === clientkey))
+    })
+
+    it('Should return permissions for multiple filters', async () => {
+      const { client_id: clientId } = await usherDb('clients').select('client_id').first()
+      const { name } = await usherDb('permissions').select('name').first()
+      const permissions = await adminPermissions.getPermissions({ clientId, name })
+      assert.ok(permissions.length > 0)
+      assert.ok(permissions.every(permission => permission.client_id.includes(clientId) && permission.name.includes(name)))
+    })
+
+    it('Should return an empty array if no permissions match the criteria', async () => {
+      const permissions = await adminPermissions.getPermissions({ name: 'Nonexistent Name', clientId: 'Nonexistent ClientId' })
+      assert.ok(permissions.length === 0)
+    })
+  })
 })
