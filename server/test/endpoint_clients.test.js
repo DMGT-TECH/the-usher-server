@@ -333,4 +333,43 @@ describe('Admin Clients Endpoint Test', () => {
       assert.equal(response.status, 409)
     })
   })
+
+  describe('Get Client Permissions', () => {
+    let validClientId
+    const getClientPermissions = async (clientId, header = requestHeaders) => {
+      return await fetch(`${url}/clients/${clientId}/permissions`, {
+        method: 'GET',
+        headers: header,
+      })
+    }
+
+    before(async () => {
+      const client = await usherDb('clients').select('*').first()
+      validClientId = client.client_id
+    })
+
+    it('should return 200 and list of all permissions', async () => {
+      const response = await getClientPermissions(validClientId)
+      assert.equal(response.status, 200)
+      const permissions = await response.json()
+      const { count: permissionCount } = await usherDb('permissions')
+        .join('clients', 'permissions.clientkey', '=', 'clients.key')
+        .where('clients.client_id', validClientId).count('*').first()
+      assert.equal(permissions?.length, Number(permissionCount))
+    })
+
+    it('should return 401 due to lack of proper token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await getClientPermissions(validClientId, {
+        ...requestHeaders,
+        Authorization: `Bearer ${userAccessToken}`
+      })
+      assert.equal(response.status, 401)
+    })
+
+    it('should return 404 for non-existent client id', async () => {
+      const response = await getClientPermissions('invalid_client_id')
+      assert.equal(response.status, 404)
+    })
+  })
 })
