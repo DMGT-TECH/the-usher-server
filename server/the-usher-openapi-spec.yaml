@@ -1097,6 +1097,39 @@ paths:
   /clients/{client_id}/permissions:
     parameters:
     - $ref: '#/components/parameters/clientIdPathParam'
+    get:
+      'x-swagger-router-controller': 'clients/permissions'
+      operationId: getClientPermissions
+      summary: Get a list of permissions for a client
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+        - bearerClientAdminAuth: []
+      responses:
+        200:
+          description: List of permissions for a client
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/PermissionObject'
+                    - type: object
+                      properties:
+                        client_id: 
+                          type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     post:
       'x-swagger-router-controller': 'clients/permissions'
       summary: Create a new permission for the given client
@@ -1135,39 +1168,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         409:
           $ref: '#/components/responses/Conflict'
-        500:
-          $ref: '#/components/responses/InternalError'
-        503:
-          $ref: '#/components/responses/ServiceUnavailableError'
-    get:
-      'x-swagger-router-controller': 'clients/permissions'
-      operationId: getClientPermissions
-      summary: Get a list of permissions for a client
-      tags:
-        - Client Admin APIs
-      security:
-        - bearerAdminAuth: []
-        - bearerClientAdminAuth: []
-      responses:
-        200:
-          description: List of permissions for a client
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  allOf:
-                    - $ref: '#/components/schemas/PermissionObject'
-                    - type: object
-                      properties:
-                        client_id: 
-                          type: string
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        404:
-          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
         503:

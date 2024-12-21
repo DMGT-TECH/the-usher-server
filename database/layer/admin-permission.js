@@ -120,7 +120,7 @@ const getPermissionsByNameClientKey = async (name, clientKey) => {
  * @param {Object} filters - The filters to apply
  * @param {string} [filters.name] - The name of the permission
  * @param {string} [filters.clientId] - The client id
- * @param {string} [filters.clientKey] - The client key
+ * @param {number} [filters.clientKey] - The client key
  * @returns {Promise<Array<Object>>} - A promise that resolves to an array of permissions
  */
 const getPermissions = async (filters = {}) => {

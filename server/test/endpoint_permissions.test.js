@@ -5,7 +5,7 @@ const { usherDb } = require('database/layer/knex')
 const { getAdmin1IdPToken, getTestUser1IdPToken } = require('./lib/tokens')
 const { getServerUrl } = require('./lib/urls')
 
-describe('Admin Roles API Tests', () => {
+describe('Admin Permissions API Tests', () => {
   const url = getServerUrl()
   let requestHeaders
   before(async () => {
@@ -21,9 +21,9 @@ describe('Admin Roles API Tests', () => {
      * GET /permissions
      * HTTP request to retrieve a list of permissions
      *
-     * @param {string} query - The query params to be added to the URL (E.g. ?name=value1&client_id=value2&client_key=value3)
+     * @param {string} query - The query params to be added to the URL (e.g., ?name=value1&client_id=value2&client_key=value3)
      * @param {Object} header - The request headers
-     * @returns {Promise<fetch.response>} - A Promise which resolves to fetch.response
+     * @returns {Promise<fetch.Response>} - A Promise which resolves to fetch.Response
      */
     const getPermissions = async (query = '', header = requestHeaders) => {
       return await fetch(`${url}/permissions${query}`, {
@@ -33,20 +33,20 @@ describe('Admin Roles API Tests', () => {
     }
 
     it('should return 200, return all the permissions', async () => {
-      const { count: totalCount } = await usherDb('permissions').count('*').first()
+      const { count: permissionCount } = await usherDb('permissions').count('*').first()
       const response = await getPermissions()
       assert.equal(response.status, 200)
       const permissions = await response.json()
-      assert.equal(permissions.length, Number(totalCount))
+      assert.equal(permissions.length, Number(permissionCount))
     })
 
     it('should return 200, return all the permissions for a client', async () => {
       const { client_id: validClientId, key: validClientKey } = await usherDb('clients').select('*').first()
-      const { count: totalCount } = await usherDb('permissions').where({ clientkey: validClientKey }).count('*').first()
+      const { count: permissionCount } = await usherDb('permissions').where({ clientkey: validClientKey }).count('*').first()
       const response = await getPermissions(`?client_id=${validClientId}`)
       assert.equal(response.status, 200)
       const permissions = await response.json()
-      assert.equal(permissions.length, Number(totalCount))
+      assert.equal(permissions.length, Number(permissionCount))
       assert.equal(permissions[0]['client_id'], validClientId)
     })
 
@@ -60,14 +60,14 @@ describe('Admin Roles API Tests', () => {
       assert.ok(permissions.every(permission => permission.name === name))
     })
 
-    it('should return 200, return empty array for invalid client_id', async () => {
+    it('should return 200, return an empty array for an invalid client_id', async () => {
       const response = await getPermissions('?client_id=invalid')
       assert.equal(response.status, 200)
       const permissions = await response.json()
       assert.equal(permissions.length, 0)
     })
 
-    it('should return 400, due to invalid query param', async () => {
+    it('should return 400, due to an invalid query param', async () => {
       const response = await getPermissions('?client_key=string,')
       assert.equal(response.status, 400)
     })

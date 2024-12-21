@@ -94,13 +94,15 @@ describe('Admin permissions view', () => {
 
   describe('Test GetPermissions by optional filter', () => {
     it('Should return all permissions when no filters are applied', async () => {
+      const { count: permissionCount } = await usherDb('permissions').count('*').first()
       const permissions = await adminPermissions.getPermissions()
-      assert.ok(permissions.length > 0)
+      assert.equal(permissions.length, Number(permissionCount))
       assert.ok(permissionTableColumns.every((col) => col in permissions[0]))
     })
 
     it('Should return permissions for a specific clientId', async () => {
-      const { client_id: clientId } = await usherDb('clients').select('client_id').first()
+      const { clientkey: clientKey } = await usherDb('permissions').select('clientkey').first()
+      const { client_id: clientId } = await usherDb('clients').select('client_id').where({ key: clientKey }).first()
       const permissions = await adminPermissions.getPermissions({ clientId })
       assert.ok(permissions.length > 0)
       assert.ok(permissions.every(permission => permission.client_id === clientId))
@@ -121,11 +123,10 @@ describe('Admin permissions view', () => {
     })
 
     it('Should return permissions for multiple filters', async () => {
-      const { client_id: clientId } = await usherDb('clients').select('client_id').first()
-      const { name } = await usherDb('permissions').select('name').first()
-      const permissions = await adminPermissions.getPermissions({ clientId, name })
+      const { name, clientkey: clientKey } = await usherDb('permissions').select('*').first()
+      const permissions = await adminPermissions.getPermissions({ name, clientKey })
       assert.ok(permissions.length > 0)
-      assert.ok(permissions.every(permission => permission.client_id.includes(clientId) && permission.name.includes(name)))
+      assert.ok(permissions.every(permission => permission.clientkey === clientKey && permission.name === name))
     })
 
     it('Should return an empty array if no permissions match the criteria', async () => {
