@@ -17,6 +17,7 @@ jobs:
       PGUSER: postgres
       PGPASSWORD: tehsecure
       PGSCHEMA: usher
+      KNEX_POOL_REAP_INTERVAL_MILLIS: 100000
     steps:
     - run: sudo ethtool -K eth0 tx off rx off
     - uses: actions/checkout@v4

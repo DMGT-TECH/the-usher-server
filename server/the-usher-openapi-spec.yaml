@@ -496,6 +496,42 @@ paths:
         503:
           $ref: '#/components/responses/ServiceUnavailableError'
 
+  /permissions:
+    get:
+      'x-swagger-router-controller': 'endpoint_permissions'
+      operationId: getPermissions
+      summary: Get a List of permissions, optionally filtered by name, client_id and client_key
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      parameters:
+        - $ref: '#/components/parameters/nameQueryParam'
+        - $ref: '#/components/parameters/clientIdQueryParam'
+        - $ref: '#/components/parameters/clientKeyQueryParam'
+      responses:
+        200:
+          description: The List of Permissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/PermissionObject'
+                    - type: object
+                      properties:
+                        client_id: 
+                          type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
+
   /personas:
     get:
       'x-swagger-router-controller': 'personas/persona'
@@ -1061,6 +1097,39 @@ paths:
   /clients/{client_id}/permissions:
     parameters:
     - $ref: '#/components/parameters/clientIdPathParam'
+    get:
+      'x-swagger-router-controller': 'clients/permissions'
+      operationId: getClientPermissions
+      summary: Get a list of permissions for a client
+      tags:
+        - Client Admin APIs
+      security:
+        - bearerAdminAuth: []
+        - bearerClientAdminAuth: []
+      responses:
+        200:
+          description: List of permissions for a client
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/PermissionObject'
+                    - type: object
+                      properties:
+                        client_id: 
+                          type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
     post:
       'x-swagger-router-controller': 'clients/permissions'
       summary: Create a new permission for the given client
@@ -1183,7 +1252,21 @@ components:
           value: "*"
     clientIdQueryParam:
       name: client_id
-      description: Unique identifier for the client.
+      description: Filter by client_id
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/EntityNameDef'
+    clientKeyQueryParam:
+      name: client_key
+      description: Filter by client_key
+      in: query
+      required: false
+      schema:
+        type: integer
+    nameQueryParam:
+      name: name
+      description: Filter by name
       in: query
       required: false
       schema:

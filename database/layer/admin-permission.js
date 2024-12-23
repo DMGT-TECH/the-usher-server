@@ -114,6 +114,39 @@ const getPermissionsByNameClientKey = async (name, clientKey) => {
   }
 }
 
+/**
+ * Get permissions by optional filters
+ *
+ * @param {Object} filters - The filters to apply
+ * @param {string} [filters.name] - The name of the permission
+ * @param {string} [filters.clientId] - The client id
+ * @param {number} [filters.clientKey] - The client key
+ * @returns {Promise<Array<Object>>} - A promise that resolves to an array of permissions
+ */
+const getPermissions = async (filters = {}) => {
+  try {
+    const query = usherDb('permissions')
+      .join('clients', 'permissions.clientkey', '=', 'clients.key')
+      .select('permissions.*', 'clients.client_id')
+
+    const { clientId, name, clientKey } = filters
+    if (clientId) {
+      query.where('clients.client_id', 'ilike', `%${clientId}%`)
+    }
+    if (name) {
+      query.where('permissions.name', 'ilike', `%${name}%`)
+    }
+    if (clientKey) {
+      query.where('permissions.clientkey', clientKey)
+    }
+
+    const permissions = await query
+    return permissions
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertPermissionByClientId,
   updatePermissionByPermissionname,
@@ -122,4 +155,5 @@ module.exports = {
   getPermissionsByRoleKey,
   insertPermission,
   getPermissionsByNameClientKey,
+  getPermissions,
 }
