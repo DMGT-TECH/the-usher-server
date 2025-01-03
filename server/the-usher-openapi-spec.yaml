@@ -1221,6 +1221,73 @@ paths:
         default:
           $ref: '#/components/responses/Default'
 
+  /tenants:
+      get:
+        'x-swagger-router-controller': 'tenants/index'
+        operationId: getTenants
+        summary: Retrieve a list of tenants
+        parameters:
+          - name: key
+            in: query
+            description: Filter by tenant key
+            schema:
+              type: number
+              example: 10
+          - name: name
+            in: query
+            description: Filter by tenant name (partial match)
+            schema:
+              type: string
+              example: DMGT
+          - name: iss_claim
+            in: query
+            description: Filter by iss_claim (partial match)
+            schema:
+              type: string
+              example: https://dmgt-prod.auth0.com/
+          - name: sort
+            in: query
+            description: Sort the results by a field. Default is tenant key.
+            schema:
+              type: string
+              example: name
+              enum:
+                [
+                  key,
+                  name,
+                  iss_claim,
+                  jwks_uri,
+                  created_at,
+                  updated_at,
+                ]
+          - name: order
+            in: query
+            description: Specify the sort order (asc or desc). Default is ascending.
+            schema:
+              type: string
+              enum: [asc, desc]
+        tags:
+          - Admin APIs
+        security:
+          - bearerAdminAuth: []
+        responses:
+          200:
+            description: Returns a list of tenants
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Tenant"
+          400:
+            $ref: '#/components/responses/BadRequest'
+          401:
+            $ref: '#/components/responses/Unauthorized'
+          500:
+            $ref: '#/components/responses/InternalError'
+          503:
+            $ref: '#/components/responses/ServiceUnavailableError'
+
 components:
 
   parameters:
@@ -1549,6 +1616,31 @@ components:
         - key
         - tenantkey
         - sub_claim
+
+    Tenant:
+      type: object
+      properties:
+        key:
+          type: integer
+          minimum: 1
+          format: int32
+        name:
+          type: string
+        iss_claim:
+          type: string
+        jwks_uri:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - key
+        - name
+        - iss_claim
+        - jwks_uri
 
 # SCOPE
 #---------------------
