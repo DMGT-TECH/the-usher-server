@@ -86,7 +86,7 @@ const deleteTenant = async (tenantName, issClaim) => {
  * @param {string} [order='desc'] - The order of sorting (asc or desc)
  * @returns {Promise<Array<Object>>} - A promise that resolves to an array of tenants
  */
-const getTenants = async (filters = {}, sort = 'key', order = 'asc') => {
+const getTenants = async (filters = {}, sort = 'key', order = 'desc') => {
   try {
     const query = usherDb('tenants').select('*')
 

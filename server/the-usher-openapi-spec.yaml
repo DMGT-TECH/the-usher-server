@@ -1262,7 +1262,7 @@ paths:
                 ]
           - name: order
             in: query
-            description: Specify the sort order (asc or desc). Default is ascending.
+            description: Specify the sort order (asc or desc). Default is descending.
             schema:
               type: string
               enum: [asc, desc]
