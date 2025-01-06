@@ -1265,6 +1265,7 @@ paths:
             description: Specify the sort order (asc or desc). Default is descending.
             schema:
               type: string
+              example: desc
               enum: [asc, desc]
         tags:
           - Admin APIs

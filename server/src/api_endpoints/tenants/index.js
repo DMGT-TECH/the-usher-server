@@ -22,7 +22,7 @@ const getTenants = async (req, res, next) => {
       return acc
     }, {})
     const tenants = await dbAdminTenant.getTenants(filters, sort, order)
-    res.status(200).send(tenants);
+    res.status(200).send(tenants)
   } catch ({ httpStatusCode = 500, message }) {
     return next(createError(httpStatusCode, { message }))
   }
