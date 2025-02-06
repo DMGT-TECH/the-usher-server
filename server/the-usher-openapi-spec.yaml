@@ -826,6 +826,7 @@ paths:
                         assigned_at:
                           type: string
                           format: date-time
+                          description: The date and time the role was assigned to the persona
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
