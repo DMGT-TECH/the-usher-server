@@ -1444,6 +1444,12 @@ components:
           type: string
           nullable: true
           maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
       required:
         - key
         - clientkey
