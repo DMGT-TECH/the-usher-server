@@ -63,7 +63,7 @@ const deletePersonaRole = async (tenantName, issClaim, subClaim, userContext, cl
 const getPersonaRoles = async (personaKey) => {
   try {
     return await usherDb('roles')
-      .select('roles.key', 'roles.name', 'roles.description', 'roles.clientkey')
+      .select('roles.key', 'roles.name', 'roles.description', 'roles.clientkey', 'personaroles.created_at as assigned_at') 
       .join('personaroles', 'roles.key', 'personaroles.rolekey')
       .join('personas', 'personaroles.personakey', 'personas.key')
       .where('personas.key', personaKey)

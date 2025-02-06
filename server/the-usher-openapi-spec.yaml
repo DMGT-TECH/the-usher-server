@@ -9,7 +9,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: 2.6.0
+  version: 2.6.1
 externalDocs:
   description: GitHub Repository
   url: https://github.com/DMGT-TECH/the-usher-server
@@ -819,7 +819,14 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/RoleWithPermissions"
+                  allOf:
+                    - $ref: "#/components/schemas/RoleWithPermissions"
+                    - type: object
+                      properties:
+                        assigned_at:
+                          type: string
+                          format: date-time
+                          description: The date and time the role was assigned to the persona
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
