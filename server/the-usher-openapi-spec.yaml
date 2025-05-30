@@ -496,6 +496,37 @@ paths:
         503:
           $ref: '#/components/responses/ServiceUnavailableError'
 
+  /roles/{role_key}/permissions/{permission_key}:
+    parameters:
+      - $ref: '#/components/parameters/roleKeyPathParam'
+      - $ref: '#/components/parameters/permissionKeyPathParam'
+    delete:
+      'x-swagger-router-controller': 'roles/permissions'
+      operationId: deleteRolePermissions
+      summary: Idempotent API to remove a permission from the specified role
+      tags:
+        - Admin APIs
+      security:
+        - bearerAdminAuth: []
+      responses:
+        204:
+          description: The permission was successfully removed from the specified role. The response is empty on success
+          headers:
+            Location:
+              description: The URL to get all the role permissions
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailableError'
+
   /permissions:
     get:
       'x-swagger-router-controller': 'endpoint_permissions'
