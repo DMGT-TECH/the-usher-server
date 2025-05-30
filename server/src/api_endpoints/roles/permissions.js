@@ -75,7 +75,7 @@ async function deleteRolePermissions(req, res, next) {
     const { role_key: roleKey, permission_key: permissionKey } = req.params
     await checkRoleExists(roleKey)
     await dbAdminRolePermissions.deleteRolePermissions(roleKey, permissionKey)
-    const locationUrl = `${req.protocol}://${req.get('host')}/${roleKey}/permissions`
+    const locationUrl = `${req.protocol}://${req.get('host')}/roles/${roleKey}/permissions`
     res.set('Location', locationUrl)
     return res.status(204).send()
   } catch ({ httpStatusCode = 500, message }) {

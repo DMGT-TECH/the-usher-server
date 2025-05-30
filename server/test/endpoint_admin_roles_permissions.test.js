@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 const assert = require('node:assert')
-const { describe, it, before } = require('mocha')
+const { describe, it, before, afterEach } = require('mocha')
 
 const { getServerUrl } = require('./lib/urls')
 const { usherDb } = require('database/layer/knex')
@@ -180,6 +180,74 @@ describe('Admin Roles Permissions', () => {
 
     afterEach(async () => {
       await usherDb('rolepermissions').where({ rolekey: validRoleKey }).del()
+    })
+  })
+
+  describe('DELETE:/roles/{role_key}/permissions/{permission_key}', () => {
+    let validRoleKey
+    let validPermissionKey
+    const invalidRoleKey = 99999
+    const invalidPermissionKey = 99999
+
+    const deleteRolesPermissions = async (permissionKey, roleKey = validRoleKey, header = requestHeaders) => {
+      return await fetch(`${url}/roles/${roleKey}/permissions/${permissionKey}`, {
+        method: 'DELETE',
+        headers: header,
+      })
+    }
+
+    before(async () => {
+      const rolePermission = await usherDb('rolepermissions').select('rolekey', 'permissionkey').first()
+      validRoleKey = rolePermission.rolekey
+      validPermissionKey = rolePermission.permissionkey
+    })
+
+    afterEach(async () => {
+      await usherDb('rolepermissions').insert({ rolekey: validRoleKey, permissionkey: validPermissionKey }).onConflict(['rolekey', 'permissionkey']).ignore()
+    })
+
+    it('should return 204, successful attempt to delete a role permission', async () => {
+      let rolePermission = await usherDb('rolepermissions').where({ rolekey: validRoleKey, permissionkey: validPermissionKey }).first()
+      assert.ok(rolePermission, 'Role permission should exist in database')
+      const response = await deleteRolesPermissions(validPermissionKey)
+      assert.equal(response.status, 204)
+      rolePermission = await usherDb('rolepermissions').where({ rolekey: validRoleKey, permissionkey: validPermissionKey }).first()
+      assert.ok(!rolePermission, 'Role permission should be deleted from the database')
+      const locationUrl = `${url}/roles/${validRoleKey}/permissions`
+      assert.equal(response.headers.get('Location'), locationUrl)
+    })
+
+    it('should return 204, idempotent API', async () => {
+      const response = await deleteRolesPermissions(invalidPermissionKey)
+      assert.equal(response.status, 204)
+    })
+
+    it('should return 400, three bad requests', async () => {
+      const responses = await Promise.all(
+        [
+          deleteRolesPermissions(0),
+          deleteRolesPermissions('a'),
+          deleteRolesPermissions(validPermissionKey, 'a'),
+        ]
+      )
+      assert.equal(responses.every(({ status }) => status === 400), true)
+    })
+
+    it('should return 401, unauthorized token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const response = await deleteRolesPermissions(
+        validPermissionKey,
+        validRoleKey,
+        {
+          ...requestHeaders,
+          Authorization: `Bearer ${userAccessToken}`
+        })
+      assert.equal(response.status, 401)
+    })
+
+    it('should return 404, fail to delete role permissions for an invalid role', async () => {
+      const response = await deleteRolesPermissions(validPermissionKey, invalidRoleKey)
+      assert.equal(response.status, 404)
     })
   })
 })

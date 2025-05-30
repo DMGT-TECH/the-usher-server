@@ -122,7 +122,7 @@ const insertRolePermissions = async (roleKey, permissionKeys) => {
 }
 
 /**
- * Delete a rolepermissions record by roleKey and permissionKey.
+ * Delete a role permissions record by roleKey and permissionKey.
  * @param {number} roleKey
  * @param {number} permissionKey
  * @returns {Promise<number>} A promise that resolves to the number of deleted records
