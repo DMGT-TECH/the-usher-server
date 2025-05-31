@@ -113,4 +113,40 @@ describe('Admin role permissions view', () => {
       assert.equal(permissions.length, 0)
     })
   })
+
+  describe('Test deleteRolePermissions', () => {
+    let validRoleKey
+    let validPermissionKey
+    const invalidRoleKey = 99999
+    const invalidPermissionKey = 99999
+
+    before(async () => {
+      const rolePermission = await usherDb('rolepermissions').select('rolekey', 'permissionkey').first()
+      validRoleKey = rolePermission.rolekey
+      validPermissionKey = rolePermission.permissionkey
+    })
+
+    afterEach(async () => {
+      await usherDb('rolepermissions').insert({ rolekey: validRoleKey, permissionkey: validPermissionKey }).onConflict(['rolekey', 'permissionkey']).ignore()
+    })
+
+    it('Should delete an existing record from rolepermissions table and return 1', async () => {
+      let rolePermission = await usherDb('rolepermissions').where({ rolekey: validRoleKey, permissionkey: validPermissionKey }).first()
+      assert.ok(rolePermission, 'The role permission should exist')
+      const deleted = await adminRolePermissions.deleteRolePermissions(validRoleKey, validPermissionKey)
+      assert.equal(deleted, 1)
+      rolePermission = await usherDb('rolepermissions').where({ rolekey: validRoleKey, permissionkey: validPermissionKey }).first()
+      assert.ok(!rolePermission, 'The role permission should be deleted')
+    })
+
+    it('Should return 0 when deleting a non existing record for invalid permission', async () => {
+      const deleted = await adminRolePermissions.deleteRolePermissions(validRoleKey, invalidPermissionKey)
+      assert.equal(deleted, 0)
+    })
+
+    it('Should return 0 when deleting a non existing record for invalid role', async () => {
+      const deleted = await adminRolePermissions.deleteRolePermissions(invalidRoleKey, validPermissionKey)
+      assert.equal(deleted, 0)
+    })
+  })
 })

@@ -121,10 +121,27 @@ const insertRolePermissions = async (roleKey, permissionKeys) => {
   }
 }
 
+/**
+ * Delete a role permissions record by roleKey and permissionKey.
+ * @param {number} roleKey
+ * @param {number} permissionKey
+ * @returns {Promise<number>} A promise that resolves to the number of deleted records
+ */
+const deleteRolePermissions = async (roleKey, permissionKey) => {
+  try {
+    return await usherDb('rolepermissions')
+      .where({ rolekey: roleKey, permissionkey: permissionKey })
+      .del()
+  } catch (err) {
+    throw pgErrorHandler(err)
+  }
+}
+
 module.exports = {
   insertRolePermissionByClientId,
   deleteRolePermissionByClientId,
   getRolePermissions,
   getPermissionsForRoleWithinSameClient,
   insertRolePermissions,
+  deleteRolePermissions,
 }
