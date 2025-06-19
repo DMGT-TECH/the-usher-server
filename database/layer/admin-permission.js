@@ -1,50 +1,65 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
 const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
-const insertPermissionByClientId = async (clientId, permissionname, permissiondescription) => {
-  const sql = 'INSERT INTO usher.permissions (clientkey, name, description) SELECT key, $1, $2 FROM usher.clients WHERE client_id = $3'
-  const sqlParams = [permissionname, permissiondescription, clientId]
+const insertPermissionByClientId = async (clientId, permissionName, permissionDescription) => {
   try {
-    await pool.query(sql, sqlParams)
-    return 'Insert successful'
-  } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "permissions_name_clientkey_uq"') {
-      const errClientPermissionAlreadyExists = `A permission ${permissionname} already exists matching client_id`
-      return `Insert failed: ${errClientPermissionAlreadyExists}`
+    // Get the client key first
+    const client = await usherDb('clients').where({ client_id: clientId }).first()
+    if (!client) {
+      throw new Error(`Client with id ${clientId} not found`)
     }
-    return `Insert failed: ${error.message}`
+
+    const [permission] = await usherDb('permissions')
+      .insert({
+        clientkey: client.key,
+        name: permissionName,
+        description: permissionDescription
+      })
+      .returning('*')
+
+    return permission
+  } catch (error) {
+    throw pgErrorHandler(error)
   }
 }
 
-const updatePermissionByPermissionname = async (clientId, permissionname, permissiondescription) => {
-  const sql = 'UPDATE usher.permissions p SET description = $1 WHERE EXISTS (SELECT 1 FROM usher.clients c WHERE c.client_id = $2) AND p.name = $3'
-  const sqlParams = [permissiondescription, clientId, permissionname]
+const updatePermissionByPermissionName = async (clientId, permissionName, permissionDescription) => {
   try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Update successful'
-    } else {
-      return `Update failed: Permission does not exist matching permissionname ${permissionname} on client ${clientId}`
-    }
+    const updatedCount = await usherDb('permissions')
+      .whereExists(function() {
+        this.select('*')
+          .from('clients')
+          .where('clients.client_id', clientId)
+      })
+      .andWhere('name', permissionName)
+      .update({ description: permissionDescription })
+
+    return updatedCount
   } catch (error) {
-    return `Update failed: ${error.message}`
+    throw pgErrorHandler(error)
   }
 }
 
-const deletePermissionByPermissionname = async (clientId, permissionname) => {
-  const sql = 'DELETE FROM usher.permissions p WHERE EXISTS (SELECT 1 FROM usher.clients c WHERE c.client_id = $1) AND p.name = $2'
-  const sqlParams = [clientId, permissionname]
+/**
+ * Delete a permission by its name for a specific client
+ * @param {string} clientId The client ID
+ * @param {string} permissionName The unique name of the permission
+ * @returns {Promise<number>} - A promise that resolves to the number of deleted rows
+ */
+const deletePermissionByPermissionName = async (clientId, permissionName) => {
   try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Delete successful'
-    } else {
-      return `Delete failed: Permission does not exist matching permissionname ${permissionname} on client_id ${clientId}`
-    }
-  } catch (error) {
-    return `Delete failed: ${error.message}`
+    const deletedCount = await usherDb('permissions')
+      .whereExists(function() {
+        this.select('*')
+          .from('clients')
+          .where('clients.client_id', clientId)
+      })
+      .andWhere('name', permissionName)
+      .del()
+
+    return deletedCount
+  } catch (err) {
+    throw pgErrorHandler(err)
   }
 }
 
@@ -149,8 +164,8 @@ const getPermissions = async (filters = {}) => {
 
 module.exports = {
   insertPermissionByClientId,
-  updatePermissionByPermissionname,
-  deletePermissionByPermissionname,
+  updatePermissionByPermissionName,
+  deletePermissionByPermissionName,
   getPermission,
   getPermissionsByRoleKey,
   insertPermission,

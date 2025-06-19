@@ -68,8 +68,8 @@ describe('Cascade deletes', function () {
   })
   it('Should delete a single specified permission', async function () {
     try {
-      const deleteResult = await postPermissions.deletePermissionByPermissionname('dummy_client', 'dummy_permission:dummyA')
-      assert.strictEqual(deleteResult, 'Delete successful')
+      const deleteResult = await postPermissions.deletePermissionByPermissionName('dummy_client', 'dummy_permission:dummyA')
+      assert.strictEqual(deleteResult, 1)
     } catch (error) {
       assert(false, error.message)
     }
@@ -95,7 +95,7 @@ describe('Cascade deletes', function () {
   it('Should delete a single specified tenant', async function () {
     try {
       const deleteResult = await postTenants.deleteTenant('dummy_tenant', 'https://dummytenant')
-      assert.strictEqual(deleteResult, 'Delete successful')
+      assert.strictEqual(deleteResult, 1)
     } catch (error) {
       assert(false, error.message)
     }
