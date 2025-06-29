@@ -1,10 +1,16 @@
 const { usherDb } = require('./knex')
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 
+/**
+ * Insert a new permission for a specific client
+ * @param {string} clientId - The client ID
+ * @param {string} permissionName - The name of the permission
+ * @param {string} permissionDescription - A description of the permission
+ * @returns {Promise<Object>} - A promise that resolves to the inserted permission object
+ */
 const insertPermissionByClientId = async (clientId, permissionName, permissionDescription) => {
   try {
-    // Get the client key first
-    const client = await usherDb('clients').where({ client_id: clientId }).first()
+    const client = await usherDb('clients').where({ client_id: clientId }).first('key')
     if (!client) {
       throw new Error(`Client with id ${clientId} not found`)
     }
