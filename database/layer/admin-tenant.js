@@ -3,18 +3,26 @@ const { usherDb } = require('./knex')
 const { PGPool } = require('./pg_pool')
 const pool = new PGPool()
 
+/**
+ * Insert a new tenant into the database
+ * @param {string} tenantName
+ * @param {string} issClaim
+ * @param {string} jwksUri
+ * @returns {Promise<object>} A promise that resolves to the inserted tenant object
+ */
 const insertTenant = async (tenantName, issClaim, jwksUri) => {
-  const sql = 'INSERT INTO usher.tenants (name, iss_claim, jwks_uri) VALUES ($1, $2, $3)'
-  const sqlParams = [tenantName, issClaim, jwksUri]
   try {
-    await pool.query(sql, sqlParams)
-    return 'Insert successful'
+    const [tenant] = await usherDb('tenants')
+      .insert({
+        name: tenantName,
+        iss_claim: issClaim,
+        jwks_uri: jwksUri
+      })
+      .returning('*')
+
+      return tenant
   } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "tenants_name_uq"') {
-      const errTenantAlreadyExists = `Tenant already exists matching tenantname ${tenantName}`
-      return `Insert failed: ${errTenantAlreadyExists}`
-    }
-    return `Insert failed: ${error.message}`
+    throw pgErrorHandler(error)
   }
 }
 
@@ -60,18 +68,22 @@ const updateTenantIssClaim = async (tenantName, issClaim, newIssClaim, newJwksUr
   }
 }
 
+/**
+ * Delete a tenant by its name and iss_claim
+ * @param {string} tenantName
+ * @param {string} issClaim
+ * @returns {Promise<number>} - A promise that resolves to the number of deleted rows
+ */
 const deleteTenant = async (tenantName, issClaim) => {
-  const sql = 'DELETE FROM usher.tenants WHERE name = $1 AND iss_claim = $2'
-  const sqlParams = [tenantName, issClaim]
   try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Delete successful'
-    } else {
-      return `Delete failed: Tenant does not exist matching tenantname ${tenantName} or iss_claim ${issClaim}`
-    }
+    const deletedCount = await usherDb('tenants')
+      .where('name', tenantName)
+      .andWhere('iss_claim', issClaim)
+      .del()
+
+    return deletedCount
   } catch (error) {
-    return `Delete failed: ${error.message}`
+    throw pgErrorHandler(error)
   }
 }
 

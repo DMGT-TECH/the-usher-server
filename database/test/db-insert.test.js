@@ -22,9 +22,9 @@ describe('Insert Update and Delete tests', function () {
     describe('Test tenant insert', function () {
       it('Should insert a single specified tenant', async function () {
         const insertResult = await postTenants.insertTenant('dummy_tenant', 'https://dummytenant', 'https://dummytenant/.well-known/jwks.json')
-        assert.strictEqual(insertResult, 'Insert successful')
+        assert.strictEqual(insertResult.name, 'dummy_tenant')
         const result2 = await postTenants.insertTenant('dummy_tenant2', 'https://dummytenant2', 'https://dummytenant2/.well-known/jwks.json')
-        assert.strictEqual(result2, 'Insert successful')
+        assert.strictEqual(result2.name, 'dummy_tenant2')
       })
       it('Should update a single specified tenant', async function () {
         let updateResult = await postTenants.updateTenantIssClaim('dummy_tenant', 'https://dummytenant', 'updated_iss_claim', 'updated_jwks_uri')
@@ -33,10 +33,15 @@ describe('Insert Update and Delete tests', function () {
         assert.strictEqual(updateResult, 'Update successful')
       })
       it('Should fail to insert a duplicate tenant', async function () {
-        await postTenants.insertTenant('t1', 'iss1', 'jwks1')
-        const insertResult = await postTenants.insertTenant('t1', 'iss2', 'jwks2')
-        assert.strictEqual(insertResult, 'Insert failed: Tenant already exists matching tenantname t1')
-        await postTenants.deleteTenant('t1', 'iss1')
+        try {
+          await postTenants.insertTenant('t1', 'iss1', 'jwks1')
+          await postTenants.insertTenant('t1', 'iss2', 'jwks2')
+        } catch (error) {
+          assert.strictEqual(error.httpStatusCode, 409)
+          assert.strictEqual(error.message, 'The operation would result in duplicate resources!')
+          const deleteResults = await postTenants.deleteTenant('t1', 'iss1')
+          assert.strictEqual(deleteResults, 1)
+        }
       })
     })
 
@@ -102,12 +107,13 @@ describe('Insert Update and Delete tests', function () {
     describe('Test permission insert', function () {
       it('Should insert a single specified permission', async function () {
         const insertResult = await postPermissions.insertPermissionByClientId('dummy_client', 'dummy_permission:dummyA', 'Dummy Permission for testing')
-        assert.strictEqual(insertResult, 'Insert successful')
+        assert.strictEqual(insertResult.name, 'dummy_permission:dummyA')
+        assert.strictEqual(insertResult.description, 'Dummy Permission for testing')
       })
       it('Should update a single specified permission', async function () {
-        await postPermissions.updatePermissionByPermissionname('dummy_client', 'dummy_permission:dummyA', 'updated_permission_description')
-        const updateResult = await postPermissions.updatePermissionByPermissionname('dummy_client', 'dummy_permission:dummyA', 'Dummy Permission for testing')
-        assert.strictEqual(updateResult, 'Update successful')
+        await postPermissions.updatePermissionByPermissionName('dummy_client', 'dummy_permission:dummyA', 'updated_permission_description')
+        const updateResult = await postPermissions.updatePermissionByPermissionName('dummy_client', 'dummy_permission:dummyA', 'Dummy Permission for testing')
+        assert.strictEqual(updateResult, 1)
       })
     })
 
@@ -336,12 +342,12 @@ describe('Insert Update and Delete tests', function () {
     })
     describe('Test permission delete', function () {
       it('Should delete a single specified permission', async function () {
-        const deleteResult = await postPermissions.deletePermissionByPermissionname('dummy_client', 'dummy_permission:dummyA')
-        assert.strictEqual(deleteResult, 'Delete successful')
+        const deleteResult = await postPermissions.deletePermissionByPermissionName('dummy_client', 'dummy_permission:dummyA')
+        assert.strictEqual(deleteResult, 1)
       })
       it('Should fail to delete a non-existent permission', async function () {
-        const deleteResult = await postPermissions.deletePermissionByPermissionname('dummy_client', 'no-permission')
-        assert.strictEqual(deleteResult, 'Delete failed: Permission does not exist matching permissionname no-permission on client_id dummy_client')
+        const deleteResult = await postPermissions.deletePermissionByPermissionName('dummy_client', 'no-permission')
+        assert.strictEqual(deleteResult, 0)
       })
     })
     describe('Test client tenant delete', function () {
@@ -373,13 +379,13 @@ describe('Insert Update and Delete tests', function () {
     describe('Test tenant delete', function () {
       it('Should delete a single specified tenant', async function () {
         const deleteResult = await postTenants.deleteTenant('dummy_tenant', 'https://dummytenant')
-        assert.strictEqual(deleteResult, 'Delete successful')
+        assert.strictEqual(deleteResult, 1)
         const result2 = await postTenants.deleteTenant('dummy_tenant2', 'https://dummytenant2')
-        assert.strictEqual(result2, 'Delete successful')
+        assert.strictEqual(result2, 1)
       })
       it('Should fail to delete a non-existent tenant', async function () {
         const deleteResult = await postTenants.deleteTenant('no-tenant', 'https://dummytenant')
-        assert.strictEqual(deleteResult, 'Delete failed: Tenant does not exist matching tenantname no-tenant or iss_claim https://dummytenant')
+        assert.strictEqual(deleteResult, 0)
       })
     })
   })
