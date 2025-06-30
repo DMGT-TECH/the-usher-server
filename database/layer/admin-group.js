@@ -1,53 +1,51 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
+const { usherDb } = require('./knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
+
+const insertGroup = async (name, description) => {
+  try {
+    const [group] = await usherDb('groups')
+      .insert({
+        name,
+        description
+      })
+      .returning('*')
+    return group
+  } catch (error) {
+    throw pgErrorHandler(error)
+  }
+}
+
+const updateGroupByGroupname = async (name, description) => {
+  try {
+    const updatedCount = await usherDb('groups')
+      .where('name', name)
+      .update({ description })
+
+    return updatedCount
+  } catch (error) {
+    throw pgErrorHandler(error)
+  }
+}
+
+/**
+ * Delete a group by its name
+ * @param {string} name The group name
+ * @returns {Promise<number>} A promise that resolves to the number of deleted rows
+ */
+const deleteGroupByGroupname = async (name) => {
+  try {
+    const deletedCount = await usherDb('groups')
+      .where('name', name)
+      .del()
+
+    return deletedCount
+  } catch (error) {
+    throw pgErrorHandler(error)
+  }
+}
 
 module.exports = {
   insertGroup,
   updateGroupByGroupname,
   deleteGroupByGroupname
-}
-
-async function insertGroup (groupname, groupdescription) {
-  const sql = 'INSERT INTO usher.groups (name, description) VALUES ($1, $2)'
-  const sqlParams = [groupname, groupdescription]
-  try {
-    await pool.query(sql, sqlParams)
-    return 'Insert successful'
-  } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "groups_name_uq"') {
-      const errGroupAlreadyExists = `Group already exists matching groupname ${groupname}`
-      return `Insert failed: ${errGroupAlreadyExists}`
-    }
-    return `Insert failed: ${error.message}`
-  }
-}
-
-async function updateGroupByGroupname (groupname, groupdescription) {
-  const sql = 'UPDATE usher.groups SET description = $1 WHERE name = $2'
-  const sqlParams = [groupdescription, groupname]
-  try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Update successful'
-    } else {
-      return `Update failed: Group does not exist matching groupname ${groupname}`
-    }
-  } catch (error) {
-    return `Update failed: ${error.message}`
-  }
-}
-
-async function deleteGroupByGroupname (groupname) {
-  const sql = 'DELETE FROM usher.groups WHERE name = $1'
-  const sqlParams = [groupname]
-  try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Delete successful'
-    } else {
-      return `Delete failed: Group does not exist matching groupname ${groupname}`
-    }
-  } catch (error) {
-    return `Delete failed: ${error.message}`
-  }
 }

@@ -1,7 +1,5 @@
 const { pgErrorHandler } = require('../utils/pgErrorHandler')
 const { usherDb } = require('./knex')
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
 
 /**
  * Insert a new tenant into the database
@@ -23,48 +21,6 @@ const insertTenant = async (tenantName, issClaim, jwksUri) => {
       return tenant
   } catch (error) {
     throw pgErrorHandler(error)
-  }
-}
-
-const updateTenantName = async (tenantName, issClaim, newTenantName) => {
-  const sql = 'UPDATE usher.tenants SET name = $3 WHERE name = $1 AND iss_claim = $2'
-  const sqlParams = [tenantName, issClaim, newTenantName]
-  try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Update successful'
-    } else {
-      return `Update failed: Tenant does not exist matching tenantname ${tenantName}`
-    }
-  } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "tenants_name_uq"') {
-      const errTenantAlreadyExists = `Tenant already exists matching tenantname ${tenantName}`
-      return `Insert failed: ${errTenantAlreadyExists}`
-    }
-    if (error.message === 'duplicate key value violates unique constraint "tenants_name_issclaim_uq"') {
-      const errTenantAlreadyExists = `Tenant already exists matching iss_claim ${issClaim}`
-      return `Update failed: ${errTenantAlreadyExists}`
-    }
-    return `Update failed: ${error.message}`
-  }
-}
-
-const updateTenantIssClaim = async (tenantName, issClaim, newIssClaim, newJwksUri) => {
-  const sql = 'UPDATE usher.tenants SET iss_claim = $3, jwks_uri = $4 WHERE name = $1 AND iss_claim = $2'
-  const sqlParams = [tenantName, issClaim, newIssClaim, newJwksUri]
-  try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Update successful'
-    } else {
-      return `Update failed: Tenant does not exist matching tenantname ${tenantName}`
-    }
-  } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "tenants_name_issclaim_uq"') {
-      const errTenantAlreadyExists = `Tenant already exists matching iss_claim ${issClaim}`
-      return `Update failed: ${errTenantAlreadyExists}`
-    }
-    return `Update failed: ${error.message}`
   }
 }
 
@@ -124,8 +80,6 @@ const getTenants = async (filters = {}, sort = 'key', order = 'desc') => {
 
 module.exports = {
   insertTenant,
-  updateTenantName,
-  updateTenantIssClaim,
   deleteTenant,
   getTenants,
 }

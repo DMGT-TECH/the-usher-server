@@ -26,12 +26,6 @@ describe('Insert Update and Delete tests', function () {
         const result2 = await postTenants.insertTenant('dummy_tenant2', 'https://dummytenant2', 'https://dummytenant2/.well-known/jwks.json')
         assert.strictEqual(result2.name, 'dummy_tenant2')
       })
-      it('Should update a single specified tenant', async function () {
-        let updateResult = await postTenants.updateTenantIssClaim('dummy_tenant', 'https://dummytenant', 'updated_iss_claim', 'updated_jwks_uri')
-        assert.strictEqual(updateResult, 'Update successful')
-        updateResult = await postTenants.updateTenantIssClaim('dummy_tenant', 'updated_iss_claim', 'https://dummytenant', 'https://dummytenant/.well-known/jwks.json')
-        assert.strictEqual(updateResult, 'Update successful')
-      })
       it('Should fail to insert a duplicate tenant', async function () {
         try {
           await postTenants.insertTenant('t1', 'iss1', 'jwks1')
@@ -120,12 +114,12 @@ describe('Insert Update and Delete tests', function () {
     describe('Test group insert', function () {
       it('Should insert a single specified group', async function () {
         const insertResult = await postGroups.insertGroup('dummy_group', 'Dummy Group for testing')
-        assert.strictEqual(insertResult, 'Insert successful')
+        assert.strictEqual(insertResult.name, 'dummy_group')
       })
       it('Should update a single specified group', async function () {
         await postGroups.updateGroupByGroupname('dummy_group', 'updated_group_description')
         const updateResult = await postGroups.updateGroupByGroupname('dummy_group', 'Dummy Group for testing')
-        assert.strictEqual(updateResult, 'Update successful')
+        assert.strictEqual(updateResult, 1)
       })
     })
 
@@ -189,23 +183,27 @@ describe('Insert Update and Delete tests', function () {
     describe('Test Tenant Client insert', function () {
       it('Should insert a single relationship', async function () {
         const result2 = await postTenantClients.insertTenantClient('dummy_tenant2', 'https://dummytenant2', 'dummy_client')
-        assert.strictEqual(result2, 'Insert successful')
+        assert.ok(Number.isInteger(result2.tenantkey), 'Tenant key should be a number')
       })
       it('Should fail to insert duplicate relationships', async function () {
-        const insertResult = await postTenantClients.insertTenantClient('dummy_tenant', 'https://dummytenant', 'dummy_client')
-        assert.strictEqual(insertResult, 'Insert failed: client_id = dummy_client already exists on tenantname = dummy_tenant iss_claim = https://dummytenant')
+        await assert.rejects(postTenantClients.insertTenantClient('dummy_tenant', 'https://dummytenant', 'dummy_client'),
+          { message: 'The operation would result in duplicate resources!' }
+        )
       })
       it('Should fail to insert an relationship with missing tenantname', async function () {
-        const insertResult = await postTenantClients.insertTenantClient('no-tenant', 'https://dummytenant', 'dummy_client')
-        assert.strictEqual(insertResult, 'Insert failed: Either or both of client_id = dummy_client; tenantname = no-tenant iss_claim = https://dummytenant does not exist')
+        await assert.rejects(postTenantClients.insertTenantClient('no-tenant', 'https://dummytenant', 'dummy_client'),
+          { message: /Tenant with name no-tenant not found/ }
+        )
       })
       it('Should fail to insert an relationship with missing iss_claim', async function () {
-        const insertResult = await postTenantClients.insertTenantClient('dummy_tenant', 'no-issclaim', 'dummy_client')
-        assert.strictEqual(insertResult, 'Insert failed: Either or both of client_id = dummy_client; tenantname = dummy_tenant iss_claim = no-issclaim does not exist')
+        await assert.rejects(postTenantClients.insertTenantClient('dummy_tenant', 'no-issclaim', 'dummy_client'),
+          { message: /Tenant with name dummy_tenant not found/ }
+        )
       })
       it('Should fail to insert an relationship with missing client', async function () {
-        const insertResult = await postTenantClients.insertTenantClient('dummy_tenant', 'https://dummytenant', 'no-client')
-        assert.strictEqual(insertResult, 'Insert failed: Either or both of client_id = no-client; tenantname = dummy_tenant iss_claim = https://dummytenant does not exist')
+        await assert.rejects(postTenantClients.insertTenantClient('dummy_tenant', 'https://dummytenant', 'no-client'),
+          { message: /Client with id no-client not found/ }
+        )
       })
     })
 
@@ -229,24 +227,27 @@ describe('Insert Update and Delete tests', function () {
     describe('Test Group Role insert', function () {
       it('Should insert a single relationship', async function () {
         const insertResult = await postGroupRoles.insertGroupRole('dummy_group', 'dummy_client', 'dummy_role:dummyA')
-        assert.strictEqual(insertResult, 'Insert successful')
+        assert.ok(Number.isInteger(insertResult.groupkey))
         const deleteResult = await postGroupRoles.deleteGroupRole('dummy_group', 'dummy_client', 'dummy_role:dummyA')
-        assert.strictEqual(deleteResult, 'Delete successful')
+        assert.strictEqual(deleteResult, 1)
       })
       it('Should fail to insert a duplicate relationship', async function () {
         await postGroupRoles.insertGroupRole('dummy_group', 'dummy_client', 'dummy_role:dummyA')
-        const insertResult = await postGroupRoles.insertGroupRole('dummy_group', 'dummy_client', 'dummy_role:dummyA')
-        assert.strictEqual(insertResult, 'Insert failed: A client role client_id = dummy_client & rolename dummy_role:dummyA is already assigned to groupname dummy_group')
+        await assert.rejects(postGroupRoles.insertGroupRole('dummy_group', 'dummy_client', 'dummy_role:dummyA'),
+          { message: 'The operation would result in duplicate resources!' }
+        )
         const deleteResult = await postGroupRoles.deleteGroupRole('dummy_group', 'dummy_client', 'dummy_role:dummyA')
-        assert.strictEqual(deleteResult, 'Delete successful')
+        assert.strictEqual(deleteResult, 1)
       })
       it('Should fail to insert an relationship with missing role', async function () {
-        const insertResult = await postGroupRoles.insertGroupRole('dummy_group', 'dummy_client', 'no-role')
-        assert(insertResult, 'Either or all of client_id = dummy_client & rolename no-role; groupname = dummy_group does not exist')
+        await assert.rejects(postGroupRoles.insertGroupRole('dummy_group', 'dummy_client', 'no-role'),
+          { message: /Role with name no-role/ }
+        )
       })
       it('Should fail to insert an relationship with missing group', async function () {
-        const insertResult = await postGroupRoles.insertGroupRole('no-group', 'dummy_client', 'dummy_role:dummyA')
-        assert(insertResult, 'Either or all of client_id = dummy_client & rolename dummy_role:dummyA; groupname = no-group does not exist')
+        await assert.rejects(postGroupRoles.insertGroupRole('no-group', 'dummy_client', 'dummy_role:dummyA'),
+          { message: /Group with name no-group/ }
+        )
       })
     })
 
@@ -353,7 +354,7 @@ describe('Insert Update and Delete tests', function () {
     describe('Test client tenant delete', function () {
       it('Should delete a single client tenant', async function () {
         const result2 = await postTenantClients.deleteTenantClient('dummy_tenant2', 'https://dummytenant2', 'dummy_client')
-        assert.strictEqual(result2, 'Delete successful')
+        assert.strictEqual(result2, 1)
       })
     })
     describe('Test client delete', function () {
@@ -369,11 +370,11 @@ describe('Insert Update and Delete tests', function () {
     describe('Test group delete', function () {
       it('Should delete a single specified group', async function () {
         const deleteResult = await postGroups.deleteGroupByGroupname('dummy_group')
-        assert.strictEqual(deleteResult, 'Delete successful')
+        assert.strictEqual(deleteResult, 1)
       })
       it('Should fail to delete a non-existent group', async function () {
         const deleteResult = await postGroups.deleteGroupByGroupname('no-group')
-        assert.strictEqual(deleteResult, 'Delete failed: Group does not exist matching groupname no-group')
+        assert.strictEqual(deleteResult, 0)
       })
     })
     describe('Test tenant delete', function () {
