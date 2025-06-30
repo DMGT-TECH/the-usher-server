@@ -1,49 +1,67 @@
-const { PGPool } = require('./pg_pool')
-const pool = new PGPool()
+const { usherDb } = require('./knex')
+const { pgErrorHandler } = require('../utils/pgErrorHandler')
+
+/**
+ * Inserts a new tenant-client relationship into the database.
+ * @param {string} tenantName Name of existing tenant
+ * @param {string} issClaim Issuer claim of the tenant
+ * @param {string} clientId ID of an existing client
+ * @returns {Promise<Object>} A promise that resolves to the inserted tenant-client relationship object
+ */
+const insertTenantClient = async (tenantName, issClaim, clientId) => {
+  try {
+    const tenant = await usherDb('tenants').where({ name: tenantName, iss_claim: issClaim }).first('key')
+    if (!tenant) {
+      throw new Error(`Tenant with name ${tenantName} not found`)
+    }
+    const client = await usherDb('clients').where({ client_id: clientId }).first('key')
+    if (!client) {
+      throw new Error(`Client with id ${clientId} not found`)
+    }
+
+    const [tenantClient] = await usherDb('tenantclients')
+      .insert({
+        tenantkey: tenant.key,
+        clientkey: client.key
+      })
+      .returning('*')
+
+    return tenantClient
+  } catch (error) {
+    throw pgErrorHandler(error)
+  }
+}
+
+/**
+ * Deletes a tenant-client relationship from the database.
+ * @param {string} tenantName Name of existing tenant
+ * @param {string} issClaim Issuer claim of the tenant
+ * @param {string} clientId ID of an existing client
+ * @returns {Promise<number>} Number of deleted rows
+ */
+const deleteTenantClient = async (tenantName, issClaim, clientId) => {
+  try {
+    const deletedCount = await usherDb('tenantclients')
+      .whereExists(function() {
+        this.select('key').from('tenants')
+        .whereRaw('tenants.key = tenantclients.tenantkey')
+        .andWhereRaw('tenants.name=?', [tenantName])
+        .andWhereRaw('tenants.iss_claim=?', [issClaim])
+      })
+      .whereExists(function() {
+        this.select('key').from('clients')
+        .whereRaw('clients.key = tenantclients.clientkey')
+        .andWhereRaw('clients.client_id=?', [clientId])
+      })
+      .del()
+
+    return deletedCount
+  } catch(error) {
+    throw pgErrorHandler(error)
+  }
+}
 
 module.exports = {
   insertTenantClient,
   deleteTenantClient
-}
-
-async function insertTenantClient (tenantName, issClaim, clientId) {
-  const sql = `INSERT INTO usher.tenantclients (tenantkey, clientkey)
-  SELECT t.KEY, c.KEY
-  FROM usher.tenants t, usher.clients c
-  WHERE t.name = $1 and t.iss_claim = $2
-  AND c.client_id = $3`
-  const sqlParams = [tenantName, issClaim, clientId]
-  try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Insert successful'
-    } else {
-      const errTenantClientDoesNotExist = `Either or both of client_id = ${clientId}; tenantname = ${tenantName} iss_claim = ${issClaim} does not exist`
-      return `Insert failed: ${errTenantClientDoesNotExist}`
-    }
-  } catch (error) {
-    if (error.message === 'duplicate key value violates unique constraint "tenantclients_tenantkey_clientkey_uq"') {
-      const errTenantClientAlreadyExists = `client_id = ${clientId} already exists on tenantname = ${tenantName} iss_claim = ${issClaim}`
-      return `Insert failed: ${errTenantClientAlreadyExists}`
-    }
-    return `Insert failed: ${error.message}`
-  }
-}
-
-async function deleteTenantClient (tenantName, issClaim, clientId) {
-  const sql = `DELETE FROM usher.tenantclients AS tc
-  WHERE EXISTS (SELECT key FROM usher.tenants t WHERE t.key = tc.tenantkey AND t.name = $1 AND t.iss_claim = $2)
-  AND EXISTS (SELECT key FROM usher.clients c WHERE c.key = tc.clientkey AND c.client_id = $3)`
-  const sqlParams = [tenantName, issClaim, clientId]
-  try {
-    const results = await pool.query(sql, sqlParams)
-    if (results.rowCount === 1) {
-      return 'Delete successful'
-    } else {
-      const errTenantClientDoesNotExist = `Either or both of client_id = ${clientId}; tenantname = ${tenantName} iss_claim = ${issClaim} does not exist`
-      return `Delete failed: ${errTenantClientDoesNotExist}`
-    }
-  } catch (error) {
-    return `Delete failed: ${error.message}`
-  }
 }

@@ -6,7 +6,7 @@ const { pgErrorHandler } = require('../utils/pgErrorHandler')
  * @param {string} clientId - The client ID
  * @param {string} permissionName - The name of the permission
  * @param {string} permissionDescription - A description of the permission
- * @returns {Promise<Object>} - A promise that resolves to the inserted permission object
+ * @returns {Promise<Object>} A promise that resolves to the inserted permission object
  */
 const insertPermissionByClientId = async (clientId, permissionName, permissionDescription) => {
   try {

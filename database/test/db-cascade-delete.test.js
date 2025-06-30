@@ -87,7 +87,7 @@ describe('Cascade deletes', function () {
   it('Should delete a single specified group', async function () {
     try {
       const deleteResult = await postGroups.deleteGroupByGroupname('dummy_group')
-      assert.strictEqual(deleteResult, 'Delete successful')
+      assert.strictEqual(deleteResult, 1)
     } catch (error) {
       assert(false, error.message)
     }
