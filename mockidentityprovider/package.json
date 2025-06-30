@@ -18,13 +18,13 @@
   "dependencies": {
     "@oas-tools/core": "3.1.0",
     "cors": "2.8.5",
-    "dotenv": "16.4.5",
+    "dotenv": "17.0.0",
     "express": "4.21.2",
-    "helmet": "7.1.0",
+    "helmet": "8.1.0",
     "http-errors": "2.0.0",
     "jsonwebtoken": "9.0.2",
     "moment": "2.30.1",
-    "nodemon": "3.1.7",
+    "nodemon": "3.1.10",
     "pem-jwk": "2.0.0"
   }
 }
