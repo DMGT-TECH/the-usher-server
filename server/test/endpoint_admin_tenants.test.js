@@ -107,4 +107,96 @@ describe('Admin Tenants', () => {
       assert.equal(response.status, 401)
     })
   })
+
+  describe('POST:/tenants', () => {
+    /**
+     * HTTP request to POST:/tenants
+     *
+     * @param {Object} body - The request body to send
+     * @param {Object} [header=requestHeaders] - The headers to include in the request
+     * @returns {Promise<Response>} The response from the fetch request
+     */
+    const createTenant = async (body, header = requestHeaders) => {
+      return await fetch(`${url}/tenants`, {
+        method: 'POST',
+        headers: header,
+        body: JSON.stringify(body)
+      })
+    }
+
+    it('should return 201, successfully create a new tenant', async () => {
+      const tenantPayload = {
+        name: 'test-tenant-create',
+        iss_claim: 'https://test-create.example.com/',
+        jwks_uri: 'https://test-create.example.com/.well-known/jwks.json'
+      }
+
+      const response = await createTenant(tenantPayload)
+      assert.equal(response.status, 201)
+
+      const createdTenant = await response.json()
+      assert.equal(createdTenant.name, tenantPayload.name)
+      assert.equal(createdTenant.iss_claim, tenantPayload.iss_claim)
+      assert.equal(createdTenant.jwks_uri, tenantPayload.jwks_uri)
+      assert.ok(createdTenant.key)
+      assert.ok(createdTenant.created_at)
+      assert.ok(createdTenant.updated_at)
+
+      // Clean up
+      await usherDb('tenants').where({ key: createdTenant.key }).del()
+    })
+
+    it('should return 400, missing required fields', async () => {
+      const invalidPayloads = [
+        {}, // missing all fields
+        { name: 'test-tenant' }, // missing iss_claim and jwks_uri
+        { iss_claim: 'https://example.com/' }, // missing name and jwks_uri
+        { jwks_uri: 'https://example.com/.well-known/jwks.json' }, // missing name and iss_claim
+        { name: 'test-tenant', iss_claim: 'https://example.com/' } // missing jwks_uri
+      ]
+
+      const responses = await Promise.all(
+        invalidPayloads.map(payload => createTenant(payload))
+      )
+
+      responses.forEach(response => {
+        assert.equal(response.status, 400)
+      })
+    })
+
+    it('should return 409, conflict for duplicate tenant', async () => {
+      const tenantPayload = {
+        name: 'test-tenant-duplicate',
+        iss_claim: 'https://test-duplicate.example.com/',
+        jwks_uri: 'https://test-duplicate.example.com/.well-known/jwks.json'
+      }
+
+      // Create the first tenant
+      const response1 = await createTenant(tenantPayload)
+      assert.equal(response1.status, 201)
+      const createdTenant = await response1.json()
+
+      // Try to create the same tenant again
+      const response2 = await createTenant(tenantPayload)
+      assert.equal(response2.status, 409)
+
+      // Clean up
+      await usherDb('tenants').where({ key: createdTenant.key }).del()
+    })
+
+    it('should return 401, unauthorized token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const tenantPayload = {
+        name: 'test-tenant-unauthorized',
+        iss_claim: 'https://test-unauthorized.example.com/',
+        jwks_uri: 'https://test-unauthorized.example.com/.well-known/jwks.json'
+      }
+
+      const response = await createTenant(tenantPayload, {
+        ...requestHeaders,
+        Authorization: `Bearer ${userAccessToken}`
+      })
+      assert.equal(response.status, 401)
+    })
+  })
 })

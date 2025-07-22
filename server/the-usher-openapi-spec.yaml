@@ -552,7 +552,7 @@ paths:
                     - $ref: '#/components/schemas/PermissionObject'
                     - type: object
                       properties:
-                        client_id: 
+                        client_id:
                           type: string
         400:
           $ref: '#/components/responses/BadRequest'
@@ -1156,7 +1156,7 @@ paths:
                     - $ref: '#/components/schemas/PermissionObject'
                     - type: object
                       properties:
-                        client_id: 
+                        client_id:
                           type: string
         400:
           $ref: '#/components/responses/BadRequest'
@@ -1326,11 +1326,58 @@ paths:
             $ref: '#/components/responses/InternalError'
           503:
             $ref: '#/components/responses/ServiceUnavailableError'
+      post:
+        'x-swagger-router-controller': 'tenants/index'
+        operationId: createTenant
+        summary: Create a new tenant
+        tags:
+          - Admin APIs
+        security:
+          - bearerAdminAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The tenant name
+                    example: xyz-tenant
+                  iss_claim:
+                    type: string
+                    description: The issuer claim for the tenant
+                    example: https://auth.example.com/
+                  jwks_uri:
+                    type: string
+                    description: The JWKS URI for the tenant
+                    example: https://auth.example.com/.well-known/jwks.json
+                required:
+                  - name
+                  - iss_claim
+                  - jwks_uri
+        responses:
+          201:
+            description: Returns the created tenant
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Tenant"
+          400:
+            $ref: '#/components/responses/BadRequest'
+          401:
+            $ref: '#/components/responses/Unauthorized'
+          409:
+            $ref: '#/components/responses/Conflict'
+          500:
+            $ref: '#/components/responses/InternalError'
+          503:
+            $ref: '#/components/responses/ServiceUnavailableError'
 
 components:
 
   parameters:
-  #---------------------
     clientIdPathParam:
       name: client_id
       description: Unique identifier for client.
@@ -1341,7 +1388,6 @@ components:
       examples:
         Client ID:
           value: datalake-api
-    # client_id
     clientIdParam:
       name: client_id
       description: Unique identifier for the client.
@@ -1452,10 +1498,7 @@ components:
           - hierarchy
 
   schemas:
-#---------------------
-# Entities
-
-# BASE DEFINITIONS
+    # BASE DEFINITIONS
     EntityNameDef:
       type: string
       maxLength: 50
@@ -1490,13 +1533,13 @@ components:
         key: 10
         name: usher:admin
         clientkey: fake-client
-      
+
     RoleWithPermissions:
       allOf:
       - $ref: '#/components/schemas/Role'
       - type: object
         properties:
-          permissions: 
+          permissions:
             $ref: '#/components/schemas/ArrayOfPermissionObject'
 
     CollectionOfRoles:
