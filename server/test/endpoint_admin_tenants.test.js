@@ -148,6 +148,7 @@ describe('Admin Tenants', () => {
 
     it('should return 400, missing required fields', async () => {
       const invalidPayloads = [
+        '', // Empty body
         {}, // missing all fields
         { name: 'test-tenant' }, // missing iss_claim and jwks_uri
         { iss_claim: 'https://example.com/' }, // missing name and jwks_uri
@@ -162,6 +163,21 @@ describe('Admin Tenants', () => {
       responses.forEach(response => {
         assert.equal(response.status, 400)
       })
+    })
+
+    it('should return 401, unauthorized token', async () => {
+      const userAccessToken = await getTestUser1IdPToken()
+      const tenantPayload = {
+        name: 'test-tenant-unauthorized',
+        iss_claim: 'https://test-unauthorized.example.com/',
+        jwks_uri: 'https://test-unauthorized.example.com/.well-known/jwks.json'
+      }
+
+      const response = await createTenant(tenantPayload, {
+        ...requestHeaders,
+        Authorization: `Bearer ${userAccessToken}`
+      })
+      assert.equal(response.status, 401)
     })
 
     it('should return 409, conflict for duplicate tenant', async () => {
@@ -182,21 +198,6 @@ describe('Admin Tenants', () => {
 
       // Clean up
       await usherDb('tenants').where({ key: createdTenant.key }).del()
-    })
-
-    it('should return 401, unauthorized token', async () => {
-      const userAccessToken = await getTestUser1IdPToken()
-      const tenantPayload = {
-        name: 'test-tenant-unauthorized',
-        iss_claim: 'https://test-unauthorized.example.com/',
-        jwks_uri: 'https://test-unauthorized.example.com/.well-known/jwks.json'
-      }
-
-      const response = await createTenant(tenantPayload, {
-        ...requestHeaders,
-        Authorization: `Bearer ${userAccessToken}`
-      })
-      assert.equal(response.status, 401)
     })
   })
 })

@@ -40,12 +40,7 @@ const getTenants = async (req, res, next) => {
 const createTenant = async (req, res, next) => {
   try {
     const { name, iss_claim, jwks_uri } = req.body
-    
-    // Basic validation (OpenAPI should also validate, but let's be safe)
-    if (!name || !iss_claim || !jwks_uri) {
-      return next(createError(400, { message: 'Missing required fields: name, iss_claim, and jwks_uri are required' }))
-    }
-    
+
     const tenant = await dbAdminTenant.insertTenant(name, iss_claim, jwks_uri)
     res.status(201).send(tenant)
   } catch ({ httpStatusCode = 500, message }) {
