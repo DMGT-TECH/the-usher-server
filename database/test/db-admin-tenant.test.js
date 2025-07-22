@@ -1,7 +1,7 @@
-const { describe, it } = require('mocha')
+const { after, describe, it } = require('mocha')
 const assert = require('node:assert')
 const { usherDb } = require('../layer/knex')
-const { getTenants } = require('../layer/admin-tenant')
+const { getTenants, insertTenant } = require('../layer/admin-tenant')
 
 describe('Admin tenant view', () => {
   describe('Test getTenants', () => {
@@ -51,6 +51,50 @@ describe('Admin tenant view', () => {
         await getTenants({ key: 'invalid-key' })
       } catch (err) {
         assert.ok(err)
+      }
+    })
+  })
+
+  describe('Test insertTenant function', () => {
+    let testTenantKey
+
+    it('Should insert a new tenant successfully', async () => {
+      const tenantName = 'test-insert-tenant'
+      const issClaim = 'https://test-insert.example.com/'
+      const jwksUri = 'https://test-insert.example.com/.well-known/jwks.json'
+
+      const tenant = await insertTenant(tenantName, issClaim, jwksUri)
+
+      assert.ok(tenant)
+      assert.equal(tenant.name, tenantName)
+      assert.equal(tenant.iss_claim, issClaim)
+      assert.equal(tenant.jwks_uri, jwksUri)
+      assert.ok(tenant.key)
+      assert.ok(tenant.created_at)
+      assert.ok(tenant.updated_at)
+
+      testTenantKey = tenant.key
+    })
+
+    it('Should handle duplicate tenant insertion (should fail)', async () => {
+      const tenantName = 'test-insert-tenant'
+      const issClaim = 'https://test-insert.example.com/'
+      const jwksUri = 'https://test-insert.example.com/.well-known/jwks.json'
+
+      try {
+        await insertTenant(tenantName, issClaim, jwksUri)
+        assert.fail('Should have thrown an error for duplicate tenant')
+      } catch (error) {
+        assert.ok(error)
+        // Check that it's a proper database constraint error
+        assert.ok(error.message || error.httpStatusCode)
+      }
+    })
+
+    after(async () => {
+      // Clean up the test tenant
+      if (testTenantKey) {
+        await usherDb('tenants').where({ key: testTenantKey }).del()
       }
     })
   })

@@ -28,6 +28,27 @@ const getTenants = async (req, res, next) => {
   }
 }
 
+/**
+ * HTTP Request handler
+ * Create a new tenant
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object to send 201 statusCode and the created tenant
+ * @param {Function} next - The callback function for the next middleware
+ * @returns {Promise<void>} - A promise that resolves to void when tenant is created
+ */
+const createTenant = async (req, res, next) => {
+  try {
+    const { name, iss_claim, jwks_uri } = req.body
+
+    const tenant = await dbAdminTenant.insertTenant(name, iss_claim, jwks_uri)
+    res.status(201).send(tenant)
+  } catch ({ httpStatusCode = 500, message }) {
+    return next(createError(httpStatusCode, { message }))
+  }
+}
+
 module.exports = {
   getTenants,
+  createTenant,
 }
