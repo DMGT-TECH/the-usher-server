@@ -9,7 +9,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: 2.6.1
+  version: 2.8.0
 externalDocs:
   description: GitHub Repository
   url: https://github.com/DMGT-TECH/the-usher-server
