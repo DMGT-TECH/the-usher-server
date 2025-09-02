@@ -32,11 +32,11 @@ async function issueSelfRefreshToken(req, res, next) {
 
   var permissionsSet = new Set()
   var rolesSet = new Set()
-  rolesAndPermissionsRows.forEach(function ({ rolename, permissionname }) {
+  rolesAndPermissionsRows.forEach(({ rolename, permissionname }) => {
     rolesSet.add(rolename)
     permissionsSet.add(permissionname)
   })
-  personaPermissionsRows.forEach(function ({ permissionname }) {
+  personaPermissionsRows.forEach(({ permissionname }) => {
     permissionsSet.add(permissionname)
   })
 

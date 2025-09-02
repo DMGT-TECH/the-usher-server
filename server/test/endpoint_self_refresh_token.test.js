@@ -5,8 +5,7 @@ const fetch = require('node-fetch')
 const jwtDecoder = require('jsonwebtoken')
 
 const postSessions = require('database/layer/admin-session')
-const viewSelectRelationships = require('database/layer/view-select-relationships')
-const dbAdminPermission = require('database/layer/admin-permission')
+const { usherDb } = require('../../database/layer/knex')
 
 const { getTestUser1IdPToken } = require('./lib/tokens')
 const { getServerUrl } = require('./lib/urls')
@@ -241,15 +240,46 @@ describe('Issue Self Refresh Token', () => {
       assert(responseExpiresIn, 'The response should have contained "expires_in"')
     })
 
-    it('should only return the correct scope for the requested client, not all client scopes under the same tenant', async function () {
+    it('should return the scopes for the specified client id', async () => {
       // arrange
       const grantType = 'refresh_token'
       const refreshToken = validEventId
       const clientId = 'test-client2'
-      const personaRolePermissionsRows = await viewSelectRelationships.selectTenantPersonaClientRolePermissions(subClaim, '', clientId)
-      const personaPermissionsRows = await viewSelectRelationships.selectTenantPersonaPermissions(clientId, subClaim)
+      const personaRolePermissionsRows = await usherDb('tenants as t')
+        .join('tenantclients as tc', 't.key', 'tc.tenantkey')
+        .join('clients as c', 'c.key', 'tc.clientkey')
+        .join('personas as p', 'p.tenantkey', 't.key')
+        .join('personaroles as pr', 'pr.personakey', 'p.key')
+        .joinRaw(`
+          JOIN roles as r
+          ON r.key = pr.rolekey AND r.clientkey = c.key
+        `)
+        .join('rolepermissions as rp', 'rp.rolekey', 'r.key')
+        .joinRaw(`
+          JOIN permissions as pm
+          ON pm.key = rp.permissionkey AND (pm.clientkey IS NULL OR pm.clientkey = c.key)
+        `)
+        .select('pm.name as permissionname')
+        .where('p.sub_claim', subClaim)
+        .andWhere('c.client_id', clientId)
+      const personaPermissionsRows = await usherDb('tenants as t')
+        .join('tenantclients as tc', 't.key', 'tc.tenantkey')
+        .join('clients as c', 'c.key', 'tc.clientkey')
+        .join('personas as p', 'p.tenantkey', 'tc.tenantkey')
+        .join('personapermissions as pp', 'p.key', 'pp.personakey')
+        .joinRaw(`
+          JOIN permissions as pm
+          ON pp.permissionkey = pm.key AND pm.clientkey = c.key
+        `)
+        .select('pm.name as permissionname')
+        .where('p.sub_claim', subClaim)
+        .andWhere('c.client_id', clientId)
+      const allClientPermissions = await usherDb('permissions')
+        .join('clients', 'permissions.clientkey', '=', 'clients.key')
+        .select('permissions.name')
+        .where('clients.client_id', clientId)
       const expectedScope = [...personaRolePermissionsRows, ...personaPermissionsRows].map(({ permissionname }) => permissionname).join(' ')
-      const allClientPermissionNames = (await dbAdminPermission.getPermissions({ clientId })).map(({ name }) => name)
+      const allClientPermissionNames = allClientPermissions.map(({ name }) => name)
 
       // act
       const response = await fetch(`${url}?grant_type=${grantType}&refresh_token=${refreshToken}&client_id=${clientId}`, { method: 'POST' })
