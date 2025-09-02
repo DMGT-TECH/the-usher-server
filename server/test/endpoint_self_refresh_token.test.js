@@ -3,7 +3,10 @@ const assert = require('node:assert')
 const crypto = require('node:crypto')
 const fetch = require('node-fetch')
 const jwtDecoder = require('jsonwebtoken')
+
 const postSessions = require('database/layer/admin-session')
+const viewSelectRelationships = require('database/layer/view-select-relationships')
+const dbAdminPermission = require('database/layer/admin-permission')
 
 const { getTestUser1IdPToken } = require('./lib/tokens')
 const { getServerUrl } = require('./lib/urls')
@@ -243,6 +246,10 @@ describe('Issue Self Refresh Token', () => {
       const grantType = 'refresh_token'
       const refreshToken = validEventId
       const clientId = 'test-client2'
+      const personaRolePermissionsRows = await viewSelectRelationships.selectTenantPersonaClientRolePermissions(subClaim, '', clientId)
+      const personaPermissionsRows = await viewSelectRelationships.selectTenantPersonaPermissions(clientId, subClaim)
+      const expectedScope = [...personaRolePermissionsRows, ...personaPermissionsRows].map(({ permissionname }) => permissionname).join(' ')
+      const allClientPermissionNames = (await dbAdminPermission.getPermissions({ clientId })).map(({ name }) => name)
 
       // act
       const response = await fetch(`${url}?grant_type=${grantType}&refresh_token=${refreshToken}&client_id=${clientId}`, { method: 'POST' })
@@ -265,7 +272,10 @@ describe('Issue Self Refresh Token', () => {
       assert(responseRefreshToken, 'The response should have contained "refresh_token"')
       assert(responseRefreshToken === validEventId, 'The response "refresh_token" should have been equal to the "refresh_token" query parameter')
       assert(responseExpiresIn, 'The response should have contained "expires_in"')
-      assert(responseDecodedToken.payload.scope === 'test-permission6', 'The "scope" claim in the access token should only contain the correct permission for the requested client')
+      assert(responseDecodedToken.payload.scope === expectedScope, 'The "scope" claim in the access token should only contain the correct permission for the requested client')
+      expectedScope.split(' ').forEach(scope => {
+        assert(allClientPermissionNames.includes(scope), `Scope "${scope}" is not a valid permission for client "${clientId}"`)
+      })
     })
   })
 })
