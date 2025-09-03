@@ -5,7 +5,7 @@ const dbSelect = require('database/layer/view-select-relationships')
 const tokenUtils = require('../utils/token-utils')
 const env = require('../../server-env')
 
-async function issueSelfRefreshToken (req, res, next) {
+async function issueSelfRefreshToken(req, res, next) {
   const refreshToken = req.query.refresh_token
   const clientId = req.query.client_id
 
@@ -28,13 +28,16 @@ async function issueSelfRefreshToken (req, res, next) {
   const decodedSessionIdpToken = jwtDecoder.decode(session.idp_token)
   const subClaim = decodedSessionIdpToken.sub
   const rolesAndPermissionsRows = await dbSelect.selectTenantPersonaClientRolePermissions(subClaim, req.header('user_context'), clientId)
-  const personaPermissionsRows = await dbSelect.selectTenantPersonaPermissions(req.header('client_id'), subClaim)
-  const unionOfPermissions = [...new Set([...rolesAndPermissionsRows, ...personaPermissionsRows])]
-  var permissionsSet = new Set()
-  var rolesSet = new Set()
-  unionOfPermissions.forEach(function (p) {
-    rolesSet.add(p.rolename)
-    permissionsSet.add(p.permissionname)
+  const personaPermissionsRows = await dbSelect.selectTenantPersonaPermissions(clientId, subClaim)
+
+  const permissionsSet = new Set()
+  const rolesSet = new Set()
+  rolesAndPermissionsRows.forEach(({ rolename, permissionname }) => {
+    rolesSet.add(rolename)
+    permissionsSet.add(permissionname)
+  })
+  personaPermissionsRows.forEach(({ permissionname }) => {
+    permissionsSet.add(permissionname)
   })
 
   const signedAccessToken = await tokenUtils.createSignedAccessToken(

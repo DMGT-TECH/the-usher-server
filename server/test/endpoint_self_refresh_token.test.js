@@ -3,7 +3,9 @@ const assert = require('node:assert')
 const crypto = require('node:crypto')
 const fetch = require('node-fetch')
 const jwtDecoder = require('jsonwebtoken')
+
 const postSessions = require('database/layer/admin-session')
+const { usherDb } = require('database/layer/knex')
 
 const { getTestUser1IdPToken } = require('./lib/tokens')
 const { getServerUrl } = require('./lib/urls')
@@ -139,8 +141,8 @@ describe('Issue Self Refresh Token', () => {
         // noop, this is ok if session for persona does not exist
       }
       // insert session with JWT lifetime in excess of IDP token lifetime
-      const jwtLifetimeDateTime = new Date( Date.now() + 45 * 60 * 1000).toISOString() // 45 minutes in the future
-      const idpExpirationDateTime = new Date( Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes in the future
+      const jwtLifetimeDateTime = new Date(Date.now() + 45 * 60 * 1000).toISOString() // 45 minutes in the future
+      const idpExpirationDateTime = new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes in the future
       await postSessions.insertSessionBySubIss(subClaim, '', issClaim, excessJwtLifetimeEventId, jwtLifetimeDateTime, idpExpirationDateTime, 'dummy_permission:dummyA', idpToken)
     })
 
@@ -197,7 +199,7 @@ describe('Issue Self Refresh Token', () => {
         // noop, this is ok if session for persona does not exist
       }
       // insert valid session
-      const idpExpirationDateTime = new Date( Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes in the future
+      const idpExpirationDateTime = new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes in the future
       await postSessions.insertSessionBySubIss(subClaim, '', issClaim, validEventId, new Date(), idpExpirationDateTime, 'dummy_permission:dummyA', idpToken)
     })
 
@@ -236,6 +238,55 @@ describe('Issue Self Refresh Token', () => {
       assert(responseRefreshToken, 'The response should have contained "refresh_token"')
       assert(responseRefreshToken === validEventId, 'The response"refresh_token" should have been equal to the "refresh_token" query parameter')
       assert(responseExpiresIn, 'The response should have contained "expires_in"')
+    })
+
+    it('should return the scopes for the specified client id', async () => {
+      // arrange
+      const grantType = 'refresh_token'
+      const clientId = 'test-client2'
+      const { personakey } = await usherDb('sessions').select('personakey').where('event_id', validEventId).first()
+      const { key: clientKey } = await usherDb('clients').select('key').where('client_id', clientId).first()
+      const personaRolePermissions = await usherDb('personaroles as pr')
+        .join('roles as r', 'pr.rolekey', 'r.key')
+        .join('rolepermissions as rp', 'r.key', 'rp.rolekey')
+        .join('permissions as pm', 'rp.permissionkey', 'pm.key')
+        .select('pm.name as permissionname')
+        .where('pr.personakey', personakey)
+        .andWhere('r.clientkey', clientKey)
+        .andWhere(function () {
+          this.whereNull('pm.clientkey').orWhere('pm.clientkey', clientKey)
+        })
+      const directPersonaPermissions = await usherDb('personapermissions as pp')
+        .join('permissions as pm', 'pp.permissionkey', 'pm.key')
+        .select('pm.name as permissionname')
+        .where('pp.personakey', personakey)
+        .andWhere('pm.clientkey', clientKey)
+      const allClientPermissions = await usherDb('permissions')
+        .select('name')
+        .where('clientkey', clientKey)
+      const allPersonaPermissions = [...personaRolePermissions, ...directPersonaPermissions]
+      const expectedScope = allPersonaPermissions.map(({ permissionname }) => permissionname)
+      const allClientPermissionNames = allClientPermissions.map(({ name }) => name)
+
+      // act
+      const response = await fetch(`${url}?grant_type=${grantType}&refresh_token=${validEventId}&client_id=${clientId}`, { method: 'POST' })
+
+      // assert
+      assert(response?.status === 200, `Expected response status code to be 200 but was ${response.status}`)
+      const responseJson = await response?.json()
+      assert(responseJson?.token_type === 'Bearer', '"token_type" value should have been Bearer')
+      assert(responseJson?.refresh_token === validEventId, 'The response "refresh_token" should have been equal to the "refresh_token" query parameter')
+      assert(responseJson?.access_token, 'The response should have contained "access_token"')
+      assert(responseJson?.expires_in, 'The response should have contained "expires_in"')
+      const responseDecodedToken = jwtDecoder.decode(responseJson?.access_token, { complete: true })
+      assert(responseDecodedToken, 'The "access_token" could not be decoded')
+      const embeddedScopesInAccessToken = responseDecodedToken?.payload?.scope?.split(' ') || []
+      embeddedScopesInAccessToken.forEach(scope => {
+        assert(allClientPermissionNames.includes(scope) && expectedScope.includes(scope), 'Access token includes permission which either does not belong to the client or is not assigned to the persona')
+      })
+      expectedScope.forEach(scope => {
+        assert(embeddedScopesInAccessToken.includes(scope), `Scope "${scope}" is not included in the access token`)
+      })
     })
   })
 })
