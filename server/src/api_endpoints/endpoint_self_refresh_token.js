@@ -30,8 +30,8 @@ async function issueSelfRefreshToken(req, res, next) {
   const rolesAndPermissionsRows = await dbSelect.selectTenantPersonaClientRolePermissions(subClaim, req.header('user_context'), clientId)
   const personaPermissionsRows = await dbSelect.selectTenantPersonaPermissions(clientId, subClaim)
 
-  var permissionsSet = new Set()
-  var rolesSet = new Set()
+  const permissionsSet = new Set()
+  const rolesSet = new Set()
   rolesAndPermissionsRows.forEach(({ rolename, permissionname }) => {
     rolesSet.add(rolename)
     permissionsSet.add(permissionname)
