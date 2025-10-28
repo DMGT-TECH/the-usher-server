@@ -88,7 +88,7 @@ describe('Admin Roles Permissions', () => {
       assert.equal(response.status, 401)
     })
 
-    it('should return 404 and for a non existing role key', async () => {
+    it('should return 404 for a non existing role key', async () => {
       const response = await fetch(`${url}/roles/${nonExistingRoleKey}/permissions`, {
         method: 'GET',
         headers: requestHeaders,

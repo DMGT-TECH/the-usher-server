@@ -58,7 +58,7 @@ This list of links is written for developers that would like to contribute to Th
   * [X] The Usher's tokens contain roles corresponding to scoped permissions
   * [X] Refresh tokens with sessions (currently limited to one session per persona)
 * Data Model
-  * [X] Permissions assigned to personas via role assigment
+  * [X] Permissions assigned to personas via role assignment
   * [X] Permissions assigned directly to personas
   * [X] Support for individual personas (each identified by same `sub` claim) to have multiple optional "user_contexts"
 * API
