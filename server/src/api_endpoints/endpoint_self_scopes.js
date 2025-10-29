@@ -5,7 +5,7 @@ const DataFrame = require('dataframe-js').DataFrame
 async function listSelfScopes (req, res, next) {
   const subClaim = req.user.sub
   if (!subClaim) {
-    return next(createError(403, 'Forbidden: Borne token not accepted: missing sub claim (no subscriber is identified).'))
+    return next(createError(403, 'Forbidden: Bearer token not accepted: missing sub claim (no subscriber is identified).'))
   }
 
   const scopeRows = await viewSelectRelationships.selectSelfScope(subClaim, req.header('user_context'), req.header('client_id'))

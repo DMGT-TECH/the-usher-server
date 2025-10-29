@@ -15,7 +15,7 @@ const issueSelfToken = async (req, res, next) => {
     const decodedToken = jwtDecoder.decode(idpToken, { complete: true })
     const subClaim = decodedToken.payload.sub
     if (!subClaim) {
-      return next(createError(403, 'Forbidden: Borne token not accepted: missing sub claim (no subscriber is identified).'))
+      return next(createError(403, 'Forbidden: Bearer token not accepted: missing sub claim (no subscriber is identified).'))
     }
 
     let { roles, permissions, xAcceptedOAuthScopes } = await tokenUtils.obtainScopedRolesAndPermissions(subClaim, req.header('user_context'), req.header('client_id'), req.query.scope)
