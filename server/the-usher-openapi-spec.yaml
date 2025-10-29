@@ -222,7 +222,7 @@ paths:
       description: |
         Returns, in the response body (not in the header), a signed JWT access token with the requested scope, if granted.  May return a smaller scope if fewer entitlements were granted to the persona. Requires a signed access token from the Persona Authorization (identity) server (e.g., Auth0, Cognito, or Azure AD) containing the **sub** claim and possibly a **groups** claim if individual personas are not being managed on this server for the given client application.
 
-        Use this endpoint if the scope need to be passed to a publicly accessible resource server.
+        Use this endpoint if the scope needs to be passed to a publicly accessible resource server.
       tags:
         - Self APIs
       security:
