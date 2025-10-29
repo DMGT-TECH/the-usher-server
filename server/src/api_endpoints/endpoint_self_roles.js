@@ -4,7 +4,7 @@ const viewSelectRelationships = require('database/layer/view-select-relationship
 async function getSelfRoles (req, res, next) {
   const subClaim = req.user.sub
   if (!subClaim) {
-    return next(createError(403, 'Forbidden: Borne token not accepted: missing sub claim (no subscriber is identified).'))
+    return next(createError(403, 'Forbidden: Bearer token not accepted: missing sub claim (no subscriber is identified).'))
   }
 
   const rolesRows = await viewSelectRelationships.selectSelfRoles(subClaim, req.header('user_context'), req.header('client_id'))

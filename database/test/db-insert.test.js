@@ -318,11 +318,11 @@ describe('Insert Update and Delete tests', function () {
         const deleteResult = await postPersonas.deletePersona('dummy_tenant', 'https://dummytenant', 'dummy_subclaim', '')
         assert.strictEqual(deleteResult, 'Delete successful')
       })
-      it('Should fail to delete a non-existant persona', async function () {
+      it('Should fail to delete a non-existent persona', async function () {
         const deleteResult = await postPersonas.deletePersona('dummy_tenant', 'https://dummytenant', 'no-subclaim', '')
         assert.strictEqual(deleteResult, 'Delete failed: A persona (sub_claim = no-subclaim; user_context = ) does not exist on tenantname dummy_tenant iss_claim https://dummytenant')
       })
-      it('Should fail to delete a non-existant persona with a user_context', async function () {
+      it('Should fail to delete a non-existent persona with a user_context', async function () {
         const deleteResult = await postPersonas.deletePersona('dummy_tenant', 'https://dummytenant', 'no-subclaim', 'no-userContext')
         assert.strictEqual(deleteResult, 'Delete failed: A persona (sub_claim = no-subclaim; user_context = no-userContext) does not exist on tenantname dummy_tenant iss_claim https://dummytenant')
       })
@@ -332,7 +332,7 @@ describe('Insert Update and Delete tests', function () {
         const deleteResult = await postRoles.deleteRoleByClientRolename('dummy_client', 'no-role')
         assert.strictEqual(deleteResult, 'Delete failed: Rolename no-role does not exist matching client_id dummy_client')
       })
-      it('Should fail to delete a role on a non-existant client', async function () {
+      it('Should fail to delete a role on a non-existent client', async function () {
         const deleteResult = await postRoles.deleteRoleByClientRolename('no-client', 'dummy_role:dummyA')
         assert.strictEqual(deleteResult, 'Delete failed: Rolename dummy_role:dummyA does not exist matching client_id no-client')
       })
