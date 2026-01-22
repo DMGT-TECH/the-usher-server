@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "development"
+    schedule:
+      interval: "cron"
+      cronjob: "0 8 1,15 * *"
+      timezone: "America/New_York"
+    groups:
+      all-github-actions:
+        patterns: ["*"]
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "actions upgrade:"
+      include: "scope"
